@@ -1,6 +1,6 @@
 # Gerador-de-horarios
 
-Alunos: Acácia, Gabriel, Harold, João Pedro, Matheus e Vladimir
+Alunos: Acácia, Davi, Gabriel, Harold, João Pedro, Matheus e Vladimir
 
 Cliente: Marco (coordenador do curso)
 

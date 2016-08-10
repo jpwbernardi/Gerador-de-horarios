@@ -1,27 +1,29 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "name": "Gerador-de-horarios",
+  "version": "0.1.0",
+  "description": "Gerador automático dos horários do semestre",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron/electron-quick-start.git"
+    "url": "git+https://github.com/jpwbernardi/Gerador-de-horarios"
   },
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial"
+    "scheduler",
+    "generator"
   ],
   "author": "GitHub",
   "license": "CC0-1.0",
   "bugs": {
-    "url": "https://github.com/electron/electron-quick-start/issues"
+    "url": "https://github.com/jpwbernardi/Gerador-de-horarios/issues"
   },
-  "homepage": "https://github.com/electron/electron-quick-start#readme",
+  "homepage": "https://github.com/jpwbernardi/Gerador-de-horarios",
+  "dependencies": {
+    "materialize-css": ">=0.97.7"
+  },
   "devDependencies": {
     "electron-prebuilt": "^1.2.0"
   }
