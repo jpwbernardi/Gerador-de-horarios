@@ -14,6 +14,8 @@
   delete window.exports;
   delete window.module;
   </script>
+
+  <title>Gerador de horários</title>
 </head>
 
 <body>
@@ -23,12 +25,14 @@
         <a href="#!" class="brand-logo">Scheduler</a>
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
-          <li><a href="#!">Home</a></li>
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
           <li><a href="#!">Professores</a></li>
           <li><a href="#!">Matérias</a></li>
         </ul>
         <ul class="side-nav" id="mobile-demo">
-          <li><a href="#!">Home</a></li>
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
           <li><a href="#!">Professores</a></li>
           <li><a href="#!">Matérias</a></li>
         </ul>
@@ -96,10 +100,6 @@
   <!--Import jQuery before materialize.js-->
   <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-  <script>
-  $(document).ready(function() {
-    $(".button-collapse").sideNav();
-  });
-  </script>
+  <script type="text/javascript" src="scheduler.js"></script>
 </body>
 </html>
