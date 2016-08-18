@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/jpwbernardi/Gerador-de-horarios",
   "dependencies": {
-    "materialize-css": ">=0.97.7"
+    "materialize-css": ">=0.97.7",
+    "sqlite3": ">=3.1.4"
   },
   "devDependencies": {
     "electron-prebuilt": "^1.2.0"
