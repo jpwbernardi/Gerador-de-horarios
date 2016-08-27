@@ -44,6 +44,15 @@ function init(db) {
 
 const db = nodeRequire('electron').remote.getGlobal('db');
 init(db);
+
+$(".autocomplete").autocomplete({
+  minLength: 0,
+  autoFocus: true,
+  source: ["First", "Second", "Third"]
+  // source: function(request, response) {
+    // return [{label: "First", value: 1}, {label: "Second", value: 2}, {label: "Third", value: 3}];
+  // }
+});
 // db.each("select * from link natural join professor natural join subject",
 // function(err, row) {
 //   console.log("Professor " + row.name + " (a.k.a. " + row.nickname + ") teaches the subject " + row.title + " (" + row.code + ")");

@@ -1,64 +1,73 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <!--Import Google Icon Font-->
-  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!--Import materialize.css-->
-  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection"/>
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
 
-  <!--Let browser know website is optimized for mobile-->
-  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0"/>
-  <script>
-  window.nodeRequire = require;
-  delete window.require;
-  delete window.exports;
-  delete window.module;
-  </script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
+    <script>
+        window.nodeRequire = require;
+        delete window.require;
+        delete window.exports;
+        delete window.module;
+    </script>
 
-  <!-- <title>Restrições</title> -->
+    <!-- <title>Restrições</title> -->
 </head>
 
 <body>
-  <nav style="margin-bottom: 20px;">
-    <div class="nav-wrapper teal darken-3">
-      <div class="container">
-        <a href="#!" class="brand-logo">Scheduler</a>
-        <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-        <ul class="right hide-on-med-and-down">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="#!">Professores</a></li>
-          <li><a href="#!">Matérias</a></li>
-        </ul>
-        <ul class="side-nav" id="mobile-demo">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="#!">Professores</a></li>
-          <li><a href="#!">Matérias</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <main>
-    <div class="container">
-      <div class="row">
-        <div class="col s12">
-          <h4>Restrições</h4>
-
+    <nav style="margin-bottom: 20px;">
+        <div class="nav-wrapper teal darken-3">
+            <div class="container">
+                <a href="#!" class="brand-logo">Scheduler</a>
+                <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="index.html">Página inicial</a></li>
+                    <li><a href="restrictions.html">Restrições</a></li>
+                    <li><a href="#!">Professores</a></li>
+                    <li><a href="#!">Matérias</a></li>
+                </ul>
+                <ul class="side-nav" id="mobile-demo">
+                    <li><a href="index.html">Página inicial</a></li>
+                    <li><a href="restrictions.html">Restrições</a></li>
+                    <li><a href="#!">Professores</a></li>
+                    <li><a href="#!">Matérias</a></li>
+                </ul>
+            </div>
         </div>
-      </div>
-    </div>
-  </main>
+    </nav>
 
-  <script>
-  // You can also require other files to run in this process
-  nodeRequire('./renderer.js');
-  </script>
-  <!--Import jQuery before materialize.js-->
-  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-  <script type="text/javascript" src="scheduler.js"></script>
-  <script type="text/javascript" src="restrictions.js"></script>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h4>Restrições</h4>
+                </div>
+                <div class="input-field col s12">
+                    <div class="select-wrapper">
+                        <span id="comboCaret" class="caret combo-caret">&#9660;</span>
+                        <input type="text" id="comboInput" class="autocomplete">
+                    </div>
+                    <label for="comboInput">Combo</label>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // You can also require other files to run in this process
+        nodeRequire('./renderer.js');
+    </script>
+    <!--Import jQuery before materialize.js-->
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
+    <script type="text/javascript" src="scheduler.js"></script>
+    <script type="text/javascript" src="restrictions.js"></script>
 </body>
+
 </html>
