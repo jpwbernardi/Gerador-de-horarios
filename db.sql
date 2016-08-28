@@ -3,12 +3,14 @@ create table professor(
   name  varchar(64),
   primary key(siape)
 );
+insert into professor values (1, "Graziela Simone Tonin"), (2, "Claunir Pavan"), (3, "José Bins"), (4, "Bráulio de Mello");
 
 create table subject(
   code  varchar(8),
   title varchar(64),
   primary key(code)
 );
+insert into subject values ("GCH008", "Iniciação à prática científica"), ("GEX103", "Engenharia de software II"), ("GEX105", "Redes de computadores"), ("GEX107", "Computação gráfica"), ("GEX108", "Construção de compiladores");
 
 create table link(
   siape integer,
@@ -17,6 +19,7 @@ create table link(
   foreign key(siape) references professor(siape),
   foreign key(code) references subject(code)
 );
+insert into link values (1, "GCH008"), (1, "GEX103"), (2, "GEX105"), (3, "GEX107"), (4, "GEX108");
 
 -- day of week [1...6]
 -- shift ('M', 'V', 'N')

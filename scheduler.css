@@ -1,0 +1,39 @@
+.ui-helper-hidden-accessible {
+  display: none;
+}
+
+.ui-menu {
+  margin: 0;
+  z-index: 999;
+  min-width: 100px;
+  overflow-y: auto;
+  max-height: 650px;
+  position: absolute;
+  background-color: #fff;
+  transition: box-shadow .25s;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.ui-menu-item {
+  clear: both;
+  width: 100%;
+  display: block;
+  color: #26a69a;
+  cursor: pointer;
+  text-align: left;
+  min-height: 50px;
+  font-size: 1.2rem;
+  padding: 14px 16px;
+  line-height: 1.5rem;
+  text-transform: none;
+  font-family: "Roboto", sans-serif;
+}
+
+.ui-state-focus {
+  font-weight: bold;
+  background-color: #eee;
+}
+
+.combo-caret {
+  cursor: pointer;
+}
