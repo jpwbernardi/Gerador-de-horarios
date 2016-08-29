@@ -53,21 +53,39 @@
         <div class="input-field col s4">
           <div class="select-wrapper">
             <span id="professorCaret" class="caret combo-caret">&#9660;</span>
-            <input type="text" id="professor" class="autocomplete validate">
+            <input type="text" id="professor" target="professorId" class="autocomplete validate">
             <input type="text" from="professor" name="Professor" id="professorId" class="professor_restriction" value="" hidden>
           </div>
-          <label for="professor" data-error="Este campo é obrigatório">Professor</label>
+          <label for="professor">Professor</label>
         </div>
-        <div class="input-field col s3">
+
+        <div class="input-field col s1">
           <div class="select-wrapper">
-            <span id="periodCaret" class="caret combo-caret">&#9660;</span>
-            <input type="text" id="period" class="autocomplete validate">
-            <input type="text" from="period" name="Período" id="periodId" class="professor_restriction" value="" hidden>
+            <span id="dowCaret" class="caret combo-caret">&#9660;</span>
+            <input type="text" id="dow" target="dowId" class="autocomplete validate" select-field="dow" select-from="period" select-group-by="dow" select-order-by="dow asc">
+            <input type="text" from="dow" name="Dia" id="dowId" class="professor_restriction" value="" hidden>
           </div>
-          <label for="period" data-error="Este campo é obrigatório">Período</label>
+          <label for="period">Dia</label>
         </div>
+        <div class="input-field col s1">
+          <div class="select-wrapper">
+            <span id="shiftCaret" class="caret combo-caret">&#9660;</span>
+            <input type="text" id="shift" target="shiftId" class="autocomplete validate" select-field="shift" select-from="period" select-group-by="shift" select-order-by="shift desc">
+            <input type="text" from="shift" name="Turno" id="shiftId" class="professor_restriction" value="" hidden>
+          </div>
+          <label for="period">Turno</label>
+        </div>
+        <div class="input-field col s1">
+          <div class="select-wrapper">
+            <span id="timeCaret" class="caret combo-caret">&#9660;</span>
+            <input type="text" id="time" target="timeId" class="autocomplete validate" select-field="time" select-from="period" select-group-by="time" select-order-by="time asc">
+            <input type="text" from="time" name="Horário" id="timeId" class="professor_restriction" value="" hidden>
+          </div>
+          <label for="period">Horário</label>
+        </div>
+
         <div class="input-field col s2">
-          <input type="checkbox" id="active" class="filled-in" checked="checked">
+          <input type="checkbox" id="active" class="filled-in professor_restriction" checked="checked">
           <label for="active">Ativa</label>
         </div>
         <div class="input-field col s3">
