@@ -21,7 +21,6 @@ $(".autocomplete").autocomplete({
     else query += table;
     if (typeof group !== typeof undefined && group !== "") query += " group by " + group;
     if (typeof order !== typeof undefined && order !== "") query += " order by " + order;
-    console.log(query);
     db.each(query, function(err, row) {
       var keys = Object.keys(row);
       var pk = row[keys[0]], label = "";
@@ -55,35 +54,32 @@ $(".autocomplete").change(function(event) {
 });
 
 $(".save").click(function(event) {
-  var target = event.currentTarget;
-  var table = target.name;
-  var $elems = $("." + table);
+  var i;
+  var table = event.currentTarget.name;
+  var elems = $("." + table);
   var correct = true;
-  $elems.each(function(index, el) {
-    if (el.value === "") {
-      $("#" + el.getAttribute("from")).addClass("invalid");
-      Materialize.toast("O campo '" + el.name + "' é obrigatório", 2000);
+  for (i = 0; i < elems.length; i++) {
+    if (elems[i].value === "") {
+      $("#" + elems[i].getAttribute("from")).addClass("invalid");
+      Materialize.toast("O campo '" + elems[i].name + "' é obrigatório", 2000);
       correct = false;
     }
-  });
+  }
   if (correct) {
-    let params = [];
-    let query = "insert into " + table + " values (";
-    let first = true;
-    $elems.each(function(index, el) {
-      if (!first) {
-        query += ", "
-      }
-      query += "?";
-      first = false;
-      console.log(el);
-      params.push(el.value);
-    });
+    let params = [elems[0].value];
+    let query = "insert into " + table + " values (?";
+    for (i = 1; i < elems.length; i++) {
+      query += ", ?";
+      if (elems[i].type === "checkbox")
+        params.push(elems[i].checked);
+      else params.push(elems[i].value);
+    }
     query += ")";
-    console.log(query);
-    console.log(params);
+    console.log("LOG_INFO: " + query);
+    console.log("LOG_INFO: " + params);
     db.run(query, params, function(err) {
       if (err !== null) {
+        console.log("LOG_ERR: " + err);
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
