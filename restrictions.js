@@ -47,6 +47,11 @@ $(".autocomplete").autocomplete({
   }
 });
 
+// Why doesn't work?
+$(".combo-caret").click(function(event) {
+  $("#" + event.currentTarget.getAttribute("target")).autocomplete("search", "");
+});
+
 $(".autocomplete").change(function(event) {
   if (event.currentTarget.value === "") {
     $("#" + event.currentTarget.getAttribute("target")).val("");

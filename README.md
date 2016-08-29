@@ -16,3 +16,19 @@ Projeto: Gerador automático dos horários do semestre
 
 - O software não é voltado para a grade de horários dos alunos individualmente.
 - O software não tem relação com horários de ônibus, ou vans, ou afins.
+
+# Para gerar o executável para o cliente:
+
+Dependências:
+- asar: npm install -g asar;
+- Última versão do Electron: http://electron.atom.io/releases/ (baixar o zip linux-x64 e extraí-lo numa pasta com o nome do projeto).
+
+Passos:
+1) Comentar a linha de abrir o console no arquivo main.js: mainWindow.webContents.openDevTools();
+2) Copiar todos os arquivos para uma pasta chamada 'app', exceto as pastas doc/, node_modules/electron* e o scheduler.db;
+3) Ainda na pasta recém criada, deletar os executáveis node_modules/.bin/electron*;
+4) Empacotar a pasta recém criada: asar pack app app.asar
+5) Copiar o arquivo app.asar para onde o zip do Electron foi extraído, dentro de resources/ (ao lado dos arquivos electron.asar e default_app.asar);
+6) Copiar o scheduler.db para a raiz do zip extraído (ao lado do executável do Electron);
+7) Renomear o executável 'electron' para 'Gerador de horários';
+8) Entregar.
