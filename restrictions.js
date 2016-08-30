@@ -3,7 +3,7 @@ const db = nodeRequire('electron').remote.getGlobal('db');
 
 $(".autocomplete").autocomplete({
   minLength: 0,
-  autoFocus: true,
+  // autoFocus: true, // automatically focus the first item in result list
   source: function(request, response) {
     var results = [];
     var $tis = $(this.element[0]);
@@ -12,6 +12,9 @@ $(".autocomplete").autocomplete({
     var query = "select ";
     var field = $tis.attr("select-field"),
       from = $tis.attr("select-from"),
+      whereField = $tis.attr("select-where"),
+      whereValue = "",
+      params = [],
       group = $tis.attr("select-group-by"),
       order = $tis.attr("select-order-by");
     if (typeof field !== typeof undefined && field !== "") query += field;
@@ -19,9 +22,24 @@ $(".autocomplete").autocomplete({
     query += " from ";
     if (typeof from !== typeof undefined && from !== "") query += from;
     else query += table;
+    if (typeof whereField !== typeof undefined && whereField !== "") {
+      let $whereField = $("#" + whereField);
+      whereValue = $whereField.val();
+      if (typeof whereValue !== typeof undefined && whereValue !== "") {
+        query += " where " + whereField + " = :" + whereField;
+        params.push(whereValue);
+      }
+      else {
+        $whereField.addClass("invalid");
+        Materialize.toast("Selecione o " + $whereField.attr("title") + " primeiro!", 2000);
+        response();
+        return;
+      }
+    }
     if (typeof group !== typeof undefined && group !== "") query += " group by " + group;
     if (typeof order !== typeof undefined && order !== "") query += " order by " + order;
-    db.each(query, function(err, row) {
+    console.log("LOG_INFO: " + query);
+    db.each(query, params, function(err, row) {
       var keys = Object.keys(row);
       var pk = row[keys[0]], label = "";
       if (keys.length === 1)
@@ -48,9 +66,9 @@ $(".autocomplete").autocomplete({
 });
 
 // Why doesn't work?
-$(".combo-caret").click(function(event) {
-  $("#" + event.currentTarget.getAttribute("target")).autocomplete("search", "");
-});
+// $(".combo-caret").click(function(event) {
+//   $("#" + event.currentTarget.getAttribute("target")).autocomplete("search", "");
+// });
 
 $(".autocomplete").change(function(event) {
   if (event.currentTarget.value === "") {
