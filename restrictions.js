@@ -27,8 +27,8 @@ $(".autocomplete").autocomplete({
     else query += "*";
     query += " from " + table;
     if (typeof whereFrom !== typeof undefined && whereFrom !== "") {
-      let $whereFrom = $("#" + whereFrom + "Id");
-      whereValue = $whereFrom.val();
+      let $whereFrom = $("#" + whereFrom);
+      whereValue = $("#" + whereFrom + "Id").val();
       console.log("where: " + whereFrom + " = " + whereValue);
       if (typeof whereValue !== typeof undefined && whereValue !== "") {
         query += " where " + whereField + " = :" + whereField;
@@ -95,8 +95,8 @@ $(".save").click(function(event) {
     }
   }
   if (correct) {
-    let params = [elems[0].value];
-    let query = "insert into " + table + " values (?";
+    let params = [null, elems[0].value];
+    let query = "insert into " + table + " values (?, ?";
     for (i = 1; i < elems.length; i++) {
       query += ", ?";
       if (elems[i].type === "checkbox")
