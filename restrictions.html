@@ -50,46 +50,47 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s3">
           <div class="select-wrapper">
             <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="professor" title="Nome do professor" target="professorId" class="autocomplete validate" select-order-by="name asc">
-            <input type="text" from="professor" name="Professor" id="professorId" class="professor_restriction" value="" hidden>
+            <input type="text" id="professor" title="Nome do professor" target="professorId" class="autocomplete validate" select-from="professor" select-order-by="name asc">
+            <input type="text" from="professor" id="professorId" class="professor_restriction" value="" hidden>
           </div>
           <label for="professor" title="Nome do professor">Professor</label>
         </div>
 
-        <div class="input-field col s1">
+        <div class="input-field col s2">
           <div class="select-wrapper">
             <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="dow" title="Dia da semana" target="dowId" class="autocomplete validate" select-field="dow" select-from="period" select-group-by="dow" select-order-by="dow asc">
-            <input type="text" from="dow" name="Dia" id="dowId" class="professor_restriction" value="" hidden>
+            <input type="text" id="dow" title="Dia da semana" target="dowId" class="autocomplete validate" select-from="dayofweek" select-order-by="number asc">
+            <input type="text" from="dow" id="dowId" class="professor_restriction" value="" hidden>
           </div>
           <label for="period" title="Dia da semana">Dia</label>
         </div>
-        <div class="input-field col s1">
+        <div class="input-field col s2">
           <div class="select-wrapper">
             <!-- <span id="shiftCaret" target="shift" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="shift" title="Turno do dia" target="shiftId" class="autocomplete validate" select-field="shift" select-from="period" select-where="dow" select-group-by="shift" select-order-by="shift desc">
-            <input type="text" from="shift" name="Turno" id="shiftId" class="professor_restriction" value="" hidden>
+            <input type="text" id="shift" title="Turno do dia" target="shiftId" class="autocomplete validate" select-from="shift" select-where="dow">
+            <!-- select-order-by="period desc" -->
+            <input type="text" from="shift" id="shiftId" class="professor_restriction" value="" hidden>
           </div>
           <label for="period" title="Turno do dia">Turno</label>
         </div>
-        <div class="input-field col s1">
+        <div class="input-field col s2">
           <div class="select-wrapper">
             <!-- <span id="timeCaret" target="time" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="time" title="Horário do turno" target="timeId" class="autocomplete validate" select-field="time" select-from="period" select-where="shift" select-group-by="time" select-order-by="time asc">
-            <input type="text" from="time" name="Horário" id="timeId" class="professor_restriction" value="" hidden>
+            <input type="text" id="time" title="Horário do turno" target="timeId" class="autocomplete validate" select-fields="time.*" select-from="shift_time natural join shift natural join time" select-where-field="sod" select-where-from="shift" select-order-by="hour asc">
+            <input type="text" from="time" id="timeId" class="professor_restriction" value="" hidden>
           </div>
           <label for="period" title="Horário do turno">Horário</label>
         </div>
 
-        <div class="input-field col s2">
+        <div class="input-field col s1">
           <input type="checkbox" id="active" class="filled-in professor_restriction" checked="checked">
           <label for="active">Ativa</label>
         </div>
-        <div class="input-field col s3">
-          <button class="btn waves-effect waves-light save" name="professor_restriction">Salvar</button>
+        <div class="input-field col s2">
+          <button class="btn waves-effect waves-light save right" table="professor_restriction">Salvar</button>
         </div>
       </div>
     </div>

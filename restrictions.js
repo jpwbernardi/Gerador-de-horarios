@@ -7,31 +7,36 @@ $(".autocomplete").autocomplete({
   source: function(request, response) {
     var results = [];
     var $tis = $(this.element[0]);
-    var table = $tis.attr("id");
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var query = "select ";
-    var field = $tis.attr("select-field"),
-      from = $tis.attr("select-from"),
-      whereField = $tis.attr("select-where"),
+    var fields = $tis.attr("select-fields"),
+      table = $tis.attr("select-from"),
+      whereFrom = $tis.attr("select-where-from"),
+      whereField = $tis.attr("select-where-field"),
       whereValue = "",
       params = [],
       group = $tis.attr("select-group-by"),
       order = $tis.attr("select-order-by");
-    if (typeof field !== typeof undefined && field !== "") query += field;
+      console.log(fields);
+    if (typeof fields !== typeof undefined && fields !== "") {
+      fields = fields.split(" ");
+      query += fields[0];
+      for (let i = 1; i < fields.length; i++)
+        query += ", " + fields[i];
+    }
     else query += "*";
-    query += " from ";
-    if (typeof from !== typeof undefined && from !== "") query += from;
-    else query += table;
-    if (typeof whereField !== typeof undefined && whereField !== "") {
-      let $whereField = $("#" + whereField);
-      whereValue = $whereField.val();
+    query += " from " + table;
+    if (typeof whereFrom !== typeof undefined && whereFrom !== "") {
+      let $whereFrom = $("#" + whereFrom + "Id");
+      whereValue = $whereFrom.val();
+      console.log("where: " + whereFrom + " = " + whereValue);
       if (typeof whereValue !== typeof undefined && whereValue !== "") {
         query += " where " + whereField + " = :" + whereField;
         params.push(whereValue);
       }
       else {
-        $whereField.addClass("invalid");
-        Materialize.toast("Selecione o " + $whereField.attr("title") + " primeiro!", 2000);
+        $whereFrom.addClass("invalid");
+        Materialize.toast("Selecione o " + $whereFrom.attr("title").toLowerCase() + " primeiro!", 2000);
         response();
         return;
       }
@@ -78,13 +83,14 @@ $(".autocomplete").change(function(event) {
 
 $(".save").click(function(event) {
   var i;
-  var table = event.currentTarget.name;
+  var table = event.currentTarget.getAttribute("table");
   var elems = $("." + table);
   var correct = true;
   for (i = 0; i < elems.length; i++) {
     if (elems[i].value === "") {
-      $("#" + elems[i].getAttribute("from")).addClass("invalid");
-      Materialize.toast("O campo '" + elems[i].name + "' é obrigatório", 2000);
+      var $fromElem = $("#" + elems[i].getAttribute("from"));
+      $fromElem.addClass("invalid");
+      Materialize.toast("O campo '" + $fromElem.attr("title").toLowerCase() + "' é obrigatório", 2000);
       correct = false;
     }
   }
