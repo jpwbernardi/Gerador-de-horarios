@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--Import Google Icon Font-->
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
+  <script>
+  window.nodeRequire = require;
+  delete window.require;
+  delete window.exports;
+  delete window.module;
+  </script>
+
+  <title>Gerador de horários - CCR</title>
+</head>
+
+<body>
+  <nav style="margin-bottom: 20px;">
+    <div class="nav-wrapper teal darken-3">
+      <div class="container">
+        <a href="index.html" class="brand-logo">Gerador de horários</a>
+        <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
+          <li><a href="#!">Professores</a></li>
+          <li><a href="ccr.html">CCRs</a></li>
+        </ul>
+        <ul class="side-nav" id="mobile-demo">
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
+          <li><a href="#!">Professores</a></li>
+          <li><a href="ccr.html">CCRs</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <div class="row">
+        <div class="col s10">
+          <h4>Componente Curricular</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s10 offset-s1 m2">
+            <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
+            <input type="text" id="ccr" class="subject" title="Nome do CCR">
+          <label for="ccr" title="Nome do CCR">Nome</label>
+        </div>
+
+        <div class="input-field col s10 offset-s1 m2">
+          <div class="select-wrapper">
+            <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
+            <input type="text" id="code" title="Código">
+          </div>
+          <label for="code" title="Código">Código</label>
+        </div>
+        <div class="input-field col s8 offset-s2 m1">
+          <select>
+            <option value="" disabled selected>Fase</option>
+            <option value="1">1ª</option>
+            <option value="2">2ª</option>
+            <option value="3">3ª</option>
+            <option value="4">4ª</option>
+            <option value="5">5ª</option>
+            <option value="6">6ª</option>
+            <option value="7">7ª</option>
+            <option value="8">8ª</option>
+            <option value="9">9ª</option>
+            <option value="10">10ª</option>
+          </select>
+        </div>
+        <div class="input-field col s6 offset-s3 m2">
+          <input type="checkbox" id="matutino" class="filled-in">
+          <label for="matutino">Matutino</label>
+        </div>
+        <div class="input-field col s6 offset-s3 m2">
+          <input type="checkbox" id="noturno" class="filled-in">
+          <label for="noturno">Noturno</label>
+        </div>
+        <div class="input-field col s3 m1 right">
+          <button class="btn waves-effect waves-light save right" table="subject">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+
+      <table class="striped centered">
+         <thead>
+           <tr>
+               <th data-field="id">Name</th>
+               <th data-field="name">Item Name</th>
+               <th data-field="price">Item Price</th>
+           </tr>
+         </thead>
+
+         <tbody>
+           <tr>
+             <td>Alvin</td>
+             <td>Eclair</td>
+             <td>$0.87</td>
+           </tr>
+           <tr>
+             <td>Alan</td>
+             <td>Jellybean</td>
+             <td>$3.76</td>
+           </tr>
+           <tr>
+             <td>Jonathan</td>
+             <td>Lollipop</td>
+             <td>$7.00</td>
+           </tr>
+         </tbody>
+       </table>
+  </main>
+
+  <script>
+  // You can also require other files to run in this process
+  nodeRequire('./renderer.js');
+  </script>
+  <!--Import jQuery before materialize.js-->
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
+  <script type="text/javascript" src="scheduler.js"></script>
+  <script type="text/javascript" src="ccr.js"></script>
+  <script> $(document).ready(function() {
+    $('select').material_select();
+  }); </script>
+</body>
+
+</html>
