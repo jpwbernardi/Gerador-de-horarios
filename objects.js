@@ -1,5 +1,9 @@
-const ORDER_TYPE_ASC = 1, ORDER_TYPE_DESC = -1;
-const FIELD_TYPE_NUMBER = 0, FIELD_TYPE_TEXT = 1, FIELD_TYPE_BOOLEAN = 2, FIELD_TYPE_FK = 3;
+const ORDER_TYPE_ASC = 1,
+  ORDER_TYPE_DESC = -1;
+const FIELD_TYPE_NUMBER = 0,
+  FIELD_TYPE_TEXT = 1,
+  FIELD_TYPE_BOOLEAN = 2,
+  FIELD_TYPE_FK = 3;
 
 function orderBy(fields, orders) {
   var order = "";
@@ -37,13 +41,16 @@ Professor.fields = ["siape", "name"];
 Professor.titles = ["SIAPE", "Nome do professor"];
 Professor.fieldTypes = [FIELD_TYPE_NUMBER, FIELD_TYPE_TEXT];
 Professor.col = {
-  "s": [2, 3]
+  "s": [12, 12],
+  "m": [5, 7],
+  "l": [2, 3]
 };
 Professor.primaryKey = [0];
 Professor.selectFields = [1];
-Professor.autocomplete = [
-  {"key": Professor.primaryKey[0], "value": 1}
-];
+Professor.autocomplete = [{
+  "key": Professor.primaryKey[0],
+  "value": 1
+}];
 Professor.orderBy = orderBy([Professor.fields[1]]);
 
 function DayOfWeek(dow) {
@@ -54,7 +61,9 @@ DayOfWeek.fields = ["dow"];
 DayOfWeek.titles = ["Dia da semana"];
 DayOfWeek.fieldTypes = [FIELD_TYPE_TEXT];
 DayOfWeek.col = {
-  "s": [2]
+  "s": [12],
+  "m": [4],
+  "l": [2]
 };
 DayOfWeek.primaryKey = [0];
 
@@ -66,7 +75,9 @@ Shift.fields = ["period"];
 Shift.titles = ["Turno do dia"];
 Shift.fieldTypes = [FIELD_TYPE_TEXT];
 Shift.col = {
-  "s": [2]
+  "s": [12],
+  "m": [4],
+  "l": [2]
 };
 Shift.primaryKey = [0];
 
@@ -78,7 +89,9 @@ Time.fields = ["block"];
 Time.titles = ["Horário do turno"];
 Time.fieldTypes = [FIELD_TYPE_TEXT];
 Time.col = {
-  "s": [2]
+  "s": [12],
+  "m": [4],
+  "l": [2]
 };
 Time.primaryKey = [0];
 
@@ -104,7 +117,9 @@ ProfessorRestriction.fields = ["active"];
 ProfessorRestriction.titles = ["Ativa"];
 ProfessorRestriction.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK, FIELD_TYPE_BOOLEAN];
 ProfessorRestriction.col = {
-  "s": [1]
+  "s": [12],
+  "m": [3],
+  "l": [1]
 }
 ProfessorRestriction.primaryKey = [0, 1];
 ProfessorRestriction.foreignKeys = [Professor, DowShiftTime];
