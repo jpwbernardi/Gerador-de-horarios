@@ -13,97 +13,110 @@ create table subject(
 insert into subject values ("GCH008", "Iniciação à prática científica"), ("GEX103", "Engenharia de software II"), ("GEX105", "Redes de computadores"), ("GEX107", "Computação gráfica"), ("GEX108", "Construção de compiladores");
 
 create table professor_subject(
-  id    integer,
   siape integer,
   code  varchar(8),
-  primary key(id),
+  primary key(siape, code),
   foreign key(siape) references professor(siape),
-  foreign key(code) references subject(code),
-  constraint unique_link unique(siape, code)
+  foreign key(code) references subject(code)
 );
 insert into professor_subject(siape, code) values (1, "GCH008"), (1, "GEX103"), (2, "GEX105"), (3, "GEX107"), (4, "GEX108");
 
 create table dayofweek(
-  number  integer,
-  dow     varchar(16),
-  primary key(number)
+  dow varchar(16),
+  primary key(dow)
 );
-insert into dayofweek values (0, 'Todos'), (2, 'Segunda-feira'), (3, 'Terça-feira'), (4, 'Quarta-feira'), (5, 'Quinta-feira'), (6, 'Sexta-feira');
+insert into dayofweek values ('Todos'), ('Segunda-feira'), ('Terça-feira'), ('Quarta-feira'), ('Quinta-feira'), ('Sexta-feira');
 
 create table shift(
-  sod     integer,
   period  varchar(16),
-  primary key(sod)
+  primary key(period)
 );
-insert into shift values (0, 'Todos'), (1, 'Matutino'), (2, 'Vespertino'), (3, 'Noturno');
+insert into shift values ('Todos'), ('Matutino'), ('Vespertino'), ('Noturno');
 
 create table time(
-  hour  integer,
   block varchar(16),
-  primary key(hour)
+  primary key(block)
 );
-insert into time values (0, 'Todos'), (1, 'Primeiro'), (2, 'Segundo'), (3, 'Terceiro'), (4, 'Quarto'), (5, 'Quinto');
+insert into time values ('Todos'), ('Primeiro'), ('Segundo'), ('Terceiro'), ('Quarto'), ('Quinto');
 
--- select time.* from shift_time natural join shift natural join time where shift_time.sod = ?;
-create table shift_time(
-  sod   integer,
-  hour  integer,
-  primary key(sod, hour),
-  foreign key(sod) references shift(sod),
-  foreign key(hour) references time(hour)
+create table dow_shift_time(
+  dow    varchar(16),
+  period varchar(16),
+  block  varchar(16),
+  primary key(dow, period, block),
+  foreign key(dow) references dayofweek(dow),
+  foreign key(period) references shift(period),
+  foreign key(block) references time(block)
 );
-insert into shift_time values
-  (0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
-  (1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
-  (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5),
-  (3, 0), (3, 1), (3, 2), (3, 3), (3, 4);
+insert into dow_shift_time values
+  ('Todos', 'Todos', 'Todos'), ('Segunda-feira', 'Todos', 'Todos'), ('Terça-feira', 'Todos', 'Todos'), ('Quarta-feira', 'Todos', 'Todos'), ('Quinta-feira', 'Todos', 'Todos'), ('Sexta-feira', 'Todos', 'Todos'),
+  ('Todos', 'Todos', 'Primeiro'), ('Segunda-feira', 'Todos', 'Primeiro'), ('Terça-feira', 'Todos', 'Primeiro'), ('Quarta-feira', 'Todos', 'Primeiro'), ('Quinta-feira', 'Todos', 'Primeiro'), ('Sexta-feira', 'Todos', 'Primeiro'),
+  ('Todos', 'Todos', 'Segundo'), ('Segunda-feira', 'Todos', 'Segundo'), ('Terça-feira', 'Todos', 'Segundo'), ('Quarta-feira', 'Todos', 'Segundo'), ('Quinta-feira', 'Todos', 'Segundo'), ('Sexta-feira', 'Todos', 'Segundo'),
+  ('Todos', 'Todos', 'Terceiro'), ('Segunda-feira', 'Todos', 'Terceiro'), ('Terça-feira', 'Todos', 'Terceiro'), ('Quarta-feira', 'Todos', 'Terceiro'), ('Quinta-feira', 'Todos', 'Terceiro'), ('Sexta-feira', 'Todos', 'Terceiro'),
+  ('Todos', 'Todos', 'Quarto'), ('Segunda-feira', 'Todos', 'Quarto'), ('Terça-feira', 'Todos', 'Quarto'), ('Quarta-feira', 'Todos', 'Quarto'), ('Quinta-feira', 'Todos', 'Quarto'), ('Sexta-feira', 'Todos', 'Quarto'),
+
+  ('Todos', 'Matutino', 'Todos'), ('Segunda-feira', 'Matutino', 'Todos'), ('Terça-feira', 'Matutino', 'Todos'), ('Quarta-feira', 'Matutino', 'Todos'), ('Quinta-feira', 'Matutino', 'Todos'), ('Sexta-feira', 'Matutino', 'Todos'),
+  ('Todos', 'Matutino', 'Primeiro'), ('Segunda-feira', 'Matutino', 'Primeiro'), ('Terça-feira', 'Matutino', 'Primeiro'), ('Quarta-feira', 'Matutino', 'Primeiro'), ('Quinta-feira', 'Matutino', 'Primeiro'), ('Sexta-feira', 'Matutino', 'Primeiro'),
+  ('Todos', 'Matutino', 'Segundo'), ('Segunda-feira', 'Matutino', 'Segundo'), ('Terça-feira', 'Matutino', 'Segundo'), ('Quarta-feira', 'Matutino', 'Segundo'), ('Quinta-feira', 'Matutino', 'Segundo'), ('Sexta-feira', 'Matutino', 'Segundo'),
+  ('Todos', 'Matutino', 'Terceiro'), ('Segunda-feira', 'Matutino', 'Terceiro'), ('Terça-feira', 'Matutino', 'Terceiro'), ('Quarta-feira', 'Matutino', 'Terceiro'), ('Quinta-feira', 'Matutino', 'Terceiro'), ('Sexta-feira', 'Matutino', 'Terceiro'),
+  ('Todos', 'Matutino', 'Quarto'), ('Segunda-feira', 'Matutino', 'Quarto'), ('Terça-feira', 'Matutino', 'Quarto'), ('Quarta-feira', 'Matutino', 'Quarto'), ('Quinta-feira', 'Matutino', 'Quarto'), ('Sexta-feira', 'Matutino', 'Quarto'),
+  ('Todos', 'Matutino', 'Quinto'), ('Segunda-feira', 'Matutino', 'Quinto'), ('Terça-feira', 'Matutino', 'Quinto'), ('Quarta-feira', 'Matutino', 'Quinto'), ('Quinta-feira', 'Matutino', 'Quinto'), ('Sexta-feira', 'Matutino', 'Quinto'),
+
+  ('Todos', 'Vespertino', 'Todos'), ('Segunda-feira', 'Vespertino', 'Todos'), ('Terça-feira', 'Vespertino', 'Todos'), ('Quarta-feira', 'Vespertino', 'Todos'), ('Quinta-feira', 'Vespertino', 'Todos'), ('Sexta-feira', 'Vespertino', 'Todos'),
+  ('Todos', 'Vespertino', 'Primeiro'), ('Segunda-feira', 'Vespertino', 'Primeiro'), ('Terça-feira', 'Vespertino', 'Primeiro'), ('Quarta-feira', 'Vespertino', 'Primeiro'), ('Quinta-feira', 'Vespertino', 'Primeiro'), ('Sexta-feira', 'Vespertino', 'Primeiro'),
+  ('Todos', 'Vespertino', 'Segundo'), ('Segunda-feira', 'Vespertino', 'Segundo'), ('Terça-feira', 'Vespertino', 'Segundo'), ('Quarta-feira', 'Vespertino', 'Segundo'), ('Quinta-feira', 'Vespertino', 'Segundo'), ('Sexta-feira', 'Vespertino', 'Segundo'),
+  ('Todos', 'Vespertino', 'Terceiro'), ('Segunda-feira', 'Vespertino', 'Terceiro'), ('Terça-feira', 'Vespertino', 'Terceiro'), ('Quarta-feira', 'Vespertino', 'Terceiro'), ('Quinta-feira', 'Vespertino', 'Terceiro'), ('Sexta-feira', 'Vespertino', 'Terceiro'),
+  ('Todos', 'Vespertino', 'Quarto'), ('Segunda-feira', 'Vespertino', 'Quarto'), ('Terça-feira', 'Vespertino', 'Quarto'), ('Quarta-feira', 'Vespertino', 'Quarto'), ('Quinta-feira', 'Vespertino', 'Quarto'), ('Sexta-feira', 'Vespertino', 'Quarto'),
+  ('Todos', 'Vespertino', 'Quinto'), ('Segunda-feira', 'Vespertino', 'Quinto'), ('Terça-feira', 'Vespertino', 'Quinto'), ('Quarta-feira', 'Vespertino', 'Quinto'), ('Quinta-feira', 'Vespertino', 'Quinto'), ('Sexta-feira', 'Vespertino', 'Quinto'),
+
+  ('Todos', 'Noturno', 'Todos'), ('Segunda-feira', 'Noturno', 'Todos'), ('Terça-feira', 'Noturno', 'Todos'), ('Quarta-feira', 'Noturno', 'Todos'), ('Quinta-feira', 'Noturno', 'Todos'), ('Sexta-feira', 'Noturno', 'Todos'),
+  ('Todos', 'Noturno', 'Primeiro'), ('Segunda-feira', 'Noturno', 'Primeiro'), ('Terça-feira', 'Noturno', 'Primeiro'), ('Quarta-feira', 'Noturno', 'Primeiro'), ('Quinta-feira', 'Noturno', 'Primeiro'), ('Sexta-feira', 'Noturno', 'Primeiro'),
+  ('Todos', 'Noturno', 'Segundo'), ('Segunda-feira', 'Noturno', 'Segundo'), ('Terça-feira', 'Noturno', 'Segundo'), ('Quarta-feira', 'Noturno', 'Segundo'), ('Quinta-feira', 'Noturno', 'Segundo'), ('Sexta-feira', 'Noturno', 'Segundo'),
+  ('Todos', 'Noturno', 'Terceiro'), ('Segunda-feira', 'Noturno', 'Terceiro'), ('Terça-feira', 'Noturno', 'Terceiro'), ('Quarta-feira', 'Noturno', 'Terceiro'), ('Quinta-feira', 'Noturno', 'Terceiro'), ('Sexta-feira', 'Noturno', 'Terceiro'),
+  ('Todos', 'Noturno', 'Quarto'), ('Segunda-feira', 'Noturno', 'Quarto'), ('Terça-feira', 'Noturno', 'Quarto'), ('Quarta-feira', 'Noturno', 'Quarto'), ('Quinta-feira', 'Noturno', 'Quarto'), ('Sexta-feira', 'Noturno', 'Quarto');
 
 create table professor_restriction(
-  professorr  integer,
-  siape       integer,
-  number      integer,
-  sod         integer,
-  hour        integer,
-  active      boolean default true,
-  primary key(professorr),
+  siape  integer,
+  dow    varchar(16),
+  period varchar(16),
+  block  varchar(16),
+  active boolean default true,
+  primary key(siape, dow, period, block),
   foreign key(siape) references professor(siape),
-  foreign key(number) references dayofweek(number),
-  foreign key(sod) references shift(sod),
-  foreign key(hour) references time(hour),
-  constraint unique_professor_restriction unique(siape, number, sod, hour)
+  foreign key(dow, period, block) references dow_shift_time(dow, period, block)
 );
 
-create table period_restriction(
-  periodr integer,
-  number  integer,
-  sod     integer,
-  hour    integer,
-  rnumber integer,
-  rsod    integer,
-  rhour   integer,
-  active  boolean default true,
-  primary key(periodr),
-  foreign key(number) references dayofweek(number),
-  foreign key(sod) references shift(sod),
-  foreign key(hour) references time(hour),
-  foreign key(rnumber) references dayofweek(number),
-  foreign key(rsod) references shift(sod),
-  foreign key(rhour) references time(hour),
-  constraint unique_period_restriction unique(number, sod, hour, rnumber, rsod, rhour)
-);
-
-create table class(
-  lesson  integer,
-  siape   integer,
-  code    varchar(8),
-  number  integer,
-  sod     integer,
-  hour    integer,
-  primary key(lesson),
-  foreign key(siape) references professor(siape),
-  foreign key(code) references subject(code),
-  foreign key(number) references dayofweek(number),
-  foreign key(sod) references shift(sod),
-  foreign key(hour) references time(hour),
-  constraint unique_class unique(siape, code, number, sod, hour)
-);
+-- create table period_restriction(
+--   periodr integer,
+--   number  integer,
+--   sod     integer,
+--   hour    integer,
+--   rnumber integer,
+--   rsod    integer,
+--   rhour   integer,
+--   active  boolean default true,
+--   primary key(periodr),
+--   foreign key(number) references dayofweek(number),
+--   foreign key(sod) references shift(sod),
+--   foreign key(hour) references time(hour),
+--   foreign key(rnumber) references dayofweek(number),
+--   foreign key(rsod) references shift(sod),
+--   foreign key(rhour) references time(hour),
+--   constraint unique_period_restriction unique(number, sod, hour, rnumber, rsod, rhour)
+-- );
+--
+-- create table class(
+--   lesson  integer,
+--   siape   integer,
+--   code    varchar(8),
+--   number  integer,
+--   sod     integer,
+--   hour    integer,
+--   primary key(lesson),
+--   foreign key(siape) references professor(siape),
+--   foreign key(code) references subject(code),
+--   foreign key(number) references dayofweek(number),
+--   foreign key(sod) references shift(sod),
+--   foreign key(hour) references time(hour),
+--   constraint unique_class unique(siape, code, number, sod, hour)
+-- );

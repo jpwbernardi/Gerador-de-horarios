@@ -49,40 +49,32 @@
           <h4>Restrições</h4>
         </div>
       </div>
+      <div class="form" object="ProfessorRestriction"></div>
       <div class="row">
         <div class="input-field col s3">
-          <div class="select-wrapper">
-            <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="professor" title="Nome do professor" target="professorId" class="autocomplete validate" select-from="professor" select-order-by="name asc">
-            <input type="text" from="professor" id="professorId" class="professor_restriction" value="" hidden>
-          </div>
+          <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
+          <input type="text" id="professor" title="Nome do professor" target="professorId" class="autocomplete validate" select-from="professor" select-order-by="name asc">
+          <input type="text" from="professor" id="professorId" class="professor_restriction" value="" hidden>
           <label for="professor" title="Nome do professor">Professor</label>
         </div>
 
         <div class="input-field col s2">
-          <div class="select-wrapper">
-            <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="dow" title="Dia da semana" target="dowId" class="autocomplete validate" select-from="dayofweek" select-order-by="number asc">
-            <input type="text" from="dow" id="dowId" class="professor_restriction" value="" hidden>
-          </div>
-          <label for="period" title="Dia da semana">Dia</label>
+          <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
+          <input type="text" id="dow" title="Dia da semana" target="dowId" class="autocomplete validate" select-from="dayofweek" select-order-by="number asc">
+          <input type="text" from="dow" id="dowId" class="professor_restriction" value="" hidden>
+          <label for="dow" title="Dia da semana">Dia da semana</label>
         </div>
         <div class="input-field col s2">
-          <div class="select-wrapper">
-            <!-- <span id="shiftCaret" target="shift" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="shift" title="Turno do dia" target="shiftId" class="autocomplete validate" select-from="shift" select-where="dow">
-            <!-- select-order-by="period desc" -->
-            <input type="text" from="shift" id="shiftId" class="professor_restriction" value="" hidden>
-          </div>
-          <label for="period" title="Turno do dia">Turno</label>
+          <!-- <span id="shiftCaret" target="shift" class="caret combo-caret">&#9660;</span> -->
+          <input type="text" id="shift" title="Turno do dia" target="shiftId" class="autocomplete validate" select-from="shift" select-where="dow">
+          <input type="text" from="shift" id="shiftId" class="professor_restriction" value="" hidden>
+          <label for="shift" title="Turno do dia">Turno do dia</label>
         </div>
         <div class="input-field col s2">
-          <div class="select-wrapper">
-            <!-- <span id="timeCaret" target="time" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="time" title="Horário do turno" target="timeId" class="autocomplete validate" select-fields="time.*" select-from="shift_time natural join shift natural join time" select-where-field="sod" select-where-from="shift" select-order-by="hour asc">
-            <input type="text" from="time" id="timeId" class="professor_restriction" value="" hidden>
-          </div>
-          <label for="period" title="Horário do turno">Horário</label>
+          <!-- <span id="timeCaret" target="time" class="caret combo-caret">&#9660;</span> -->
+          <input type="text" id="time" title="Horário do turno" target="timeId" class="autocomplete validate" select-fields="time.*" select-from="shift_time natural join shift natural join time" select-where-field="sod" select-where-from="shift" select-order-by="hour asc">
+          <input type="text" from="time" id="timeId" class="professor_restriction" value="" hidden>
+          <label for="time" title="Horário do turno">Horário do turno</label>
         </div>
 
         <div class="input-field col s1">
@@ -90,9 +82,10 @@
           <label for="active">Ativa</label>
         </div>
         <div class="input-field col s2">
-          <button class="btn waves-effect waves-light save right" table="professor_restriction">Salvar</button>
+          <button class="btn waves-effect waves-light form-save right" table="professor_restriction">Salvar</button>
         </div>
       </div>
+      <div class="restriction-lists"></div>
     </div>
   </main>
 
