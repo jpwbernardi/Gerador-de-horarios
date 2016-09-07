@@ -1,7 +1,7 @@
-$(document).ready(function() {
-  buildForms();
+// $(document).ready(function() {
+  // buildForms();
   // listRestrictions();
-});
+// });
 
 function listRestrictions() {
   var $lists = $(".restriction-lists");

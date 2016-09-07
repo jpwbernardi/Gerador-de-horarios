@@ -5,18 +5,6 @@ const FIELD_TYPE_NUMBER = 0,
   FIELD_TYPE_BOOLEAN = 2,
   FIELD_TYPE_FK = 3;
 
-function orderBy(fields, orders) {
-  var order = "";
-  var defaultOrder = false;
-  if (typeof orders !== typeof undefined && orders.length > 0) {
-    if (orders.length !== fields.length)
-      throw new RangeError("Ordering type must be specified for every field, if any.");
-  } else defaultOrder = true;
-  for (let i = 0; i < fields.length; i++)
-    order += fields[i] + " " + (defaultOrder === true ? ORDER_TYPE_ASC : orders[i]);
-  return order;
-}
-
 module.exports = {
   Professor: Professor,
   DayOfWeek: DayOfWeek,
@@ -38,6 +26,7 @@ function Professor(siape, name) {
 }
 Professor.table = "professor";
 Professor.fields = ["siape", "name"];
+Professor.fieldRequired = [true, true];
 Professor.titles = ["SIAPE", "Nome do professor"];
 Professor.fieldTypes = [FIELD_TYPE_NUMBER, FIELD_TYPE_TEXT];
 Professor.col = {
@@ -51,7 +40,9 @@ Professor.autocomplete = [{
   "key": Professor.primaryKey[0],
   "value": 1
 }];
-Professor.orderBy = orderBy([Professor.fields[1]]);
+Professor.orderBy = {
+  "fields": [Professor.fields[1]]
+};
 
 function DayOfWeek(dow) {
   this.dow = dow;
@@ -118,8 +109,8 @@ ProfessorRestriction.titles = ["Ativa"];
 ProfessorRestriction.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK, FIELD_TYPE_BOOLEAN];
 ProfessorRestriction.col = {
   "s": [12],
-  "m": [3],
-  "l": [1]
+  "m": [4],
+  "l": [2]
 }
 ProfessorRestriction.primaryKey = [0, 1];
 ProfessorRestriction.foreignKeys = [Professor, DowShiftTime];

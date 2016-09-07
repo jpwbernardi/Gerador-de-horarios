@@ -49,42 +49,39 @@
           <h4>Restrições</h4>
         </div>
       </div>
-      <div class="form" object="ProfessorRestriction"></div>
-      <div class="row">
-        <div class="input-field col s3">
-          <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
-          <input type="text" id="professor" title="Nome do professor" target="professorId" class="autocomplete validate" select-from="professor" select-order-by="name asc">
-          <input type="text" from="professor" id="professorId" class="professor_restriction" value="" hidden>
-          <label for="professor" title="Nome do professor">Professor</label>
+      <form object="ProfessorRestriction">
+        <div class="row">
+          <div class="input-field col s12 m7 l3">
+            <input type="number" id="professor-siape-id" object="ProfessorRestriction" from="professor-name" value="" hidden="hidden" required="required">
+            <input type="text" id="professor-name" class="autocomplete validate" title="Nome do professor" target="professor-siape-id" object="Professor" owner-object="Professor">
+            <label for="name" title="Nome do professor" class="">Nome do professor</label>
+          </div>
+          <div class="input-field col s12 m4 l2">
+            <input type="text" id="dayofweek-dow-id" object="ProfessorRestriction" from="dayofweek-dow" value="" hidden="hidden" required="required">
+            <input type="text" id="dayofweek-dow" class="autocomplete validate" title="Dia da semana" target="dayofweek-dow-id" object="DowShiftTime" owner-object="DayOfWeek">
+            <label for="dow" title="Dia da semana">Dia da semana</label>
+          </div>
+          <div class="input-field col s12 m4 l2">
+            <input type="text" id="shift-period-id" object="ProfessorRestriction" from="shift-period" value="" hidden="hidden" required="required">
+            <input type="text" id="shift-period" class="autocomplete validate" title="Turno do dia" target="shift-period-id" object="DowShiftTime" owner-object="Shift">
+            <label for="period" title="Turno do dia">Turno do dia</label>
+          </div>
+          <div class="input-field col s12 m4 l2">
+            <input type="text" id="time-block-id" object="ProfessorRestriction" from="time-block" value="" hidden="hidden" required="required">
+            <input type="text" id="time-block" class="autocomplete validate" title="Horário do turno" target="time-block-id" object="DowShiftTime" owner-object="Time">
+            <label for="block" title="Horário do turno">Horário do turno</label>
+          </div>
+          <div class="input-field col s12 m4 l2">
+            <input type="checkbox" id="active" object="ProfessorRestriction" class="filled-in" title="Ativa" checked="checked">
+            <label for="active" title="Ativa">Ativa</label>
+          </div>
+          <div class="input-field col s4 m2 l1">
+            <button class="btn btn-short waves-effect waves-light form-save" object="ProfessorRestriction" title="Salvar">
+              <i class="material-icons">save</i>
+            </button>
+          </div>
         </div>
-
-        <div class="input-field col s2">
-          <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
-          <input type="text" id="dow" title="Dia da semana" target="dowId" class="autocomplete validate" select-from="dayofweek" select-order-by="number asc">
-          <input type="text" from="dow" id="dowId" class="professor_restriction" value="" hidden>
-          <label for="dow" title="Dia da semana">Dia da semana</label>
-        </div>
-        <div class="input-field col s2">
-          <!-- <span id="shiftCaret" target="shift" class="caret combo-caret">&#9660;</span> -->
-          <input type="text" id="shift" title="Turno do dia" target="shiftId" class="autocomplete validate" select-from="shift" select-where="dow">
-          <input type="text" from="shift" id="shiftId" class="professor_restriction" value="" hidden>
-          <label for="shift" title="Turno do dia">Turno do dia</label>
-        </div>
-        <div class="input-field col s2">
-          <!-- <span id="timeCaret" target="time" class="caret combo-caret">&#9660;</span> -->
-          <input type="text" id="time" title="Horário do turno" target="timeId" class="autocomplete validate" select-fields="time.*" select-from="shift_time natural join shift natural join time" select-where-field="sod" select-where-from="shift" select-order-by="hour asc">
-          <input type="text" from="time" id="timeId" class="professor_restriction" value="" hidden>
-          <label for="time" title="Horário do turno">Horário do turno</label>
-        </div>
-
-        <div class="input-field col s1">
-          <input type="checkbox" id="active" class="filled-in professor_restriction" checked="checked">
-          <label for="active">Ativa</label>
-        </div>
-        <div class="input-field col s2">
-          <button class="btn waves-effect waves-light form-save right" table="professor_restriction">Salvar</button>
-        </div>
-      </div>
+      </form>
       <div class="restriction-lists"></div>
     </div>
   </main>

@@ -1,3 +1,12 @@
+.combo-caret {
+  cursor: pointer;
+}
+
+.btn-short {
+  padding: 0 0.65rem;
+}
+
+/* jQuery Autocomplete */
 .ui-helper-hidden-accessible {
   display: none;
 }
@@ -32,8 +41,4 @@
 .ui-state-focus {
   font-weight: bold;
   background-color: #eee;
-}
-
-.combo-caret {
-  cursor: pointer;
 }

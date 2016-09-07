@@ -12,59 +12,58 @@ var autocompleteOptions = {
   source: function(request, response) {
     var results = [];
     var $this = $(this.element[0]);
-    var obj = $this.attr("object");
-    var thisObj = $this.attr("this-object");
+    var obj = objects[$this.attr("object")];
+    var ownerObj = objects[$this.attr("owner-object")];
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
-    var query = "select ";
-    var fields = thisObj.selectFields,
-      table = thisObj.table,
-      params = [],
-      group = thisObj.orderBy,
-      order = thisObj.groupBy;
-    if (typeof fields !== typeof undefined && fields.length > 0) {
-      query += thisObj.fields[fields[0]];
-      for (let i = 1; i < fields.length; i++)
-        query += ", " + thisObj.fields[fields[i]];
-    } else query += "*";
-    query += " from " + table;
-    if (typeof group !== typeof undefined && group !== "") query += " group by " + group;
-    if (typeof order !== typeof undefined && order !== "") query += " order by " + order;
-    console.log("LOG_INFO: " + query);
+    var params = [];
+    var query = "select * from " + ownerObj.table;
+    if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
+      query += " group by " + groupBy(ownerObj.groupBy);
+    if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
+      query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
+    console.log("LOG_INFO[autocompleteOptions, 1]: " + query);
     db.each(query, params, function(err, row) {
-      var keys = Object.keys(row);
-      var pk = row[keys[0]],
-        label = "";
-      if (keys.length === 1)
-        label = row[keys[0]];
-      else {
-        label += row[keys[1]];
-        for (let i = 2; i < keys.length; i++)
-          label += " " + row[keys[i]];
-        label += " (" + pk + ")";
+      var keys = undefined;
+      if (typeof ownerObj.selectFields !== typeof undefined && ownerObj.selectFields.length > 0) {
+        keys = [ownerObj.fields[ownerObj.selectFields[0]]];
+        for (let i = 1; i < ownerObj.selectFields.length; i++)
+          keys.push(ownerObj.fields[ownerObj.selectFields[i]]);
+      } else {
+        keys = Object.keys(row); // all fields from the 'select *'
       }
-      if (matcher.test(label))
-        results.push({
-          id: pk,
-          target: $this.attr("target"),
-          value: label
+      var label = row[keys[0]];
+      for (let i = 1; i < keys.length; i++)
+        label += ", " + row[keys[i]];
+      if (matcher.test(label)) {
+        let rowJson = {
+          "label": label,
+          "pk": {}
+        };
+        $.each(ownerObj.primaryKey, function(i, key) {
+          rowJson.pk[ownerObj.table + "-" + ownerObj.fields[key] + "-id"] = row[ownerObj.fields[key]];
         });
+        results.push(rowJson);
+      }
     }, function(err, nrows) {
       response(results);
     });
   },
   select: function(event, ui) {
-    document.getElementById(ui.item.target).value = ui.item.id;
+    $.each(ui.item.pk, function(key, value) {
+      document.getElementById(key).value = value;
+    });
   }
 };
 
-$(document).ready(function() {
-  $(".button-collapse").sideNav();
-  $(".autocomplete").autocomplete(autocompleteOptions);
-  $(".autocomplete").change(function(event) {
-    if (event.currentTarget.value === "") {
-      $("#" + event.currentTarget.getAttribute("target")).val("");
-    }
-  });
+$(".button-collapse").sideNav();
+$(".autocomplete").autocomplete(autocompleteOptions);
+$(".autocomplete").change(function(event) {
+  if (event.currentTarget.value === "") {
+    var obj = objects[event.currentTarget.getAttribute("object")];
+    $.each(obj.primaryKey, function(i, key) {
+      $("#" + obj.table + "-" + obj.fields[key] + "-id").val("");
+    });
+  }
 });
 
 function $createElement(tag, attributes, events) {
@@ -87,7 +86,7 @@ function $createTextualElement(tag, attributes, content) {
   $.each(attributes, function(key, value) {
     $element.attr(key, value);
   });
-  $element.append(document.createTextNode(content));
+  $element.append(content);
   return $element;
 }
 
@@ -118,9 +117,43 @@ function decodeType(obj, findex) {
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
     default:
-      console.log("LOG_WARN: unknown type '" + obj.fieldTypes[findex] + "'");
+      console.log("LOG_WARN[decodeType, 1]: unknown type '" + obj.fieldTypes[findex] + "'");
       return "";
   }
+}
+
+function decodeOrder(type) {
+  switch (type) {
+    case 1:
+      return "asc";
+    case -1:
+      return "desc";
+    default:
+      console.log("LOG_WARN[decodeOrder, 1]: unknown order by, type '" + type + "'!");
+      return "";
+  }
+}
+
+function orderBy(fields, types) {
+  var order = "";
+  var defaultOrder = false;
+  if (typeof types !== typeof undefined && types.length > 0) {
+    if (fields.length !== types.length)
+      throw new RangeError("Ordering type must be specified for every field, if any.");
+  } else defaultOrder = true;
+  for (let i = 0; i < fields.length; i++)
+    order += fields[i] + " " + decodeOrder(defaultOrder === true ? ORDER_TYPE_ASC : types[i]);
+  return order;
+}
+
+function groupBy(fields) {
+  var group = "";
+  if (typeof fields !== typeof undefined && fields.length > 0) {
+    group = fields[0];
+    for (let i = 1; i < fields.length; i++)
+      group += ", " + fields[i];
+  } else console.log("LOG_WARN[groupBy, 1]: empty 'fields' parameter");
+  return group;
 }
 
 function getForeignObjects(obj) {
@@ -136,14 +169,14 @@ function getForeignObjects(obj) {
 }
 
 function buildForms() {
-  var $forms = $(".form");
+  var $forms = $("form");
   $forms.each(function(index, form) {
     var o = form.getAttribute("object");
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
       $(form).append($buildForm(obj));
     else
-      console.log("LOG_ERR: object " + o + " not found!");
+      console.log("LOG_ERR[buildForms, 1]: object " + o + " not found!");
   });
 }
 
@@ -172,14 +205,17 @@ function $buildForm(obj) {
           $col = $createElement("div", {
             "class": "input-field col"
           });
-          $col.append($createElement("input", {
+          let $hiddenInput = $createElement("input", {
             "type": decodeType(fo, f.key),
             "id": fo.table + "-" + fo.fields[f.key] + "-id",
-            "table": obj.table,
+            "object": obj.name,
             "from": fo.table + "-" + fo.fields[f.value],
             "value": "",
             "hidden": "hidden"
-          }));
+          });
+          if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+            $hiddenInput.attr("required", "required");
+          $col.append($hiddenInput);
           $col.append($createElement("input", {
             "type": decodeType(fo, f.value),
             "id": fo.table + "-" + fo.fields[f.value],
@@ -187,7 +223,7 @@ function $buildForm(obj) {
             "title": fo.titles[f.value],
             "target": fo.table + "-" + fo.fields[f.key] + "-id",
             "object": fobj.name,
-            "this-object": fo.name
+            "owner-object": fo.name
           }));
           $col.append($createTextualElement("label", {
             "for": fo.fields[f.value],
@@ -204,8 +240,11 @@ function $buildForm(obj) {
       var $input = $createElement("input");
       $input.attr("type", decodeType(obj, j));
       $input.attr("id", obj.fields[i]);
+      $input.attr("object", obj.name);
       if (type === objects.FIELD_TYPE_BOOLEAN) $input.attr("class", "filled-in");
       $input.attr("title", obj.titles[i]);
+      if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+        $input.attr("required", "required");
       var $label = $createTextualElement("label", {
         "for": obj.fields[i],
         "title": obj.titles[i]
@@ -217,20 +256,27 @@ function $buildForm(obj) {
       i++;
     }
   });
-  $row.append($createTextualElement("button", {
-    "class": "btn waves-effect waves-light form-save",
-    "object": obj.name
-  }, "<i class='material-icons'>add</i>"));
+  $col = $createElement("div", {
+    "class": "input-field col s4 m2 l1"
+  });
+  $col.append($createTextualElement("button", {
+    "class": "btn btn-short waves-effect waves-light form-save",
+    "object": obj.name,
+    "title": "Salvar"
+  }, $createTextualElement("i", {
+    "class": "material-icons"
+  }, "save")));
+  $row.append($col);
   return $row;
 }
 
 $(".form-save").click(function(event) {
   var i;
-  var table = event.currentTarget.getAttribute("table");
-  var elems = $("." + table);
+  var obj = objects[event.currentTarget.getAttribute("object")];
+  var elems = $("input[object=" + obj.name + "]");
   var correct = true;
   for (i = 0; i < elems.length; i++) {
-    if (elems[i].value === "") {
+    if (elems[i].type !== "checkbox" && elems[i].value === "") {
       var $fromElem = $("#" + elems[i].getAttribute("from"));
       $fromElem.addClass("invalid");
       Materialize.toast("O campo '" + $fromElem.attr("title").toLowerCase() + "' é obrigatório", 2000);
@@ -238,8 +284,8 @@ $(".form-save").click(function(event) {
     }
   }
   if (correct) {
-    let params = [null, elems[0].value];
-    let query = "insert into " + table + " values (?, ?";
+    let params = [elems[0].value];
+    let query = "insert into " + obj.table + " values (?";
     for (i = 1; i < elems.length; i++) {
       query += ", ?";
       if (elems[i].type === "checkbox")
@@ -247,14 +293,15 @@ $(".form-save").click(function(event) {
       else params.push(elems[i].value);
     }
     query += ")";
-    console.log("LOG_INFO: " + query);
-    console.log("LOG_INFO: " + params);
+    console.log("LOG_INFO[.form-save click, 1]: " + query);
+    console.log("LOG_INFO[.form-save click, 2]: " + params);
     db.run(query, params, function(err) {
       if (err !== null) {
-        console.log("LOG_ERR: " + err);
+        console.log("LOG_ERR[.form-save click, 3]: " + err);
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
+        $("form[object=" + obj.name + "]")[0].reset();
       }
     });
   }
