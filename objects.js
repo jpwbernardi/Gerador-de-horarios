@@ -7,7 +7,9 @@ const FIELD_TYPE_NUMBER = 0,
 
 module.exports = {
   Professor: Professor,
+  Subject: Subject,
   DayOfWeek: DayOfWeek,
+  Semester: Semester,
   Shift: Shift,
   Time: Time,
   DowShiftTime: DowShiftTime,
@@ -44,6 +46,22 @@ Professor.orderBy = {
   "fields": [Professor.fields[1]]
 };
 
+function Subject(cod, title) {
+  this.cod = cod;
+  this.title = title;
+}
+Subject.table = "subject";
+Subject.fields = ["cod", "title"];
+Subject.fieldRequired = [true, true];
+Subject.titles = ["Código", "Componente Curricular"];
+Subject.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_TEXT];
+Subject.col = {
+  "s": [12, 12],
+  "m": [5, 7],
+  "l": [2, 3]
+};
+Subject.primaryKey = [0];
+
 function DayOfWeek(dow) {
   this.dow = dow;
 }
@@ -57,6 +75,21 @@ DayOfWeek.col = {
   "l": [2]
 };
 DayOfWeek.primaryKey = [0];
+
+function Semester(sem) {
+  this.sem = sem;
+}
+Semester.table = "semester";
+Semester.fields = ["sem"];
+Semester.titles = ["Semestre"];
+Semester.fieldTypes = [FIELD_TYPE_TEXT];
+Semester.col = {
+  "s": [12],
+  "m": [4],
+  "l": [2]
+};
+Semester.primaryKey = [0];
+
 
 function Shift(period) {
   this.period = period;

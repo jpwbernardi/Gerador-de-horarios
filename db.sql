@@ -27,6 +27,12 @@ create table dayofweek(
 );
 insert into dayofweek values ('Todos'), ('Segunda-feira'), ('Terça-feira'), ('Quarta-feira'), ('Quinta-feira'), ('Sexta-feira');
 
+create table semester(
+  sem varchar(2),
+  primary key(sem)
+);
+insert into semester values ('1'), ('2'), ('3'), ('4'), ('5'), ('6'), ('7'), ('8'), ('9'), ('10');
+
 create table shift(
   period  varchar(16),
   primary key(period)
