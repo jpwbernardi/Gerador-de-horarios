@@ -49,23 +49,21 @@
           <h4>Componente Curricular</h4>
         </div>
       </div>
+      <div class="list" object="Subject"></div>
       <div class="row">
-        <div class="row col s12 m7" style="padding-top:15px">
+        <div class="col s12 m7">
           <div class="input-field col s10 offset-s1 m5 l6">
-            <!-- <span id="professorCaret" target="professor" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="subject-title" class="validate" object="Subject" owner-object="Subject" title="Nome do CCR">
+            <input type="text" id="subject-title" object="Subject" title="Nome do CCR" required="required">
             <label for="subject-title" title="Nome do CCR">Nome</label>
           </div>
-
           <div class="input-field col s10 offset-s1 m4 l3">
-            <!-- <span id="dowCaret" target="dow" class="caret combo-caret">&#9660;</span> -->
-            <input type="text" id="code" title="Código">
-            <label for="code" title="Código">Código</label>
+            <input type="text" id="subject-code" object="Subject" title="Código" required="required">
+            <label for="subject-code" title="Código">Código</label>
           </div>
           <div class="input-field col s8 offset-s2 m3">
-            <input type="text" id="semester-sem-id" object="Subject" from="semester-sem" value="" hidden="hidden" required="required">
-            <input type="text" id="semester-sem" class="autocomplete validate" title="Semestre" target="semester-sem-id" object="Semester" owner-object="Semester">
-            <label for="sem" title="Semestre">Semestre</label>
+            <input type="text" id="semester-sem-id" object="Subject" from="semester-sem" value="" hidden="hidden">
+            <input type="text" id="semester-sem" class="autocomplete validate" title="Semestre" target="semester-sem-id" object="Subject" owner-object="Semester" required="required">
+            <label for="semester-sem" title="Semestre">Semestre</label>
           </div>
         </div>
         <div class="input-field col s2 offset-s3 m2">
@@ -77,7 +75,7 @@
           <label for="noturno">Noturno</label>
         </div>
         <div class="input-field col s1 offset-s3 m1 offset-m1" style="padding-top:25px">
-          <button class="btn btn-short waves-effect waves-light form-save" object="ProfessorRestriction" title="Salvar">
+          <button class="btn btn-short waves-effect waves-light form-save" object="Subject" title="Salvar">
             <i class="material-icons">save</i>
           </button>
         </div>
@@ -123,7 +121,7 @@
   <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
   <script type="text/javascript" src="scheduler.js"></script>
-  <script type="text/javascript" src="restrictions.js"></script>
+  <script type="text/javascript" src="ccr.js"></script>
   <script> $(document).ready(function() {
     $('select').material_select();
   }); </script>

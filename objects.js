@@ -67,21 +67,32 @@ Professor.orderBy = {
   "fields": [Professor.fields[1]]
 };
 
-function Subject(cod, title) {
-  this.cod = cod;
+function Subject(code, title, sem, period) {
+  this.code = code;
   this.title = title;
+  this.sem = sem;
+  this.period = period;
 }
 Subject.table = "subject";
-Subject.fields = ["cod", "title"];
-Subject.fieldRequired = [true, true];
-Subject.titles = ["Código", "Componente Curricular"];
-Subject.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_TEXT];
+Subject.fields = ["code", "title"];
+Subject.fieldRequired = [true, true, true, true];
+Subject.titles = ["Código", "Componente curricular"];
+Subject.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_TEXT, FIELD_TYPE_FK, FIELD_TYPE_FK];
 Subject.col = {
   "s": [12, 12],
   "m": [5, 7],
   "l": [2, 3]
 };
 Subject.primaryKey = [0];
+Subject.foreignKeys = [Semester, Shift];
+Subject.selectFields = [0, 1];
+Subject.autocomplete = [{
+  "key": Subject.primaryKey[0],
+  "value": 1
+}];
+Subject.orderBy = {
+  "fields": [Subject.fields[1]]
+};
 
 function DayOfWeek(dow) {
   this.dow = dow;
@@ -103,14 +114,18 @@ function Semester(sem) {
 }
 Semester.table = "semester";
 Semester.fields = ["sem"];
+Semester.fieldRequired = [true];
 Semester.titles = ["Semestre"];
-Semester.fieldTypes = [FIELD_TYPE_TEXT];
+Semester.fieldTypes = [FIELD_TYPE_NUMBER];
 Semester.col = {
   "s": [12],
   "m": [4],
   "l": [2]
 };
 Semester.primaryKey = [0];
+Semester.orderBy = {
+  "fields": [Semester.fields[0]]
+};
 
 
 function Shift(period) {

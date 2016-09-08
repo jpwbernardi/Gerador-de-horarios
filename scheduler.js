@@ -208,7 +208,7 @@ function buildLists() {
 }
 
 function $buildForm(obj) {
-  var i = 0;
+  var i = 0, _i = 0;
   var $row = $createElement("div", {
     "class": "row"
   });
@@ -216,7 +216,8 @@ function $buildForm(obj) {
     var $col = null,
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      let fobj = obj.foreignKeys[j];
+      // fazer iterador só para FK
+      let fobj = obj.foreignKeys[_i];
       let fobjs = getForeignObjects(fobj);
       $.each(fobjs, function(k, fo) {
         var autocomplete = fo.autocomplete;
@@ -262,6 +263,7 @@ function $buildForm(obj) {
           $row.append($col);
         });
       });
+      _i++;
     } else {
       $col = $createElement("div", {
         "class": "input-field col"
@@ -307,10 +309,11 @@ $(".form-save").click(function(event) {
   var elems = $("input[object=" + obj.name + "]");
   var correct = true;
   for (i = 0; i < elems.length; i++) {
-    if (elems[i].type !== "checkbox" && elems[i].value === "" && $("#" + elems[i].getAttribute("from")).val() === "") {
-      var $fromElem = $("#" + elems[i].getAttribute("from"));
-      $fromElem.addClass("invalid");
-      Materialize.toast("O campo '" + $fromElem.attr("title") + "' é obrigatório", 2000);
+    var $elem = $(elems[i]);
+    if (typeof $elem.attr("from") !== typeof undefined) $elem = $("#" + $elem.attr("from"));
+    if ($elem.attr("required") && $elem.val() === "" && $elem.attr("type") !== "checkbox") {
+      $elem.addClass("invalid");
+      Materialize.toast("O campo '" + $elem.attr("title") + "' é obrigatório", 2000);
       correct = false;
     }
   }

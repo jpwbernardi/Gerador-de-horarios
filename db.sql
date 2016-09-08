@@ -5,12 +5,33 @@ create table professor(
 );
 insert into professor values (1, "Graziela Simone Tonin"), (2, "Claunir Pavan"), (3, "José Bins"), (4, "Bráulio de Mello");
 
-create table subject(
-  code  varchar(8),
-  title varchar(64),
-  primary key(code)
+create table semester(
+  sem integer,
+  primary key(sem)
 );
-insert into subject values ("GCH008", "Iniciação à prática científica"), ("GEX103", "Engenharia de software II"), ("GEX105", "Redes de computadores"), ("GEX107", "Computação gráfica"), ("GEX108", "Construção de compiladores");
+insert into semester values (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
+
+create table shift(
+  period  varchar(16),
+  primary key(period)
+);
+insert into shift values ('Todos'), ('Matutino'), ('Vespertino'), ('Noturno');
+
+create table subject(
+  code   varchar(8),
+  title  varchar(64),
+  sem    integer,
+  period varchar(16),
+  primary key(code),
+  foreign key(sem) references semester(sem) on delete cascade,
+  foreign key(period) references shift(period) on delete cascade
+);
+insert into subject values
+("GCH008", "Iniciação à prática científica", 5, 'Noturno'),
+("GEX103", "Engenharia de software II", 6, 'Matutino'),
+("GEX105", "Redes de computadores", 6, 'Matutino'),
+("GEX107", "Computação gráfica", 6, 'Matutino'),
+("GEX108", "Construção de compiladores, 6, 'Matutino'");
 
 create table professor_subject(
   siape integer,
@@ -26,18 +47,6 @@ create table dayofweek(
   primary key(dow)
 );
 insert into dayofweek values ('Todos'), ('Segunda-feira'), ('Terça-feira'), ('Quarta-feira'), ('Quinta-feira'), ('Sexta-feira');
-
-create table semester(
-  sem varchar(2),
-  primary key(sem)
-);
-insert into semester values ('1'), ('2'), ('3'), ('4'), ('5'), ('6'), ('7'), ('8'), ('9'), ('10');
-
-create table shift(
-  period  varchar(16),
-  primary key(period)
-);
-insert into shift values ('Todos'), ('Matutino'), ('Vespertino'), ('Noturno');
 
 create table time(
   block varchar(16),
