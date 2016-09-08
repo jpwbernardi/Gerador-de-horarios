@@ -16,12 +16,39 @@ var autocompleteOptions = {
     var ownerObj = objects[$this.attr("owner-object")];
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var params = [];
-    var query = "select * from " + ownerObj.table;
+    var query = "select ";
+    $.each(ownerObj.fields, function(i, field) {
+      query += (i === 0 ? "" : ", ") + field;
+    });
+    query += " from " + obj.table;
+    if (typeof obj.selectWhere !== typeof undefined) {
+      let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
+      if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
+        if (typeof obj.selectWhere[fieldIndex].object !== typeof undefined && obj.selectWhere[fieldIndex].object.length > 0 && obj.selectWhere[fieldIndex].object.length === obj.selectWhere[fieldIndex].field.length) {
+          for (let i = 0; i < obj.selectWhere[fieldIndex].object.length; i++) {
+            let $whereField = $("#" + obj.selectWhere[fieldIndex].object[i].table + "-" + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + "-id");
+            if ($whereField.val() === "") {
+              let $whereFrom = $("#" + $whereField.attr("from"));
+              $whereFrom.addClass("invalid");
+              Materialize.toast("Selecione o campo '" + $whereFrom.attr("title") + "' primeiro!", 2000);
+              response();
+              return;
+            }
+            query += (i === 0 ? " where " : " and ") + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + " = ?";
+            params.push($whereField.val());
+          }
+        } else {
+          console.log("LOG_ERR[autocompleteOptions, 4]: " + obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          return;
+        }
+      } else console.log("LOG_WARN[autocompleteOptions, 3]: " + obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else console.log("LOG_INFO[autocompleteOptions, 2]: " + obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
     if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
     console.log("LOG_INFO[autocompleteOptions, 1]: " + query);
+    console.log("LOG_INFO[autocompleteOptions, 5]: " + params);
     db.each(query, params, function(err, row) {
       var keys = undefined;
       if (typeof ownerObj.selectFields !== typeof undefined && ownerObj.selectFields.length > 0) {
@@ -186,7 +213,8 @@ function $buildForm(obj) {
     "class": "row"
   });
   $.each(obj.fieldTypes, function(j, type) {
-    var $col = null;
+    var $col = null,
+      $input = null;
     if (type === objects.FIELD_TYPE_FK) {
       let fobj = obj.foreignKeys[j];
       let fobjs = getForeignObjects(fobj);
@@ -205,7 +233,7 @@ function $buildForm(obj) {
           $col = $createElement("div", {
             "class": "input-field col"
           });
-          let $hiddenInput = $createElement("input", {
+          $input = $createElement("input", {
             "type": decodeType(fo, f.key),
             "id": fo.table + "-" + fo.fields[f.key] + "-id",
             "object": obj.name,
@@ -213,10 +241,8 @@ function $buildForm(obj) {
             "value": "",
             "hidden": "hidden"
           });
-          if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
-            $hiddenInput.attr("required", "required");
-          $col.append($hiddenInput);
-          $col.append($createElement("input", {
+          $col.append($input);
+          $input = $createElement("input", {
             "type": decodeType(fo, f.value),
             "id": fo.table + "-" + fo.fields[f.value],
             "class": "autocomplete validate",
@@ -224,7 +250,10 @@ function $buildForm(obj) {
             "target": fo.table + "-" + fo.fields[f.key] + "-id",
             "object": fobj.name,
             "owner-object": fo.name
-          }));
+          });
+          if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+            $input.attr("required", "required");
+          $col.append($input);
           $col.append($createTextualElement("label", {
             "for": fo.fields[f.value],
             "title": fo.titles[f.value]
@@ -237,7 +266,7 @@ function $buildForm(obj) {
       $col = $createElement("div", {
         "class": "input-field col"
       });
-      var $input = $createElement("input");
+      $input = $createElement("input");
       $input.attr("type", decodeType(obj, j));
       $input.attr("id", obj.fields[i]);
       $input.attr("object", obj.name);
@@ -276,10 +305,10 @@ $(".form-save").click(function(event) {
   var elems = $("input[object=" + obj.name + "]");
   var correct = true;
   for (i = 0; i < elems.length; i++) {
-    if (elems[i].type !== "checkbox" && elems[i].value === "") {
+    if (elems[i].type !== "checkbox" && elems[i].value === "" && $("#" + elems[i].getAttribute("from")).val() === "") {
       var $fromElem = $("#" + elems[i].getAttribute("from"));
       $fromElem.addClass("invalid");
-      Materialize.toast("O campo '" + $fromElem.attr("title").toLowerCase() + "' é obrigatório", 2000);
+      Materialize.toast("O campo '" + $fromElem.attr("title") + "' é obrigatório", 2000);
       correct = false;
     }
   }

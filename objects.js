@@ -6,6 +6,7 @@ const FIELD_TYPE_NUMBER = 0,
   FIELD_TYPE_FK = 3;
 
 module.exports = {
+  Test: Test,
   Professor: Professor,
   Subject: Subject,
   DayOfWeek: DayOfWeek,
@@ -21,6 +22,26 @@ module.exports = {
   FIELD_TYPE_BOOLEAN: FIELD_TYPE_BOOLEAN,
   FIELD_TYPE_FK: FIELD_TYPE_FK
 }
+
+function Test(a, b, c) {
+  this.a = a;
+  this.b = b;
+  this.c = c;
+}
+Test.table = "test";
+Test.fields = ["a", "b", "c"];
+Test.fieldRequired = [true, true, false];
+Test.titles = ["A", "B", "C"];
+Test.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_NUMBER, FIELD_TYPE_BOOLEAN];
+Test.col = {
+  "s": [12, 12, 12],
+  "m": [7, 5, 4],
+  "l": [3, 2, 2]
+};
+Test.primaryKey = [0, 1];
+Test.orderBy = {
+  "fields": [Test.fields]
+};
 
 function Professor(siape, name) {
   this.siape = siape;
@@ -75,6 +96,7 @@ DayOfWeek.col = {
   "l": [2]
 };
 DayOfWeek.primaryKey = [0];
+DayOfWeek.groupBy = [DayOfWeek.fields];
 
 function Semester(sem) {
   this.sem = sem;
@@ -104,6 +126,7 @@ Shift.col = {
   "l": [2]
 };
 Shift.primaryKey = [0];
+Shift.groupBy = [Shift.fields];
 
 function Time(block) {
   this.block = block;
@@ -118,6 +141,7 @@ Time.col = {
   "l": [2]
 };
 Time.primaryKey = [0];
+Time.groupBy = [Time.fields];
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;
@@ -129,7 +153,13 @@ DowShiftTime.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK, FIELD_TYPE_FK];
 DowShiftTime.primaryKey = [0, 1, 2];
 DowShiftTime.foreignKeys = [DayOfWeek, Shift, Time];
 // DowShiftTime.selectFields = [Time];
-DowShiftTime.selectWhere = [undefined, DayOfWeek, Shift];
+DowShiftTime.selectWhere = [undefined, {
+  "object": [DayOfWeek],
+  "field": [DayOfWeek.primaryKey[0]]
+}, {
+  "object": [Shift],
+  "field": [Shift.primaryKey[0]]
+}];
 
 function ProfessorRestriction(professor, dowShiftTime, active) {
   this.professor = professor;
