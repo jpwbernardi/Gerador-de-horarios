@@ -16,8 +16,8 @@ create table professor_subject(
   siape integer,
   code  varchar(8),
   primary key(siape, code),
-  foreign key(siape) references professor(siape),
-  foreign key(code) references subject(code)
+  foreign key(siape) references professor(siape) on delete cascade,
+  foreign key(code) references subject(code) on delete cascade
 );
 insert into professor_subject(siape, code) values (1, "GCH008"), (1, "GEX103"), (2, "GEX105"), (3, "GEX107"), (4, "GEX108");
 
@@ -50,9 +50,9 @@ create table dow_shift_time(
   period varchar(16),
   block  varchar(16),
   primary key(dow, period, block),
-  foreign key(dow) references dayofweek(dow),
-  foreign key(period) references shift(period),
-  foreign key(block) references time(block)
+  foreign key(dow) references dayofweek(dow) on delete cascade,
+  foreign key(period) references shift(period) on delete cascade,
+  foreign key(block) references time(block) on delete cascade
 );
 insert into dow_shift_time values
   ('Todos', 'Todos', 'Todos'), ('Segunda-feira', 'Todos', 'Todos'), ('Terça-feira', 'Todos', 'Todos'), ('Quarta-feira', 'Todos', 'Todos'), ('Quinta-feira', 'Todos', 'Todos'), ('Sexta-feira', 'Todos', 'Todos'),
@@ -88,8 +88,8 @@ create table professor_restriction(
   block  varchar(16),
   active boolean default true,
   primary key(siape, dow, period, block),
-  foreign key(siape) references professor(siape),
-  foreign key(dow, period, block) references dow_shift_time(dow, period, block)
+  foreign key(siape) references professor(siape) on delete cascade,
+  foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade
 );
 
 -- create table period_restriction(

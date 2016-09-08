@@ -312,7 +312,6 @@ $(".form-save").click(function(event) {
       correct = false;
     }
   }
-  console.log("Elems.lenght: " + elems.length);
   if (correct) {
     let params = [elems[0].value];
     let query = "insert into " + obj.table + " values (?";
