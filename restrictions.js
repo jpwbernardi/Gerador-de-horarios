@@ -1,7 +1,4 @@
-// $(document).ready(function() {
-  // buildForms();
-  // listRestrictions();
-// });
+// buildLists();
 
 function listRestrictions() {
   var $lists = $(".restriction-lists");

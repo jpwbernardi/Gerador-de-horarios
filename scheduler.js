@@ -195,15 +195,15 @@ function getForeignObjects(obj) {
   return keys;
 }
 
-function buildForms() {
-  var $forms = $("form");
-  $forms.each(function(index, form) {
-    var o = form.getAttribute("object");
+function buildLists() {
+  var $lists = $(".list");
+  $lists.each(function(index, list) {
+    var o = list.getAttribute("object");
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
-      $(form).append($buildForm(obj));
+      $(list).append($buildForm(obj));
     else
-      console.log("LOG_ERR[buildForms, 1]: object " + o + " not found!");
+      console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
   });
 }
 
@@ -268,14 +268,14 @@ function $buildForm(obj) {
       });
       $input = $createElement("input");
       $input.attr("type", decodeType(obj, j));
-      $input.attr("id", obj.fields[i]);
+      $input.attr("id", obj.table + "-" + obj.fields[i]);
       $input.attr("object", obj.name);
       if (type === objects.FIELD_TYPE_BOOLEAN) $input.attr("class", "filled-in");
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
         $input.attr("required", "required");
       var $label = $createTextualElement("label", {
-        "for": obj.fields[i],
+        "for": obj.table + "-" + obj.fields[i],
         "title": obj.titles[i]
       }, obj.titles[i]);
       $col.addClass(buildColClasses(obj, i));
@@ -288,13 +288,15 @@ function $buildForm(obj) {
   $col = $createElement("div", {
     "class": "input-field col s4 m2 l1"
   });
-  $col.append($createTextualElement("button", {
+  let $saveButton = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-save",
     "object": obj.name,
     "title": "Salvar"
   }, $createTextualElement("i", {
     "class": "material-icons"
-  }, "save")));
+  }, "save"));
+  $saveButton.on("click", console.log("Clica automaticamente ao carregar a página?"));
+  $col.append($saveButton);
   $row.append($col);
   return $row;
 }
