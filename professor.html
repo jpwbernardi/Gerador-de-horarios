@@ -51,21 +51,27 @@
       </div>
       <div class="row">
         <div class="col s12 m7">
+          <div class="input-field col s12 m5 l2">
+            <input type="text" id="professor-code" object="Professor" title="Siape" required="required">
+            <label for="professor-code" title="Siape">Siape</label>
+          </div>
           <div class="input-field col s10 offset-s1 m5 l6">
-            <input type="text" id="subject-title" object="Subject" title="Nome do professor" required="required">
-            <label for="subject-title" title="Nome do professor">Nome</label>
+            <input type="text" id="professor-title" object="Professor" title="Nome do professor" required="required">
+            <label for="professor-title" title="Nome do professor">Nome</label>
           </div>
         </div>
 
-        <div class="input-field col s1 offset-s3 m1 offset-m1" style="padding-top:25px">
-          <button class="btn btn-short waves-effect waves-light form-save" object="Subject" title="Salvar">
+        <div class="input-field col s4 m2 l1">
+          <button class="btn btn-short waves-effect waves-light form-save" object="Professor" title="Salvar">
             <i class="material-icons">save</i>
           </button>
         </div>
       </div>
     </div>
-
+    <!--<div class="list" object="Professor"></div>-->
   </main>
+
+
 
   <script>
   // You can also require other files to run in this process
@@ -76,7 +82,7 @@
   <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
   <script type="text/javascript" src="scheduler.js"></script>
-  <script type="text/javascript" src="professor.js"></script>
+  <!--<script type="text/javascript" src="professor.js"></script>-->
   <script> $(document).ready(function() {
     $('select').material_select();
   }); </script>
