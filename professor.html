@@ -21,27 +21,8 @@
 </head>
 
 <body>
-  <nav style="margin-bottom: 20px;">
-    <div class="nav-wrapper teal darken-3">
-      <div class="container">
-        <a href="index.html" class="brand-logo">Gerador de horários</a>
-        <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-        <ul class="right hide-on-med-and-down">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="professor.html">Professores</a></li>
-          <li><a href="ccr.html">CCRs</a></li>
-        </ul>
-        <ul class="side-nav" id="mobile-demo">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="professor.html">Professores</a></li>
-          <li><a href="ccr.html">CCRs</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+  <div class="sch-menu"></div>
+  <div class="list" object="Professor"></div>
   <main>
     <div class="container">
       <div class="row">
@@ -50,17 +31,14 @@
         </div>
       </div>
       <div class="row">
-        <div class="col s12 m7">
-          <div class="input-field col s12 m5 l2">
-            <input type="text" id="professor-code" object="Professor" title="Siape" required="required">
-            <label for="professor-code" title="Siape">Siape</label>
-          </div>
-          <div class="input-field col s10 offset-s1 m5 l6">
-            <input type="text" id="professor-title" object="Professor" title="Nome do professor" required="required">
-            <label for="professor-title" title="Nome do professor">Nome</label>
-          </div>
+        <div class="input-field col s12 m5 l2">
+          <input type="number" id="professor-siape" object="Professor" title="SIAPE" required="required">
+          <label for="professor-siape" title="SIAPE">SIAPE</label>
         </div>
-
+        <div class="input-field col s12 m7 l3">
+          <input type="text" id="professor-name" object="Professor" title="Nome do professor" required="required">
+          <label for="professor-name" title="Nome do professor">Nome do professor</label>
+        </div>
         <div class="input-field col s4 m2 l1">
           <button class="btn btn-short waves-effect waves-light form-save" object="Professor" title="Salvar">
             <i class="material-icons">save</i>
@@ -68,11 +46,8 @@
         </div>
       </div>
     </div>
-    <!--<div class="list" object="Professor"></div>-->
+    <div class="list" object="Professor"></div>
   </main>
-
-
-
   <script>
   // You can also require other files to run in this process
   nodeRequire('./renderer.js');
@@ -82,7 +57,7 @@
   <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
   <script type="text/javascript" src="scheduler.js"></script>
-  <!--<script type="text/javascript" src="professor.js"></script>-->
+  <script type="text/javascript" src="professor.js"></script>
   <script> $(document).ready(function() {
     $('select').material_select();
   }); </script>

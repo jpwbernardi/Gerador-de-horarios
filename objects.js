@@ -116,7 +116,7 @@ Semester.table = "semester";
 Semester.fields = ["sem"];
 Semester.fieldRequired = [true];
 Semester.titles = ["Semestre"];
-Semester.fieldTypes = [FIELD_TYPE_NUMBER];
+Semester.fieldTypes = [FIELD_TYPE_TEXT];
 Semester.col = {
   "s": [12],
   "m": [4],

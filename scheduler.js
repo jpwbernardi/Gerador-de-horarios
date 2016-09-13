@@ -16,11 +16,7 @@ var autocompleteOptions = {
     var ownerObj = objects[$this.attr("owner-object")];
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var params = [];
-    var query = "select ";
-    $.each(ownerObj.fields, function(i, field) {
-      query += (i === 0 ? "" : ", ") + field;
-    });
-    query += " from " + obj.table;
+    var query = buildSelectClause(ownerObj, obj);
     if (typeof obj.selectWhere !== typeof undefined) {
       let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
@@ -75,6 +71,7 @@ var autocompleteOptions = {
   }
 };
 
+menu();
 $(".button-collapse").sideNav();
 $(".autocomplete").autocomplete(autocompleteOptions);
 $(".autocomplete").change(function(event) {
@@ -86,6 +83,15 @@ $(".autocomplete").change(function(event) {
   }
 });
 buildLists();
+
+function buildSelectClause(ownerObj, obj) {
+  var query = "select ";
+  $.each(ownerObj.fields, function(i, field) {
+    query += (i === 0 ? "" : ", ") + field;
+  });
+  query += " from " + (typeof obj !== typeof undefined ? obj.table : ownerObj.table);
+  return query;
+}
 
 function getComboFields(obj) {
   if (typeof obj.selectFields !== typeof undefined && obj.selectFields.length > 0) {
@@ -206,10 +212,82 @@ function buildLists() {
     var o = list.getAttribute("object");
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
-      $(list).append($buildForm(obj));
+      $(list).append($listFromDatabase(obj));
     else
       console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
   });
+}
+
+function $listFromDatabase(obj) {
+  var query = buildSelectClause(obj);
+  db.each(query, /* params */ [], function(err, row) {
+    console.log(row);
+  }, function(err, nrows) {
+    console.log("LOG_INFO: done loading " + obj.table + " rows.");
+  });
+}
+
+function menu() {
+  var $menu = $(".sch-menu");
+  var $nav = $createElement("nav", {"class": "menu marbot-20px"});
+  var $cont = $createElement("div", {
+    "class": "container"
+  });
+  $cont.append($createTextualElement("a", {
+    "href": "index.html",
+    "class": "brand-logo"
+  }, "Gerador de horários"));
+  var $ico = $createTextualElement("i", {
+    "class": "material-icons"
+  }, "menu");
+  var $link = $createElement("a", {
+    "href": "#",
+    "data-activates": "mobile-demo",
+    "class": "button-collapse"
+  });
+  $link.append($ico);
+  $cont.append($link);
+  var $lista = $createElement("ul", {
+    "class": "right hide-on-med-and-down"
+  });
+  buttons($lista);
+  $cont.append($lista);
+  $lista = $createElement("ul", {
+    "class": "side-nav",
+    "id": "mobile-demo"
+  })
+  buttons($lista);
+  $cont.append($lista);
+
+  var $navwrapper = $createElement("div", {
+    "class": "nav-wrapper teal darken-3"
+  });
+  $navwrapper.append($cont);
+  $nav.append($navwrapper);
+  $menu.append($nav);
+}
+
+function buttons($lista) {
+  var $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "index.html"
+  }, "Página inicial"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "restrictions.html"
+  }, "Restrições"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "professor.html"
+  }, "Professores"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "ccr.html"
+  }, "CCR"));
+  $lista.append($item);
 }
 
 function $buildForm(obj) {
