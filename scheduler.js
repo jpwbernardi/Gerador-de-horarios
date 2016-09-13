@@ -73,6 +73,8 @@ var autocompleteOptions = {
 
 menu();
 $(".button-collapse").sideNav();
+build("form");
+// build("list");
 $(".autocomplete").autocomplete(autocompleteOptions);
 $(".autocomplete").change(function(event) {
   if (event.currentTarget.value === "") {
@@ -82,7 +84,6 @@ $(".autocomplete").change(function(event) {
     });
   }
 });
-buildLists();
 
 function buildQueryFields(fields) {
   var query = "";
@@ -301,15 +302,15 @@ function buttons($lista) {
   $lista.append($item);
 }
 
-function buildLists() {
-  var $lists = $("div.list");
-  $lists.each(function(index, list) {
-    var o = list.getAttribute("object");
+function build(clazz) {
+  var $elems = $("div." + clazz);
+  $elems.each(function(index, elem) {
+    var o = elem.getAttribute("object");
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
-      $(list).append($listFromDatabase(obj));
+      $(elem).append($buildForm(obj, clazz));
     else
-      console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
+      console.log("LOG_ERR[build('" + clazz + "'), 1]: object " + o + " not found!");
   });
 }
 
@@ -324,7 +325,7 @@ function $listFromDatabase(obj) {
   });
 }
 
-function $buildForm(obj) {
+function $buildForm(obj, clazz) {
   var i = 0, _i = 0;
   var $row = $createElement("div", {
     "class": "row"
@@ -405,22 +406,35 @@ function $buildForm(obj) {
   $col = $createElement("div", {
     "class": "input-field col s4 m2 l2"
   });
-  let $button = $createTextualElement("button", {
-    "class": "btn btn-short waves-effect waves-light form-edit",
-    "object": obj.name,
-    "title": "Editar"
-  }, $createTextualElement("i", {
-    "class": "material-icons"
-  }, "edit"));
-  $col.append($button);
-  $button = $createTextualElement("button", {
-    "class": "btn btn-short waves-effect waves-light form-delete",
-    "object": obj.name,
-    "title": "Deletar"
-  }, $createTextualElement("i", {
-    "class": "material-icons"
-  }, "delete"));
-  $col.append($button);
+  let $button;
+  if (clazz === "form") {
+    $button = $createTextualElement("button", {
+      "class": "btn btn-short waves-effect waves-light form-save",
+      "object": obj.name,
+      "title": "Salvar"
+    }, $createTextualElement("i", {
+      "class": "material-icons"
+    }, "save"));
+    $col.append($button);
+  }
+  else if (clazz === "list") {
+    $button = $createTextualElement("button", {
+      "class": "btn btn-short waves-effect waves-light form-edit",
+      "object": obj.name,
+      "title": "Editar"
+    }, $createTextualElement("i", {
+      "class": "material-icons"
+    }, "edit"));
+    $col.append($button);
+    $button = $createTextualElement("button", {
+      "class": "btn btn-short waves-effect waves-light form-delete",
+      "object": obj.name,
+      "title": "Deletar"
+    }, $createTextualElement("i", {
+      "class": "material-icons"
+    }, "delete"));
+    $col.append($button);
+  }
   $row.append($col);
   return $row;
 }

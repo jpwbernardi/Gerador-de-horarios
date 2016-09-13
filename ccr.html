@@ -30,29 +30,7 @@
           <h4>Componente Curricular</h4>
         </div>
       </div>
-      <div class="row" object="Subject">
-        <div class="input-field col s12 m5 l2">
-          <input type="text" id="subject-code" object="Subject" title="Código" required="required">
-          <label for="subject-code" title="Código">Código</label></div><div class="input-field col s12 m7 l3">
-            <input type="text" id="subject-title" object="Subject" title="Componente curricular" required="required">
-            <label for="subject-title" title="Componente curricular">Componente curricular</label>
-          </div>
-          <div class="input-field col s12 m4 l2">
-            <input type="number" id="semester-sem-id" object="Subject" from="semester-sem" value="" hidden="hidden">
-            <input type="number" id="semester-sem" class="autocomplete validate" title="Semestre" target="semester-sem-id" object="Semester" owner-object="Semester" required="required">
-            <label for="sem" title="Semestre">Semestre</label>
-          </div>
-          <div class="input-field col s12 m4 l2">
-            <input type="text" id="shift-period-id" object="Subject" from="shift-period" value="" hidden="hidden">
-            <input type="text" id="shift-period" class="autocomplete validate" title="Turno do dia" target="shift-period-id" object="Shift" owner-object="Shift" required="required">
-            <label for="period" title="Turno do dia">Turno do dia</label>
-          </div>
-          <div class="input-field col s4 m2 l1">
-            <button class="btn btn-short waves-effect waves-light form-save" object="Subject" title="Salvar">
-              <i class="material-icons">save</i>
-            </button>
-          </div>
-        </div>
+      <div class="form" object="Subject"></div>
       </div>
 
 
