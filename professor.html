@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--Import Google Icon Font-->
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
+  <script>
+  window.nodeRequire = require;
+  delete window.require;
+  delete window.exports;
+  delete window.module;
+  </script>
+
+  <title>Gerador de horários - Professores</title>
+</head>
+
+<body>
+  <nav style="margin-bottom: 20px;">
+    <div class="nav-wrapper teal darken-3">
+      <div class="container">
+        <a href="index.html" class="brand-logo">Gerador de horários</a>
+        <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
+          <li><a href="professor.html">Professores</a></li>
+          <li><a href="ccr.html">CCRs</a></li>
+        </ul>
+        <ul class="side-nav" id="mobile-demo">
+          <li><a href="index.html">Página inicial</a></li>
+          <li><a href="restrictions.html">Restrições</a></li>
+          <li><a href="professor.html">Professores</a></li>
+          <li><a href="ccr.html">CCRs</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <div class="row">
+        <div class="col s10">
+          <h4>Professor</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12 m7">
+          <div class="input-field col s10 offset-s1 m5 l6">
+            <input type="text" id="subject-title" object="Subject" title="Nome do professor" required="required">
+            <label for="subject-title" title="Nome do professor">Nome</label>
+          </div>
+        </div>
+
+        <div class="input-field col s1 offset-s3 m1 offset-m1" style="padding-top:25px">
+          <button class="btn btn-short waves-effect waves-light form-save" object="Subject" title="Salvar">
+            <i class="material-icons">save</i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+  // You can also require other files to run in this process
+  nodeRequire('./renderer.js');
+  </script>
+  <!--Import jQuery before materialize.js-->
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
+  <script type="text/javascript" src="scheduler.js"></script>
+  <script type="text/javascript" src="professor.js"></script>
+  <script> $(document).ready(function() {
+    $('select').material_select();
+  }); </script>
+</body>
+
+</html>
