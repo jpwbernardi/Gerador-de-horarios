@@ -50,14 +50,7 @@ var autocompleteOptions = {
     console.log("LOG_INFO[autocompleteOptions, 1]: " + query);
     console.log("LOG_INFO[autocompleteOptions, 5]: " + params);
     db.each(query, params, function(err, row) {
-      var keys = undefined;
-      if (typeof ownerObj.selectFields !== typeof undefined && ownerObj.selectFields.length > 0) {
-        keys = [ownerObj.fields[ownerObj.selectFields[0]]];
-        for (let i = 1; i < ownerObj.selectFields.length; i++)
-          keys.push(ownerObj.fields[ownerObj.selectFields[i]]);
-      } else {
-        keys = Object.keys(row); // all fields from the 'select *'
-      }
+      var keys = getComboFields(ownerObj);
       var label = row[keys[0]];
       for (let i = 1; i < keys.length; i++)
         label += ", " + row[keys[i]];
@@ -92,6 +85,18 @@ $(".autocomplete").change(function(event) {
     });
   }
 });
+buildLists();
+
+function getComboFields(obj) {
+  if (typeof obj.selectFields !== typeof undefined && obj.selectFields.length > 0) {
+    keys = [obj.fields[obj.selectFields[0]]];
+    for (let i = 1; i < obj.selectFields.length; i++)
+      keys.push(obj.fields[obj.selectFields[i]]);
+  } else {
+    keys = obj.fields; // all fields from the 'select *'
+  }
+  return keys;
+}
 
 function $createElement(tag, attributes, events) {
   var $element = $(document.createElement(tag));
@@ -196,7 +201,7 @@ function getForeignObjects(obj) {
 }
 
 function buildLists() {
-  var $lists = $(".list");
+  var $lists = $("div.list");
   $lists.each(function(index, list) {
     var o = list.getAttribute("object");
     var obj = objects[o];
@@ -213,8 +218,7 @@ function $buildForm(obj) {
     "class": "row"
   });
   $.each(obj.fieldTypes, function(j, type) {
-    var $col = null,
-      $input = null;
+    var $col = null, $input = null;
     if (type === objects.FIELD_TYPE_FK) {
       // fazer iterador só para FK
       let fobj = obj.foreignKeys[_i];
@@ -288,17 +292,24 @@ function $buildForm(obj) {
     }
   });
   $col = $createElement("div", {
-    "class": "input-field col s4 m2 l1"
+    "class": "input-field col s4 m2 l2"
   });
-  let $saveButton = $createTextualElement("button", {
-    "class": "btn btn-short waves-effect waves-light form-save",
+  let $button = $createTextualElement("button", {
+    "class": "btn btn-short waves-effect waves-light form-edit",
     "object": obj.name,
-    "title": "Salvar"
+    "title": "Editar"
   }, $createTextualElement("i", {
     "class": "material-icons"
-  }, "save"));
-  $saveButton.on("click", console.log("Clica automaticamente ao carregar a página?"));
-  $col.append($saveButton);
+  }, "edit"));
+  $col.append($button);
+  $button = $createTextualElement("button", {
+    "class": "btn btn-short waves-effect waves-light form-delete",
+    "object": obj.name,
+    "title": "Deletar"
+  }, $createTextualElement("i", {
+    "class": "material-icons"
+  }, "delete"));
+  $col.append($button);
   $row.append($col);
   return $row;
 }

@@ -31,7 +31,7 @@ insert into subject values
 ("GEX103", "Engenharia de software II", 6, 'Matutino'),
 ("GEX105", "Redes de computadores", 6, 'Matutino'),
 ("GEX107", "Computação gráfica", 6, 'Matutino'),
-("GEX108", "Construção de compiladores, 6, 'Matutino'");
+("GEX108", "Construção de compiladores", 6, 'Matutino');
 
 create table professor_subject(
   siape integer,

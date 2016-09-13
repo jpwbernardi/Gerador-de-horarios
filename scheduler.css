@@ -2,6 +2,11 @@
   cursor: pointer;
 }
 
+.btn {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
 .btn-short {
   padding: 0 0.65rem;
 }
@@ -41,4 +46,21 @@
 .ui-state-focus {
   font-weight: bold;
   background-color: #eee;
+}
+
+/* Materialize container overwrite */
+.container {
+  width: 95% !important;
+}
+
+@media only screen and (min-width: 601px) {
+  .container {
+    width: 90% !important;
+  }
+}
+
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 85% !important;
+  }
 }
