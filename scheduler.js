@@ -82,6 +82,7 @@ var autocompleteOptions = {
   }
 };
 
+menu();
 $(".button-collapse").sideNav();
 $(".autocomplete").autocomplete(autocompleteOptions);
 $(".autocomplete").change(function(event) {
@@ -205,6 +206,69 @@ function buildLists() {
     else
       console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
   });
+}
+
+function menu() {
+  var $menu = $(".sch-menu");
+  var $nav = $createElement("nav", {"class": "menu marbot-20px"});
+  console.log($nav);
+  var $cont = $createElement("div", {
+    "class": "container"
+  });
+  $cont.append($createTextualElement("a", {
+    "href": "index.html",
+    "class": "brand-logo"
+  }, "Gerador de horários"));
+  var $ico = $createTextualElement("i", {
+    "class": "material-icons"
+  }, "menu");
+  var $link = $createElement("a", {
+    "href": "#",
+    "data-activates": "mobile-demo",
+    "class": "button-collapse"
+  });
+  $link.append($ico);
+  $cont.append($link);
+  var $lista = $createElement("ul", {
+    "class": "right hide-on-med-and-down"
+  });
+  buttons($lista);
+  $cont.append($lista);
+  $lista = $createElement("ul", {
+    "class": "side-nav",
+    "id": "mobile-demo"
+  })
+  buttons($lista);
+  $cont.append($lista);
+
+  var $navwrapper = $createElement("div", {
+    "class": "nav-wrapper teal darken-3"
+  });
+  $navwrapper.append($cont);
+  $nav.append($navwrapper);
+  $menu.append($nav);
+}
+function buttons($lista) {
+  var $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "index.html"
+  }, "Página inicial"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "restrictions.html"
+  }, "Restrições"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "professor.html"
+  }, "Professores"));
+  $lista.append($item);
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "ccr.html"
+  }, "CCR"));
+  $lista.append($item);
 }
 
 function $buildForm(obj) {
