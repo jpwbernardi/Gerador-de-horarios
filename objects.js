@@ -188,7 +188,7 @@ ProfessorRestriction.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK, FIELD_TYPE_BOOL
 ProfessorRestriction.col = {
   "s": [12],
   "m": [4],
-  "l": [2]
+  "l": [1]
 }
 ProfessorRestriction.primaryKey = [0, 1];
 ProfessorRestriction.foreignKeys = [Professor, DowShiftTime];
