@@ -70,23 +70,39 @@
 
       <tbody>
         <tr>
-          <td>Alvin</td>
-          <td>Eclair</td>
-          <td>$0.87</td>
+          <td>4856</td>
+          <td>Marco</td>
+          <td>
+            <a class="waves-effect waves-light btn modal-trigger modalzinho" href="#modal1">Modal</a>
+          </td>
         </tr>
         <tr>
-          <td>Alan</td>
-          <td>Jellybean</td>
-          <td>$3.76</td>
+          <td>2222</td>
+          <td>Bueno</td>
+          <td>
+            <a class="waves-effect waves-light btn modal-trigger modalzinho" href="#modal1">Modal</a>
+          </td>
         </tr>
         <tr>
-          <td>Jonathan</td>
-          <td>Lollipop</td>
-          <td>$7.00</td>
+          <td>11111</td>
+          <td>SO KID</td>
+          <td>
+            <a class="waves-effect waves-light btn modal-trigger modalzinho" href="#modal1">Modal</a>
+          </td>
         </tr>
       </tbody>
     </table>
   </main>
+
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Fechar</a>
+    </div>
+  </div>
+
 
   <script>
     // You can also require other files to run in this process
@@ -101,7 +117,9 @@
   <script>
     $(document).ready(function() {
       $('select').material_select();
+      $('.modal-trigger').leanModal();
     });
+
   </script>
 </body>
 
