@@ -17,7 +17,7 @@
   delete window.module;
   </script>
 
-  <title>Gerador de horários - CCR</title>
+  <title>Gerador de horários - Professores</title>
 </head>
 
 <body>
@@ -46,34 +46,17 @@
     <div class="container">
       <div class="row">
         <div class="col s10">
-          <h4>Componente Curricular</h4>
+          <h4>Professor</h4>
         </div>
       </div>
-      <div class="list" object="Subject"></div>
       <div class="row">
         <div class="col s12 m7">
           <div class="input-field col s10 offset-s1 m5 l6">
-            <input type="text" id="subject-title" object="Subject" title="Nome do CCR" required="required">
-            <label for="subject-title" title="Nome do CCR">Nome</label>
-          </div>
-          <div class="input-field col s10 offset-s1 m4 l3">
-            <input type="text" id="subject-code" object="Subject" title="Código" required="required">
-            <label for="subject-code" title="Código">Código</label>
-          </div>
-          <div class="input-field col s8 offset-s2 m3">
-            <input type="text" id="semester-sem-id" object="Subject" from="semester-sem" value="" hidden="hidden">
-            <input type="text" id="semester-sem" class="autocomplete validate" title="Semestre" target="semester-sem-id" object="Subject" owner-object="Semester" required="required">
-            <label for="semester-sem" title="Semestre">Semestre</label>
+            <input type="text" id="subject-title" object="Subject" title="Nome do professor" required="required">
+            <label for="subject-title" title="Nome do professor">Nome</label>
           </div>
         </div>
-        <div class="input-field col s2 offset-s3 m2">
-          <input type="checkbox" id="matutino" class="filled-in">
-          <label for="matutino">Matutino</label>
-          <input type="checkbox" id="vespertino" class="filled-in">
-          <label for="vespertino">Vespertino</label>
-          <input type="checkbox" id="noturno" class="filled-in">
-          <label for="noturno">Noturno</label>
-        </div>
+
         <div class="input-field col s1 offset-s3 m1 offset-m1" style="padding-top:25px">
           <button class="btn btn-short waves-effect waves-light form-save" object="Subject" title="Salvar">
             <i class="material-icons">save</i>
@@ -82,34 +65,6 @@
       </div>
     </div>
 
-
-    <table class="striped centered">
-      <thead>
-        <tr>
-          <th data-field="id">Name</th>
-          <th data-field="name">Item Name</th>
-          <th data-field="price">Item Price</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>Alvin</td>
-          <td>Eclair</td>
-          <td>$0.87</td>
-        </tr>
-        <tr>
-          <td>Alan</td>
-          <td>Jellybean</td>
-          <td>$3.76</td>
-        </tr>
-        <tr>
-          <td>Jonathan</td>
-          <td>Lollipop</td>
-          <td>$7.00</td>
-        </tr>
-      </tbody>
-    </table>
   </main>
 
   <script>
@@ -121,7 +76,7 @@
   <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
   <script type="text/javascript" src="scheduler.js"></script>
-  <script type="text/javascript" src="ccr.js"></script>
+  <script type="text/javascript" src="professor.js"></script>
   <script> $(document).ready(function() {
     $('select').material_select();
   }); </script>
