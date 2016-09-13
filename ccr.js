@@ -1,9 +1,9 @@
 $('.modalzinho').on('click', function () {
     var target = $(this).closest('td').siblings(':first-child').text();
     console.log(target);
-    makemodal()
 });
 
-function makemodal() {
-  var $modal = $(".modal-content")
-}
+$(document).ready(function() {
+  $(".modal-content").append('aa'); //Colocar aqui select do banco
+  // var $modal = $(".modal-content")
+});
