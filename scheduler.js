@@ -16,7 +16,7 @@ var autocompleteOptions = {
     var ownerObj = objects[$this.attr("owner-object")];
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var params = [];
-    var query = buildSelectClause(ownerObj, obj);
+    var query = "select " + buildQueryFields(ownerObj.fields) + " from " + obj.table;
     if (typeof obj.selectWhere !== typeof undefined) {
       let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
@@ -84,12 +84,44 @@ $(".autocomplete").change(function(event) {
 });
 buildLists();
 
-function buildSelectClause(ownerObj, obj) {
-  var query = "select ";
-  $.each(ownerObj.fields, function(i, field) {
+function buildQueryFields(fields) {
+  var query = "";
+  $.each(fields, function(i, field) {
     query += (i === 0 ? "" : ", ") + field;
   });
-  query += " from " + (typeof obj !== typeof undefined ? obj.table : ownerObj.table);
+  return query;
+}
+
+function getListQuery(obj) {
+  var joins = [];
+  var fields = [];
+  var i = 0, _i = 0;
+  var query = "select ";
+  $.each(obj.fieldTypes, function(j, type) {
+    if (type === objects.FIELD_TYPE_FK) {
+      let fobj = obj.foreignKeys[_i++];
+      let fobjs = getForeignObjects(fobj);
+      $.each(fobjs, function(k, fo) {
+        joins.push(fo);
+        if (typeof fo.autocomplete !== typeof undefined) {
+          $.each(fo.autocomplete, function(l, field) {
+            fields.push(fo.fields[field.value]);
+          });
+        } else {
+          $.each(fo.primaryKey, function(l, key) {
+            fields.push(fo.fields[key]);
+          });
+        }
+      });
+    } else {
+      fields.push(obj.fields[i++]);
+    }
+  });
+  query += buildQueryFields(fields);
+  query += " from " + obj.table;
+  $.each(joins, function(j, o) {
+    query += " natural join " + o.table;
+  });
   return query;
 }
 
@@ -206,27 +238,6 @@ function getForeignObjects(obj) {
   return keys;
 }
 
-function buildLists() {
-  var $lists = $("div.list");
-  $lists.each(function(index, list) {
-    var o = list.getAttribute("object");
-    var obj = objects[o];
-    if (typeof obj !== typeof undefined)
-      $(list).append($listFromDatabase(obj));
-    else
-      console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
-  });
-}
-
-function $listFromDatabase(obj) {
-  var query = buildSelectClause(obj);
-  db.each(query, /* params */ [], function(err, row) {
-    console.log(row);
-  }, function(err, nrows) {
-    console.log("LOG_INFO: done loading " + obj.table + " rows.");
-  });
-}
-
 function menu() {
   var $menu = $(".sch-menu");
   var $nav = $createElement("nav", {"class": "menu marbot-20px"});
@@ -290,6 +301,29 @@ function buttons($lista) {
   $lista.append($item);
 }
 
+function buildLists() {
+  var $lists = $("div.list");
+  $lists.each(function(index, list) {
+    var o = list.getAttribute("object");
+    var obj = objects[o];
+    if (typeof obj !== typeof undefined)
+      $(list).append($listFromDatabase(obj));
+    else
+      console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
+  });
+}
+
+function $listFromDatabase(obj) {
+  var query = getListQuery(obj);
+  console.log("query:");
+  console.log(query);
+  db.each(query, [], function(err, row) {
+    console.log(row);
+  }, function(err, nrows) {
+    console.log("LOG_INFO: done loading " + obj.table + " rows.");
+  });
+}
+
 function $buildForm(obj) {
   var i = 0, _i = 0;
   var $row = $createElement("div", {
@@ -298,7 +332,6 @@ function $buildForm(obj) {
   $.each(obj.fieldTypes, function(j, type) {
     var $col = null, $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      // fazer iterador só para FK
       let fobj = obj.foreignKeys[_i];
       let fobjs = getForeignObjects(fobj);
       $.each(fobjs, function(k, fo) {
