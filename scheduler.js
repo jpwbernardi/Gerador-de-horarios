@@ -16,11 +16,7 @@ var autocompleteOptions = {
     var ownerObj = objects[$this.attr("owner-object")];
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var params = [];
-    var query = "select ";
-    $.each(ownerObj.fields, function(i, field) {
-      query += (i === 0 ? "" : ", ") + field;
-    });
-    query += " from " + obj.table;
+    var query = buildSelectClause(ownerObj, obj);
     if (typeof obj.selectWhere !== typeof undefined) {
       let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
@@ -86,6 +82,15 @@ $(".autocomplete").change(function(event) {
   }
 });
 buildLists();
+
+function buildSelectClause(ownerObj, obj) {
+  var query = "select ";
+  $.each(ownerObj.fields, function(i, field) {
+    query += (i === 0 ? "" : ", ") + field;
+  });
+  query += " from " + (typeof obj !== typeof undefined ? obj.table : ownerObj.table);
+  return query;
+}
 
 function getComboFields(obj) {
   if (typeof obj.selectFields !== typeof undefined && obj.selectFields.length > 0) {
@@ -206,9 +211,18 @@ function buildLists() {
     var o = list.getAttribute("object");
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
-      $(list).append($buildForm(obj));
+      $(list).append($listFromDatabase(obj));
     else
       console.log("LOG_ERR[buildLists, 1]: object " + o + " not found!");
+  });
+}
+
+function $listFromDatabase(obj) {
+  var query = buildSelectClause(obj);
+  db.each(query, /* params */ [], function(err, row) {
+    console.log(row);
+  }, function(err, nrows) {
+    console.log("LOG_INFO: done loading " + obj.table + " rows.");
   });
 }
 
