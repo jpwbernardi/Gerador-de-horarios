@@ -6,6 +6,21 @@
 
 - The `selectFields` attribute is for what fields that are not foreign keys should be used in the results suggestions of an autocomplete of this object. It is an array and must contain only valid indexes of the `fields` attribute.
 
+- The `selectWhere` attribute indicates, for each primary key that is a also a foreign key (see annotations below), what foreign field the `i`th field depends on. That field will be used in the `where` statement inside the dynamic `select` that will be created.
+  Every position of this array is a JSON with `object` and `field` keys. The values are: for the `object` key, an array of objects; for the `field` key, an array of valid indexes for the `fields` attribute of the objects previously listed in this JSON. For every foreign field that this field depends on, a new position in `object` *and* `field` is needed, indicating where it comes from and what foreign field it is. E.g.:
+
+  ```
+  DowShiftTime.selectWhere = [undefined, {
+    "object": [DayOfWeek],
+    "field": DayOfWeek.primaryKey // this is an array!
+  }, {
+    "object": [Shift],
+    "field": Shift.primaryKey // this is an array!
+  }];
+  ```
+
+  In the `DowShiftTime` object, the first field does not depend on anyone, so it is `undefined`. This is important: if the field does not depend on anyone, leave that position as `undefined`. **Otherwise, it will throw an error. These two arrays must be non-empty and the same length, if they exist**. The second field (that comes from `Shift`, if you look at the object) depends on the primary key**s** of `DayOfWeek` (this is because the shift might vary depending on the day of the week). Likewise, the third field (which comes from `Time`) depends on `Shift` (night shift does not have the 5th time block, for example). Note that this dependence *forbids* the user to select shift before day of week, and time before shift.
+
 - The `foreignTitle` attribute is the label of the autocomplete input field of this object. Must be a valid index of the `titles` attribute.
 
 - To make a field required, add a static attribute to the Object function called `fieldRequired` with a boolean for every field in the class. E.g.:
