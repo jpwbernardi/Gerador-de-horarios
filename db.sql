@@ -14,160 +14,180 @@ insert into professor values
 (1781719, "Luciano Lores Caimi"),
 (1521671, "Marco Aurelio Spohn");
 
+create table dayofweek(
+  dow       integer,
+  dow_name  varchar(16),
+  primary key(dow),
+  constraint unique_dow_name unique(dow_name)
+);
+insert into dayofweek values
+(0, 'Todos'),
+(2, 'Segunda-feira'),
+(3, 'Terça-feira'),
+(4, 'Quarta-feira'),
+(5, 'Quinta-feira'),
+(6, 'Sexta-feira');
+
+create table shift(
+  period      integer,
+  period_name varchar(16),
+  primary key(period)
+);
+insert into shift values
+(0, 'Todos'),
+(1, 'Matutino'),
+(2, 'Vespertino'),
+(3, 'Noturno');
+
+create table time(
+  block       integer,
+  block_name  varchar(16),
+  primary key(block)
+);
+insert into time values
+(0, 'Todos'),
+(1, 'Primeiro'),
+(2, 'Segundo'),
+(3, 'Terceiro'),
+(4, 'Quarto'),
+(5, 'Quinto');
+
 create table semester(
   sem integer,
   primary key(sem)
 );
 insert into semester values (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
-create table shift(
-  period  varchar(16),
-  primary key(period)
+-- pode ter uma ccr com mesmo código, período e semestre?
+create table subject(
+  code   varchar(8),
+  title  varchar(64),
+  sem    integer,
+  period integer,
+  primary key(code, period),
+  foreign key(sem) references semester(sem) on delete cascade,
+  foreign key(period) references shift(period) on delete cascade
 );
-insert into shift values ('Todos'), ('Matutino'), ('Vespertino'), ('Noturno');
+insert into subject values
+("GEX002", "Introdução à informática", 1, 1),
+("GEX001", "Matemática instrumental", 1, 1),
+("GLA001", "Leitura e produção textual I", 1, 1),
+("GEX003", "Algoritmos e programação", 1, 1),
+("GEN001", "Circuitos digitais", 1, 1),
+("GEX004", "Geometria analítica", 1, 1),
 
-  create table subject(
-    code   varchar(8),
-    title  varchar(64),
-    sem    integer,
-    period varchar(16),
-    primary key(code, period),
-    foreign key(sem) references semester(sem) on delete cascade,
-    foreign key(period) references shift(period) on delete cascade
-  );
+("GEX006", "Estatística básica", 2, 1),
+("GLA004", "Leitura e produção textual II", 2, 1),
+("GEX015", "Estrutura de dados I", 2, 1),
+("GEX016", "Sistemas digitais", 2, 1),
+("GEX009", "Cálculo I", 2, 1),
+("GEX012", "Álgebra linear", 2, 1),
 
-  insert into subject values
-  ("GEX002", "Introdução à informática", 1, 'Matutino'),
-  ("GEX001", "Matemática instrumental", 1, 'Matutino'),
-  ("GLA001", "Leitura e produção textual I", 1, 'Matutino'),
-  ("GEX003", "Algoritmos e programação", 1, 'Matutino'),
-  ("GEN001", "Circuitos digitais", 1, 'Matutino'),
-  ("GEX004", "Geometria analítica", 1, 'Matutino'),
+("GEX093", "Matemática discreta", 3, 1),
+("GEX092", "Estrutura de dados II", 3, 1),
+("GEX098", "Programação I", 3, 1),
+("GEX055", "Probabilidade e estatística", 3, 1),
+("GEX033", "Cálculo II", 3, 1),
+("GEX100", "Organização de computadores", 3, 1),
 
-  ("GEX006", "Estatística básica", 2, 'Matutino'),
-  ("GLA004", "Leitura e produção textual II", 2, 'Matutino'),
-  ("GEX015", "Estrutura de dados I", 2, 'Matutino'),
-  ("GEX016", "Sistemas digitais", 2, 'Matutino'),
-  ("GEX009", "Cálculo I", 2, 'Matutino'),
-  ("GEX012", "Álgebra linear", 2, 'Matutino'),
+("GEX090", "Banco de dados I", 4, 1),
+("GEX099", "Programação II", 4, 1),
+("GEX036", "Cálculo numérico", 4, 1),
+("GCH011", "Introdução ao pensamento social", 4, 1),
+("GEX104", "Teoria da computação", 4, 1),
+("GEN039", "Grafos", 4, 1),
 
-  ("GEX093", "Matemática discreta", 3, 'Matutino'),
-  ("GEX092", "Estrutura de dados II", 3, 'Matutino'),
-  ("GEX098", "Programação I", 3, 'Matutino'),
-  ("GEX055", "Probabilidade e estatística", 3, 'Matutino'),
-  ("GEX033", "Cálculo II", 3, 'Matutino'),
-  ("GEX100", "Organização de computadores", 3, 'Matutino'),
+("GEX091", "Banco de dados II", 5, 1),
+("GEX102", "Engenharia de software I", 5, 1),
+("GCH008", "Iniciação à prática científica", 5, 1),
+("GEX101", "Linguagens formais e autômatos", 5, 1),
+("GCS010", "Direitos e cidadania", 5, 1),
+("GEX110", "Sistemas operacionais", 5, 1),
 
-  ("GEX090", "Banco de dados I", 4, 'Matutino'),
-  ("GEX099", "Programação II", 4, 'Matutino'),
-  ("GEX036", "Cálculo numérico", 4, 'Matutino'),
-  ("GCH011", "Introdução ao pensamento social", 4, 'Matutino'),
-  ("GEX104", "Teoria da computação", 4, 'Matutino'),
-  ("GEN039", "Grafos", 4, 'Matutino'),
+("GCH029", "Historia da fronteira Sul", 6, 1),
+("GEX103", "Engenharia de software II", 6, 1),
+("GEX105", "Redes de computadores", 6, 1),
+("GEX107", "Computação gráfica", 6, 1),
+("GCS107", "Planejamento e gestão de projetos", 6, 1),
+("GEX108", "Construção de compiladores", 6, 1),
 
-  ("GEX091", "Banco de dados II", 5, 'Matutino'),
-  ("GEX102", "Engenharia de software I", 5, 'Matutino'),
-  ("GCH008", "Iniciação à prática científica", 5, 'Matutino'),
-  ("GEX101", "Linguagens formais e autômatos", 5, 'Matutino'),
-  ("GCS010", "Direitos e cidadania", 5, 'Matutino'),
-  ("GEX110", "Sistemas operacionais", 5, 'Matutino'),
+("GCH012", "Fundamentos da crítica social", 7, 1),
+("GEX109", "Inteligência artificial", 7, 1),
+("GEX106", "Computação distribuída", 7, 1),
+("GEX119", "Trabalho de conclusão de curso I", 7, 1),
 
-  ("GCH029", "Historia da fronteira Sul", 6, 'Matutino'),
-  ("GEX103", "Engenharia de software II", 6, 'Matutino'),
-  ("GEX105", "Redes de computadores", 6, 'Matutino'),
-  ("GEX107", "Computação gráfica", 6, 'Matutino'),
-  ("GCS107", "Planejamento e gestão de projetos", 6, 'Matutino'),
-  ("GEX108", "Construção de compiladores", 6, 'Matutino'),
+("GCS011", "Meio ambiente, economia e sociedade", 8, 1),
+("GEX112", "Segurança e auditoria de sistemas", 8, 1),
+("GEX120", "Trabalho de conclusão de curso II", 8, 1),
 
-  ("GCH012", "Fundamentos da crítica social", 7, 'Matutino'),
-  ("GEX109", "Inteligência artificial", 7, 'Matutino'),
-  ("GEX106", "Computação distribuída", 7, 'Matutino'),
-  ("GEX119", "Trabalho de conclusão de curso I", 7, 'Matutino'),
+("GEX002", "Introdução à informática", 1, 3),
+("GEX001", "Matemática instrumental", 1, 3),
+("GLA001", "Leitura e produção textual I", 1, 3),
+("GEX003", "Algoritmos e programação", 1, 3),
+("GEN001", "Circuitos digitais", 1, 3),
 
-  ("GCS011", "Meio ambiente, economia e sociedade", 8, 'Matutino'),
-  ("GEX112", "Segurança e auditoria de sistemas", 8, 'Matutino'),
-  ("GEX120", "Trabalho de conclusão de curso II", 8, 'Matutino'),
+("GEX006", "Estatística básica", 2, 3),
+("GLA004", "Leitura e produção textual II", 2, 3),
+("GEX015", "Estrutura de dados I", 2, 3),
+("GEX016", "Sistemas digitais", 2, 3),
+("GEX004", "Geometria analítica", 2, 3),
 
-  ("GEX002", "Introdução à informática", 1, 'Noturno'),
-  ("GEX001", "Matemática instrumental", 1, 'Noturno'),
-  ("GLA001", "Leitura e produção textual I", 1, 'Noturno'),
-  ("GEX003", "Algoritmos e programação", 1, 'Noturno'),
-  ("GEN001", "Circuitos digitais", 1, 'Noturno'),
+("GEX093", "Matemática discreta", 3, 3),
+("GEX092", "Estrutura de dados II", 3, 3),
+("GEX098", "Programação I", 3, 3),
+("GEX012", "Álgebra linear", 3, 3),
+("GEX009", "Cálculo I", 3, 3),
 
-  ("GEX006", "Estatística básica", 2, 'Noturno'),
-  ("GLA004", "Leitura e produção textual II", 2, 'Noturno'),
-  ("GEX015", "Estrutura de dados I", 2, 'Noturno'),
-  ("GEX016", "Sistemas digitais", 2, 'Noturno'),
-  ("GEX004", "Geometria analítica", 2, 'Noturno'),
+("GEX090", "Banco de dados I", 4, 3),
+("GEX099", "Programação II", 4, 3),
+("GEX100", "Organização de computadores", 4, 3),
+("GEX055", "Probabilidade e estatística", 4, 3),
+("GEX033", "Cálculo II", 4, 3),
 
-  ("GEX093", "Matemática discreta", 3, 'Noturno'),
-  ("GEX092", "Estrutura de dados II", 3, 'Noturno'),
-  ("GEX098", "Programação I", 3, 'Noturno'),
-  ("GEX012", "Álgebra linear", 3, 'Noturno'),
-  ("GEX009", "Cálculo I", 3, 'Noturno'),
+("GEX091", "Banco de dados II", 5, 3),
+("GEX102", "ngenharia de software I", 5, 3),
+("GCH008", "Iniciação à prática científica", 5, 3),
+("GEX104", "Teoria da computação", 5, 3),
+("GEN039", "Grafos", 5, 3),
 
-  ("GEX090", "Banco de dados I", 4, 'Noturno'),
-  ("GEX099", "Programação II", 4, 'Noturno'),
-  ("GEX100", "Organização de computadores", 4, 'Noturno'),
-  ("GEX055", "Probabilidade e estatística", 4, 'Noturno'),
-  ("GEX033", "Cálculo II", 4, 'Noturno'),
+("GCH029", "Historia da fronteira Sul", 6, 3),
+("GEX103", "Engenharia software II", 6, 3),
+("GEX101", "Linguagens formais e autômatos", 6, 3),
+("GCS010", "Direitos e cidadania", 6, 3),
+("GEX036", "Cálculo numérico", 6, 3),
 
-  ("GEX091", "Banco de dados II", 5, 'Noturno'),
-  ("GEX102", "ngenharia de software I", 5, 'Noturno'),
-  ("GCH008", "Iniciação à prática científica", 5, 'Noturno'),
-  ("GEX104", "Teoria da computação", 5, 'Noturno'),
-  ("GEN039", "Grafos", 5, 'Noturno'),
+("GCH012", "Fundamentos da crŕtica social", 7, 3),
+("GEX109", "Inteligência artificial", 7, 3),
+("GEX108", "Construção de compiladores", 7, 3),
+("GEX107", "Computação gráfica", 7, 3),
+("GEX110", "Sistemas operacionais", 7, 3),
 
-  ("GCH029", "Historia da fronteira Sul", 6, 'Noturno'),
-  ("GEX103", "Engenharia software II", 6, 'Noturno'),
-  ("GEX101", "Linguagens formais e autômatos", 6, 'Noturno'),
-  ("GCS010", "Direitos e cidadania", 6, 'Noturno'),
-  ("GEX036", "Cálculo numérico", 6, 'Noturno'),
+("GCS011", "Meio ambiente, economia e sociedade", 8, 3),
+("GEX105", "Redes de computadores", 8, 3),
+("GCS107", "Planejamento e gestão de projetos", 8, 3),
+("GCH011", "Introdução ao pensamento social", 8, 3),
 
-  ("GCH012", "Fundamentos da crŕtica social", 7, 'Noturno'),
-  ("GEX109", "Inteligência artificial", 7, 'Noturno'),
-  ("GEX108", "Construção de compiladores", 7, 'Noturno'),
-  ("GEX107", "Computação gráfica", 7, 'Noturno'),
-  ("GEX110", "Sistemas operacionais", 7, 'Noturno'),
+("GEX106", "Computação distribuída", 9, 3),
+("GEX112", "Segurança e auditoria de sistemas", 9, 3),
+("GEX119", "Trabalho de conclusão de curso I", 9, 3),
 
-  ("GCS011", "Meio ambiente, economia e sociedade", 8, 'Noturno'),
-  ("GEX105", "Redes de computadores", 8, 'Noturno'),
-  ("GCS107", "Planejamento e gestão de projetos", 8, 'Noturno'),
-  ("GCH011", "Introdução ao pensamento social", 8, 'Noturno'),
-
-  ("GEX106", "Computação distribuída", 9,'Noturno'),
-  ("GEX112", "Segurança e auditoria de sistemas", 9,'Noturno'),
-  ("GEX119", "Trabalho de conclusão de curso I", 9,'Noturno'),
-
-  ("GEX120", "Trabalho de conclusão de curso II", 10,'Noturno');
+("GEX120", "Trabalho de conclusão de curso II", 10, 3);
 
 create table professor_subject(
-  siape integer,
-  code  varchar(8),
-  period varchar(16),
+  siape   integer,
+  code    varchar(8),
+  period  integer,
   primary key(siape, code, period),
   foreign key(siape) references professor(siape) on delete cascade,
   foreign key(code, period) references subject(code, period) on delete cascade
 );
 insert into professor_subject values
-(1645173, "GEX108", 'Matutino'),
-(1835372, "GEX105", 'Matutino');
-
-create table dayofweek(
-  dow varchar(16),
-  primary key(dow)
-);
-insert into dayofweek values ('Todos'), ('Segunda-feira'), ('Terça-feira'), ('Quarta-feira'), ('Quinta-feira'), ('Sexta-feira');
-
-create table time(
-  block varchar(16),
-  primary key(block)
-);
-insert into time values ('Todos'), ('Primeiro'), ('Segundo'), ('Terceiro'), ('Quarto'), ('Quinto');
+(1645173, "GEX108", 1),
+(1835372, "GEX105", 1);
 
 create table dow_shift_time(
   dow    varchar(16),
-  period varchar(16),
+  period integer,
   block  varchar(16),
   primary key(dow, period, block),
   foreign key(dow) references dayofweek(dow) on delete cascade,
@@ -175,37 +195,37 @@ create table dow_shift_time(
   foreign key(block) references time(block) on delete cascade
 );
 insert into dow_shift_time values
-  ('Todos', 'Todos', 'Todos'), ('Segunda-feira', 'Todos', 'Todos'), ('Terça-feira', 'Todos', 'Todos'), ('Quarta-feira', 'Todos', 'Todos'), ('Quinta-feira', 'Todos', 'Todos'), ('Sexta-feira', 'Todos', 'Todos'),
-  ('Todos', 'Todos', 'Primeiro'), ('Segunda-feira', 'Todos', 'Primeiro'), ('Terça-feira', 'Todos', 'Primeiro'), ('Quarta-feira', 'Todos', 'Primeiro'), ('Quinta-feira', 'Todos', 'Primeiro'), ('Sexta-feira', 'Todos', 'Primeiro'),
-  ('Todos', 'Todos', 'Segundo'), ('Segunda-feira', 'Todos', 'Segundo'), ('Terça-feira', 'Todos', 'Segundo'), ('Quarta-feira', 'Todos', 'Segundo'), ('Quinta-feira', 'Todos', 'Segundo'), ('Sexta-feira', 'Todos', 'Segundo'),
-  ('Todos', 'Todos', 'Terceiro'), ('Segunda-feira', 'Todos', 'Terceiro'), ('Terça-feira', 'Todos', 'Terceiro'), ('Quarta-feira', 'Todos', 'Terceiro'), ('Quinta-feira', 'Todos', 'Terceiro'), ('Sexta-feira', 'Todos', 'Terceiro'),
-  ('Todos', 'Todos', 'Quarto'), ('Segunda-feira', 'Todos', 'Quarto'), ('Terça-feira', 'Todos', 'Quarto'), ('Quarta-feira', 'Todos', 'Quarto'), ('Quinta-feira', 'Todos', 'Quarto'), ('Sexta-feira', 'Todos', 'Quarto'),
+(0, 0, 0), (2, 0, 0), (3, 0, 0), (4, 0, 0), (5, 0, 0), (6, 0, 0),
+(0, 0, 1), (2, 0, 1), (3, 0, 1), (4, 0, 1), (5, 0, 1), (6, 0, 1),
+(0, 0, 2), (2, 0, 2), (3, 0, 2), (4, 0, 2), (5, 0, 2), (6, 0, 2),
+(0, 0, 3), (2, 0, 3), (3, 0, 3), (4, 0, 3), (5, 0, 3), (6, 0, 3),
+(0, 0, 4), (2, 0, 4), (3, 0, 4), (4, 0, 4), (5, 0, 4), (6, 0, 4),
 
-  ('Todos', 'Matutino', 'Todos'), ('Segunda-feira', 'Matutino', 'Todos'), ('Terça-feira', 'Matutino', 'Todos'), ('Quarta-feira', 'Matutino', 'Todos'), ('Quinta-feira', 'Matutino', 'Todos'), ('Sexta-feira', 'Matutino', 'Todos'),
-  ('Todos', 'Matutino', 'Primeiro'), ('Segunda-feira', 'Matutino', 'Primeiro'), ('Terça-feira', 'Matutino', 'Primeiro'), ('Quarta-feira', 'Matutino', 'Primeiro'), ('Quinta-feira', 'Matutino', 'Primeiro'), ('Sexta-feira', 'Matutino', 'Primeiro'),
-  ('Todos', 'Matutino', 'Segundo'), ('Segunda-feira', 'Matutino', 'Segundo'), ('Terça-feira', 'Matutino', 'Segundo'), ('Quarta-feira', 'Matutino', 'Segundo'), ('Quinta-feira', 'Matutino', 'Segundo'), ('Sexta-feira', 'Matutino', 'Segundo'),
-  ('Todos', 'Matutino', 'Terceiro'), ('Segunda-feira', 'Matutino', 'Terceiro'), ('Terça-feira', 'Matutino', 'Terceiro'), ('Quarta-feira', 'Matutino', 'Terceiro'), ('Quinta-feira', 'Matutino', 'Terceiro'), ('Sexta-feira', 'Matutino', 'Terceiro'),
-  ('Todos', 'Matutino', 'Quarto'), ('Segunda-feira', 'Matutino', 'Quarto'), ('Terça-feira', 'Matutino', 'Quarto'), ('Quarta-feira', 'Matutino', 'Quarto'), ('Quinta-feira', 'Matutino', 'Quarto'), ('Sexta-feira', 'Matutino', 'Quarto'),
-  ('Todos', 'Matutino', 'Quinto'), ('Segunda-feira', 'Matutino', 'Quinto'), ('Terça-feira', 'Matutino', 'Quinto'), ('Quarta-feira', 'Matutino', 'Quinto'), ('Quinta-feira', 'Matutino', 'Quinto'), ('Sexta-feira', 'Matutino', 'Quinto'),
+(0, 1, 0), (2, 1, 0), (3, 1, 0), (4, 1, 0), (5, 1, 0), (6, 1, 0),
+(0, 1, 1), (2, 1, 1), (3, 1, 1), (4, 1, 1), (5, 1, 1), (6, 1, 1),
+(0, 1, 2), (2, 1, 2), (3, 1, 2), (4, 1, 2), (5, 1, 2), (6, 1, 2),
+(0, 1, 3), (2, 1, 3), (3, 1, 3), (4, 1, 3), (5, 1, 3), (6, 1, 3),
+(0, 1, 4), (2, 1, 4), (3, 1, 4), (4, 1, 4), (5, 1, 4), (6, 1, 4),
+(0, 1, 5), (2, 1, 5), (3, 1, 5), (4, 1, 5), (5, 1, 5), (6, 1, 5),
 
-  ('Todos', 'Vespertino', 'Todos'), ('Segunda-feira', 'Vespertino', 'Todos'), ('Terça-feira', 'Vespertino', 'Todos'), ('Quarta-feira', 'Vespertino', 'Todos'), ('Quinta-feira', 'Vespertino', 'Todos'), ('Sexta-feira', 'Vespertino', 'Todos'),
-  ('Todos', 'Vespertino', 'Primeiro'), ('Segunda-feira', 'Vespertino', 'Primeiro'), ('Terça-feira', 'Vespertino', 'Primeiro'), ('Quarta-feira', 'Vespertino', 'Primeiro'), ('Quinta-feira', 'Vespertino', 'Primeiro'), ('Sexta-feira', 'Vespertino', 'Primeiro'),
-  ('Todos', 'Vespertino', 'Segundo'), ('Segunda-feira', 'Vespertino', 'Segundo'), ('Terça-feira', 'Vespertino', 'Segundo'), ('Quarta-feira', 'Vespertino', 'Segundo'), ('Quinta-feira', 'Vespertino', 'Segundo'), ('Sexta-feira', 'Vespertino', 'Segundo'),
-  ('Todos', 'Vespertino', 'Terceiro'), ('Segunda-feira', 'Vespertino', 'Terceiro'), ('Terça-feira', 'Vespertino', 'Terceiro'), ('Quarta-feira', 'Vespertino', 'Terceiro'), ('Quinta-feira', 'Vespertino', 'Terceiro'), ('Sexta-feira', 'Vespertino', 'Terceiro'),
-  ('Todos', 'Vespertino', 'Quarto'), ('Segunda-feira', 'Vespertino', 'Quarto'), ('Terça-feira', 'Vespertino', 'Quarto'), ('Quarta-feira', 'Vespertino', 'Quarto'), ('Quinta-feira', 'Vespertino', 'Quarto'), ('Sexta-feira', 'Vespertino', 'Quarto'),
-  ('Todos', 'Vespertino', 'Quinto'), ('Segunda-feira', 'Vespertino', 'Quinto'), ('Terça-feira', 'Vespertino', 'Quinto'), ('Quarta-feira', 'Vespertino', 'Quinto'), ('Quinta-feira', 'Vespertino', 'Quinto'), ('Sexta-feira', 'Vespertino', 'Quinto'),
+(0, 2, 0), (2, 2, 0), (3, 2, 0), (4, 2, 0), (5, 2, 0), (6, 2, 0),
+(0, 2, 1), (2, 2, 1), (3, 2, 1), (4, 2, 1), (5, 2, 1), (6, 2, 1),
+(0, 2, 2), (2, 2, 2), (3, 2, 2), (4, 2, 2), (5, 2, 2), (6, 2, 2),
+(0, 2, 3), (2, 2, 3), (3, 2, 3), (4, 2, 3), (5, 2, 3), (6, 2, 3),
+(0, 2, 4), (2, 2, 4), (3, 2, 4), (4, 2, 4), (5, 2, 4), (6, 2, 4),
+(0, 2, 5), (2, 2, 5), (3, 2, 5), (4, 2, 5), (5, 2, 5), (6, 2, 5),
 
-  ('Todos', 'Noturno', 'Todos'), ('Segunda-feira', 'Noturno', 'Todos'), ('Terça-feira', 'Noturno', 'Todos'), ('Quarta-feira', 'Noturno', 'Todos'), ('Quinta-feira', 'Noturno', 'Todos'), ('Sexta-feira', 'Noturno', 'Todos'),
-  ('Todos', 'Noturno', 'Primeiro'), ('Segunda-feira', 'Noturno', 'Primeiro'), ('Terça-feira', 'Noturno', 'Primeiro'), ('Quarta-feira', 'Noturno', 'Primeiro'), ('Quinta-feira', 'Noturno', 'Primeiro'), ('Sexta-feira', 'Noturno', 'Primeiro'),
-  ('Todos', 'Noturno', 'Segundo'), ('Segunda-feira', 'Noturno', 'Segundo'), ('Terça-feira', 'Noturno', 'Segundo'), ('Quarta-feira', 'Noturno', 'Segundo'), ('Quinta-feira', 'Noturno', 'Segundo'), ('Sexta-feira', 'Noturno', 'Segundo'),
-  ('Todos', 'Noturno', 'Terceiro'), ('Segunda-feira', 'Noturno', 'Terceiro'), ('Terça-feira', 'Noturno', 'Terceiro'), ('Quarta-feira', 'Noturno', 'Terceiro'), ('Quinta-feira', 'Noturno', 'Terceiro'), ('Sexta-feira', 'Noturno', 'Terceiro'),
-  ('Todos', 'Noturno', 'Quarto'), ('Segunda-feira', 'Noturno', 'Quarto'), ('Terça-feira', 'Noturno', 'Quarto'), ('Quarta-feira', 'Noturno', 'Quarto'), ('Quinta-feira', 'Noturno', 'Quarto'), ('Sexta-feira', 'Noturno', 'Quarto');
+(0, 3, 0), (2, 3, 0), (3, 3, 0), (4, 3, 0), (5, 3, 0), (6, 3, 0),
+(0, 3, 1), (2, 3, 1), (3, 3, 1), (4, 3, 1), (5, 3, 1), (6, 3, 1),
+(0, 3, 2), (2, 3, 2), (3, 3, 2), (4, 3, 2), (5, 3, 2), (6, 3, 2),
+(0, 3, 3), (2, 3, 3), (3, 3, 3), (4, 3, 3), (5, 3, 3), (6, 3, 3),
+(0, 3, 4), (2, 3, 4), (3, 3, 4), (4, 3, 4), (5, 3, 4), (6, 3, 4);
 
 create table professor_restriction(
   siape  integer,
-  dow    varchar(16),
-  period varchar(16),
-  block  varchar(16),
+  dow    integer,
+  period integer,
+  block  integer,
   active boolean default true,
   primary key(siape, dow, period, block),
   foreign key(siape) references professor(siape) on delete cascade,

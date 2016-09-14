@@ -17,6 +17,7 @@ var autocompleteOptions = {
     var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
     var params = [];
     var query = "select " + buildQueryFields(ownerObj.fields) + " from " + obj.table;
+    if (obj !== ownerObj) query += " natural join " + ownerObj.table;
     if (typeof obj.selectWhere !== typeof undefined) {
       let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
@@ -58,6 +59,7 @@ var autocompleteOptions = {
         $.each(ownerObj.primaryKey, function(i, key) {
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[key] + "-id"] = row[ownerObj.fields[key]];
         });
+        console.log("LOG_INFO[autocompleteOptions, 6]: " + JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
@@ -104,15 +106,9 @@ function getListQuery(obj) {
       let fobjs = getForeignObjects(fobj);
       $.each(fobjs, function(k, fo) {
         joins.push(fo);
-        if (typeof fo.autocomplete !== typeof undefined) {
-          $.each(fo.autocomplete, function(l, field) {
-            fields.push(fo.fields[field.value]);
-          });
-        } else {
-          $.each(fo.primaryKey, function(l, key) {
-            fields.push(fo.fields[key]);
-          });
-        }
+        $.each(fo.primaryKey, function(l, key) {
+          fields.push(fo.fields[key]);
+        });
       });
     } else {
       fields.push(obj.fields[i++]);
@@ -336,48 +332,38 @@ function $buildForm(obj, clazz) {
       let fobj = obj.foreignKeys[_i];
       let fobjs = getForeignObjects(fobj);
       $.each(fobjs, function(k, fo) {
-        var autocomplete = fo.autocomplete;
-        if (typeof autocomplete === typeof undefined) {
-          autocomplete = [];
-          $.each(fo.primaryKey, function(l, key) {
-            autocomplete.push({
-              "key": key,
-              "value": key
-            });
-          });
-        }
-        $.each(autocomplete, function(l, f) {
-          $col = $createElement("div", {
-            "class": "input-field col"
-          });
+        $col = $createElement("div", {
+          "class": "input-field col"
+        });
+        $.each(fo.primaryKey, function(l, pk) {
           $input = $createElement("input", {
-            "type": decodeType(fo, f.key),
-            "id": fo.table + "-" + fo.fields[f.key] + "-id",
+            "type": decodeType(fo, fo.fieldTypes[pk]),
+            "id": fo.table + "-" + fo.fields[pk] + "-id",
             "object": obj.name,
-            "from": fo.table + "-" + fo.fields[f.value],
+            "from": obj.table + "-" + fo.table,
             "value": "",
             "hidden": "hidden"
           });
-          $col.append($input);
-          $input = $createElement("input", {
-            "type": decodeType(fo, f.value),
-            "id": fo.table + "-" + fo.fields[f.value],
-            "class": "autocomplete validate",
-            "title": fo.titles[f.value],
-            "target": fo.table + "-" + fo.fields[f.key] + "-id",
-            "object": fobj.name,
-            "owner-object": fo.name
-          });
-          if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
-            $input.attr("required", "required");
-          $col.append($input);
-          $col.append($createTextualElement("label", {
-            "for": fo.fields[f.value],
-            "title": fo.titles[f.value]
-          }, fo.titles[f.value]));
-          $col.addClass(buildColClasses(fo, f.value));
-          $row.append($col);
         });
+        $col.append($input);
+        $input = $createElement("input", {
+          "type": "text",
+          "id": obj.table + "-" + fo.table,
+          "class": "autocomplete validate",
+          "title": fo.titles[fo.foreignTitle],
+          // "target": fo.table + "-" + fo.fields[pk] + "-id",
+          "object": fobj.name,
+          "owner-object": fo.name
+        });
+        if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+          $input.attr("required", "required");
+        $col.append($input);
+        $col.append($createTextualElement("label", {
+          "for": obj.table + "-" + fo.table,
+          "title": fo.titles[fo.foreignTitle]
+        }, fo.titles[fo.foreignTitle]));
+        $col.addClass(buildColClasses(fo, fo.foreignTitle));
+        $row.append($col);
       });
       _i++;
     } else {
@@ -388,7 +374,10 @@ function $buildForm(obj, clazz) {
       $input.attr("type", decodeType(obj, j));
       $input.attr("id", obj.table + "-" + obj.fields[i]);
       $input.attr("object", obj.name);
-      if (type === objects.FIELD_TYPE_BOOLEAN) $input.attr("class", "filled-in");
+      if (type === objects.FIELD_TYPE_BOOLEAN) {
+        $input.attr("class", "filled-in");
+        $input.attr("checked", "checked");
+      }
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
         $input.attr("required", "required");
@@ -471,7 +460,7 @@ $(".form-save").click(function(event) {
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
-        $("form[object=" + obj.name + "]")[0].reset();
+        $("div.form[object=" + obj.name + "]").find("input").val("");
       }
     });
   }
