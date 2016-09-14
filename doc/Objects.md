@@ -35,3 +35,15 @@
 - An autocomplete field is created for every primary key of every foreign object that is also a foreign key. On the last level (an object with primary keys that are not also foreign keys), only one autocomplete field is created, and as many hidden fields as there are primary keys.
 - When the field is a foreign key, the `object` attribute on the visible field indicates the first level foreign object, i.e., where it should be `SELECT`ed from. On foreign keys hidden fields and on fields that are not foreign keys, it's used to select the fields that are going to be persisted.
 - When the field is a foreign key, the `owner-object` attribute indicates who is the actual owner of that field, where it comes from. That's why the field 'Dia da semana' has `owner-object='DayOfWeek'`. Otherwise, it's the same as the `object` attribute.
+- To create a form for a class, simply add a line in the following pattern to the desired HTML:
+
+  ```
+  <div class="form" object="Object"></div>
+  ```
+
+  Where "Object" must be replaced with the class name of the object. E.g.: Professor for the `Professor` class and so on.
+- To create a list of the persisted objects of a class, the steps are indentical, just change the `.form` class to `.list`:
+
+  ```
+  <div class="list" object="Object"></div>
+  ```
