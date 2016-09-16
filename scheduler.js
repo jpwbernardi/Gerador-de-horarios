@@ -452,7 +452,7 @@ function $buildRow(obj, tuple, rownum) {
       var $label = $createTextualElement("label", {
         "for": obj.table + "-" + obj.fields[i],
         "title": obj.titles[i],
-        "class": $input.val() === "" ? "" : "active"
+        "class": $input.val() !== "" && type !== objects.FIELD_TYPE_BOOLEAN ? "active" : ""
       }, obj.titles[i]);
       $col.addClass(buildColClasses(obj, i));
       $col.append($input);
