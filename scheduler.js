@@ -135,7 +135,7 @@ $("main").on("click", "button.form-save", (event) => {
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
-        $("div.form[object=" + obj.name + "]").find("input").val("");
+        appendNewRow(obj, fields);
       }
     });
   }
@@ -154,7 +154,8 @@ function valuesFormatted(obj, fields, type) {
     string: [],
     params: []
   };
-  var objFields = undefined, sep = "";
+  var objFields = undefined,
+    sep = "";
   if (type === objects.VALUES_INSERT) {
     objFields = allOwnFields(obj);
     sep = ", ";
@@ -186,8 +187,10 @@ function valueOf(field) {
 
 function objFields(obj, filter) {
   var fields = [];
-  var f = 0, fk = 0;
-  var isForeign = false, index = 0;
+  var f = 0,
+    fk = 0;
+  var isForeign = false,
+    index = 0;
   var types = (filter === objects.FILTER_ALL_PRIMARY ? obj.primaryKey : obj.fieldTypes),
     nextFilter = (filter === objects.FILTER_ALL ? objects.FILTER_ALL : objects.FILTER_ALL_PRIMARY);
   $.each(types, (i, type) => {
@@ -490,13 +493,37 @@ function $buildListRow(obj, tuple, rownum) {
   return $row;
 }
 
+function appendNewRow(obj, fields) {
+  var lastRow = -Infinity;
+  var rownums = $("div.row").map(function() {
+    return this.getAttribute("index");
+  });
+  rownums.each((i, num) => {
+    if (num > lastRow) lastRow = num;
+  });
+  var query = valuesWhere(obj, fields);
+  query.string = selectAllJoins(obj) + " where " + query.string;
+  console.log("LOG_INFO[appendNewRow, 1]: " + query.string);
+  console.log("LOG_INFO[appendNewRow, 2]: " + query.params);
+  db.get(query.string, query.params, (err, tuple) => {
+    if (err === null) {
+      if (typeof tuple !== typeof undefined) {
+        $("div.list[object=" + obj.name + "]").append($buildListRow(obj, tuple, lastRow + 1));
+        $("div.form[object=" + obj.name + "]").find("input").val("");
+      }
+      else console.log("LOG_ERR[appendNewRow, 4]: tuple is undefined.");
+    }
+    else console.log("LOG_ERR[appendNewRow, 3]: " + err);
+  });
+}
+
 function $buildRow(obj, tuple, rownum) {
   var i = 0,
     _i = 0;
-  var loadValue = typeof tuple !== typeof undefined;
   var $row = $createElement("div", {
     "class": "row"
   });
+  if (rownum !== "") $row.attr("index", rownum);
   $.each(obj.fieldTypes, function(j, type) {
     var $col = null,
       $input = null;
