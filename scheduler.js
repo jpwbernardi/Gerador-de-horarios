@@ -429,6 +429,7 @@ function $buildRow(obj, tuple, rownum) {
           "owner-object": fo.name,
           "value": autocompleteValue
         });
+        if ($input.val() !== "") $input.attr("disabled", "disabled");
         if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
           $input.attr("required", "required");
         $col.append($input);
@@ -454,14 +455,19 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
         $input.attr("required", "required");
+      if (typeof tuple[obj.fields[i]] !== typeof undefined)
+        $input.attr("disabled", "disabled");
       var $label = $createTextualElement("label", {
-        "for": obj.table + "-" + obj.fields[i],
+        "for": obj.table + "-" + obj.fields[i] + rownum,
         "title": obj.titles[i]
       }, obj.titles[i]);
       if (type === objects.FIELD_TYPE_BOOLEAN) {
         $input.addClass("filled-in");
-        if (tuple[obj.fields[i]] === 1) $input.attr("checked", "checked");
-      } else if ($input.val() !== "") $label.addClass("active");
+        if (tuple[obj.fields[i]] === 1 || rownum === "")
+          $input.attr("checked", "checked");
+      } else if ($input.val() !== "") {
+        $label.addClass("active");
+      }
       $col.addClass(buildColClasses(obj, i));
       $col.append($input);
       $col.append($label);
@@ -472,7 +478,11 @@ function $buildRow(obj, tuple, rownum) {
   return $row;
 }
 
-$(".form-save").click(function(event) {
+$(".form-delete").click((event) => {
+
+});
+
+$(".form-save").click((event) => {
   var i;
   var correct = true;
   var obj = objects[event.currentTarget.getAttribute("object")];
