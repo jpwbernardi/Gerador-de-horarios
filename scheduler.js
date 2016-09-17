@@ -22,7 +22,7 @@ var autocompleteOptions = {
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
         if (typeof obj.selectWhere[fieldIndex].object !== typeof undefined && obj.selectWhere[fieldIndex].object.length > 0 && obj.selectWhere[fieldIndex].object.length === obj.selectWhere[fieldIndex].field.length) {
           for (let i = 0; i < obj.selectWhere[fieldIndex].object.length; i++) {
-            let $whereField = $("#" + obj.selectWhere[fieldIndex].object[i].table + "-" + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + "-id");
+            let $whereField = $("#" + obj.selectWhere[fieldIndex].object[i].table + "-" + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + "-id" + $this.attr("index"));
             if ($whereField.val() === "") {
               let $whereFrom = $("#" + $whereField.attr("from"));
               $whereFrom.addClass("invalid");
@@ -85,9 +85,9 @@ function initAutocomplete(err, nrows) {
     $(".autocomplete").autocomplete(autocompleteOptions);
     $(".autocomplete").change((event) => {
       if (event.currentTarget.value === "") {
-        var obj = objects[event.currentTarget.getAttribute("object")];
+        var obj = objects[event.currentTarget.getAttribute("owner-object")];
         $.each(obj.primaryKey, function(i, key) {
-          $("#" + obj.table + "-" + obj.fields[key] + "-id").val("");
+          $("#" + obj.table + "-" + obj.fields[key] + "-id" + event.currentTarget.getAttribute("index")).val("");
         });
       }
     });
@@ -325,10 +325,10 @@ function $buildForm(obj, clazz) {
   var $form = $createElement("div");
   if (clazz === "form") $form.append($buildFormRow(obj));
   else if (clazz === "list") {
-    let i = 0;
+    let rownum = 0;
     let query = selectAllJoins(obj);
     db.each(query, function(err, row) {
-      if (err === null) $form.append($buildListRow(obj, row, i++));
+      if (err === null) $form.append($buildListRow(obj, row, rownum++));
       else console.log("LOG_ERR[$buildForm, 1]: error fectching " + obj.table + " rows.");
     }, initAutocomplete);
   }
@@ -352,15 +352,15 @@ function $buildFormRow(obj) {
   return $row;
 }
 
-function $buildListRow(obj, tuple, i) {
-  var $row = $buildRow(obj, tuple, i);
+function $buildListRow(obj, tuple, rownum) {
+  var $row = $buildRow(obj, tuple, rownum);
   var $col = $createElement("div", {
     "class": "input-field col s4 m2 l2"
   });
   $button = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-edit",
     "object": obj.name,
-    "index": i,
+    "index": rownum,
     "title": "Editar"
   }, $createTextualElement("i", {
     "class": "material-icons"
@@ -369,7 +369,7 @@ function $buildListRow(obj, tuple, i) {
   $button = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-delete",
     "object": obj.name,
-    "index": i,
+    "index": rownum,
     "title": "Deletar"
   }, $createTextualElement("i", {
     "class": "material-icons"
@@ -425,6 +425,7 @@ function $buildRow(obj, tuple, rownum) {
           "class": "autocomplete validate",
           "title": fo.titles[fo.foreignTitle],
           "object": fobj.name,
+          "index": rownum,
           "owner-object": fo.name,
           "value": autocompleteValue
         });
