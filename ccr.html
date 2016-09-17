@@ -11,10 +11,10 @@
   <!--Let browser know website is optimized for mobile-->
   <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
   <script>
-  window.nodeRequire = require;
-  delete window.require;
-  delete window.exports;
-  delete window.module;
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
   </script>
 
   <title>Gerador de horários - CCR</title>
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="form" object="Subject"></div>
-      </div>
+    </div>
 
 
     <table class="striped centered">
@@ -82,21 +82,12 @@
   <script>
     // You can also require other files to run in this process
     nodeRequire('./renderer.js');
-    </script>
-    <!--Import jQuery before materialize.js-->
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-    <script type="text/javascript" src="scheduler.js"></script>
-    <script type="text/javascript" src="ccr.js"></script>
-    <script>
-    $(document).ready(function() {
-      $('select').material_select();
-      $('.modal-trigger').leanModal();
-    });
-
-    </script>
-  </body>
+  </script>
+  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
+  <script type="text/javascript" src="scheduler.js"></script>
+  <script type="text/javascript" src="ccr.js"></script>
+</body>
 
 
-  </html>
+</html>
