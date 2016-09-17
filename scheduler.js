@@ -509,7 +509,9 @@ function appendNewRow(obj, fields) {
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
         $("div.list[object=" + obj.name + "]").append($buildListRow(obj, tuple, lastRow + 1));
-        $("div.form[object=" + obj.name + "]").find("input").val("");
+        let $inputs = $("div.form[object=" + obj.name + "]").find("input");
+        $inputs.val("");
+        $inputs.filter(":visible:first").focus();
       }
       else console.log("LOG_ERR[appendNewRow, 4]: tuple is undefined.");
     }
