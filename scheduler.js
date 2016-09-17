@@ -93,16 +93,17 @@ $("main").on("click", "button.form-delete", (event) => {
   var obj = objects[$target.attr("object")];
   var index = $target.attr("index");
   var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-  var query = queryParams(obj, objects.QUERY_TYPE_DELETE);
+  var query = valuesWhere(obj, fields);
   query.string = "delete from " + obj.table + " where " + query.string;
   console.log("LOG_INFO[.form-delete click, 3]: " + query.string);
+  console.log("LOG_INFO[.form-delete click, 3]: " + query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
       $row.remove();
-      Materialize.toast("Item deletado com sucesso!", 1000);
+      Materialize.toast("Item deletado com sucesso!", 2000);
       console.log("LOG_INFO[.form-delete click, 1]: successfully deleted item.");
     } else {
-      Materialize.toast(err, 2000);
+      Materialize.toast(err, 3000);
       console.log("LOG_ERR[.form-delete click, 2]: " + err);
     }
   });
@@ -113,29 +114,22 @@ $("main").on("click", "button.form-save", (event) => {
   var correct = true;
   var obj = objects[event.currentTarget.getAttribute("object")];
   var index = objects[event.currentTarget.getAttribute("index")];
-  var elems = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-  for (i = 0; i < elems.length; i++) {
-    var $elem = $(elems[i]);
-    if (typeof $elem.attr("from") !== typeof undefined) $elem = $("#" + $elem.attr("from"));
-    if ($elem.attr("required") && $elem.val() === "" && $elem.attr("type") !== "checkbox") {
-      $elem.addClass("invalid");
-      Materialize.toast("O campo '" + $elem.attr("title") + "' é obrigatório", 2000);
+  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
+  for (i = 0; i < fields.length; i++) {
+    var $field = $(fields[i]);
+    if (typeof $field.attr("from") !== typeof undefined) $field = $("#" + $field.attr("from"));
+    if ($field.attr("required") && $field.val() === "" && $field.attr("type") !== "checkbox") {
+      $field.addClass("invalid");
+      Materialize.toast("O campo '" + $field.attr("title") + "' é obrigatório", 2000);
       correct = false;
     }
   }
   if (correct) {
-    let params = [elems[0].value];
-    let query = "insert into " + obj.table + " values (?";
-    for (i = 1; i < elems.length; i++) {
-      query += ", ?";
-      if (elems[i].type === "checkbox")
-        params.push(elems[i].checked);
-      else params.push(elems[i].value);
-    }
-    query += ")";
-    console.log("LOG_INFO[.form-save click, 1]: " + query);
-    console.log("LOG_INFO[.form-save click, 2]: " + params);
-    db.run(query, params, function(err) {
+    let query = valuesInsert(obj, fields);
+    query.string = "insert into " + obj.table + " values (" + query.string + ")";
+    console.log("LOG_INFO[.form-save click, 1]: " + query.string);
+    console.log("LOG_INFO[.form-save click, 2]: " + query.params);
+    db.run(query.string, query.params, function(err) {
       if (err !== null) {
         console.log("LOG_ERR[.form-save click, 3]: " + err);
         Materialize.toast(err, 3000);
@@ -150,46 +144,81 @@ $("main").on("click", "button.form-save", (event) => {
 function initAutocomplete(err, nrows) {
   if (typeof err === typeof undefined || err === null) {
     if (typeof nrows !== typeof undefined)
-      console.log("LOG_INFO[initAutocomplete, 1]: done loading " + nrows + " rows");
+      console.log("LOG_INFO[initAutocomplete, 1]: done loading " + nrows + " rows.");
     $(".autocomplete").autocomplete(autocompleteOptions);
   } else console.log("LOG_ERR[initAutocomplete, 2]: " + err);
 }
 
-function queryParams(obj, type) {
+function valuesFormatted(obj, fields, type) {
   var query = {
-    string: "",
+    string: [],
     params: []
   };
-  $.each(allPrimaryKeys(obj), (i, field) => {
-    if (i > 0) query.string += (type === objects.QUERY_TYPE_UPDATE ? ", " : " and ");
-    query.string += field + " = ?";
+  var objFields = undefined, sep = "";
+  if (type === objects.VALUES_INSERT) {
+    objFields = allOwnFields(obj);
+    sep = ", ";
+  } else {
+    objFields = allPrimaryFields(obj);
+    sep = " and ";
+  }
+  $.each(objFields, (i, field) => {
+    if (type === objects.VALUES_INSERT) query.string.push("?")
+    else query.string.push(field + " = ?");
+    query.params.push(valueOf(fields[i]));
   });
+  query.string = query.string.join(sep);
   return query;
 }
 
-function allPrimaryKeys(obj) {
-  var fk = 0;
-  var pks = [];
-  $.each(obj.primaryKey, (i, key) => {
-    if (obj.fieldTypes[key] === objects.FIELD_TYPE_FK) pks = pks.concat(allPrimaryKeys(obj.foreignKeys[fk++]));
-    else pks.push(obj.fields[key]);
-  });
-  return pks;
+function valuesInsert(obj, fields) {
+  return valuesFormatted(obj, fields, objects.VALUES_INSERT);
 }
 
-function allFields(obj) {
+function valuesWhere(obj, fields) {
+  return valuesFormatted(obj, fields, objects.VALUES_WHERE);
+}
+
+function valueOf(field) {
+  if (field.type === "checkbox") return field.checked;
+  return field.value;
+}
+
+function objFields(obj, filter) {
   var fields = [];
-  var f = 0,
-    fk = 0;
-  $.each(obj.fieldTypes, (i, type) => {
-    if (type === objects.FIELD_TYPE_FK) fields = fields.concat(allFields(obj.foreignKeys[fk++]));
-    else fields.push(obj.fields[f++]);
+  var f = 0, fk = 0;
+  var isForeign = false, index = 0;
+  var types = (filter === objects.FILTER_ALL_PRIMARY ? obj.primaryKey : obj.fieldTypes),
+    nextFilter = (filter === objects.FILTER_ALL ? objects.FILTER_ALL : objects.FILTER_ALL_PRIMARY);
+  $.each(types, (i, type) => {
+    isForeign = false;
+    if (filter === objects.FILTER_ALL_PRIMARY) {
+      if (obj.fieldTypes[type] === objects.FIELD_TYPE_FK) isForeign = true;
+      else index = type;
+    } else {
+      if (type === objects.FIELD_TYPE_FK) isForeign = true;
+      else index = f++;
+    }
+    if (isForeign) fields = fields.concat(objFields(obj.foreignKeys[fk++], nextFilter));
+    else fields.push(obj.fields[index]);
   });
   return fields;
 }
 
+function allPrimaryFields(obj) {
+  return objFields(obj, objects.FILTER_ALL_PRIMARY);
+}
+
+function allOwnFields(obj) {
+  return objFields(obj, objects.FILTER_ALL_OWN);
+}
+
+function allFields(obj) {
+  return objFields(obj, objects.FILTER_ALL);
+}
+
 function selectAll(obj) {
-  return "select " + allFields(obj).join(",") + " from " + obj.table;
+  return "select " + allFields(obj).join(", ") + " from " + obj.table;
 }
 
 function selectAllJoins(obj) {
