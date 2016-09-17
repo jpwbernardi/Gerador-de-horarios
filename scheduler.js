@@ -76,84 +76,83 @@ buildMenu();
 $(".button-collapse").sideNav();
 buildForm("form");
 buildForm("list");
-initForms();
+initAutocomplete();
 
-function initForms(err, nrows) {
+$("main").on("change", ".autocomplete", (event) => {
+  if (event.currentTarget.value === "") {
+    var obj = objects[event.currentTarget.getAttribute("owner-object")];
+    $.each(obj.primaryKey, function(i, key) {
+      $("#" + obj.table + "-" + obj.fields[key] + "-id" + event.currentTarget.getAttribute("index")).val("");
+    });
+  }
+});
+
+$("main").on("click", "button.form-delete", (event) => {
+  var $target = $(event.currentTarget);
+  var $row = $target.closest("div.row");
+  var obj = objects[$target.attr("object")];
+  var index = $target.attr("index");
+  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
+  var query = queryParams(obj, objects.QUERY_TYPE_DELETE);
+  query.string = "delete from " + obj.table + " where " + query.string;
+  console.log("LOG_INFO[.form-delete click, 3]: " + query.string);
+  db.run(query.string, query.params, (err) => {
+    if (err === null) {
+      $row.remove();
+      Materialize.toast("Item deletado com sucesso!", 1000);
+      console.log("LOG_INFO[.form-delete click, 1]: successfully deleted item.");
+    } else {
+      Materialize.toast(err, 2000);
+      console.log("LOG_ERR[.form-delete click, 2]: " + err);
+    }
+  });
+});
+
+$("main").on("click", "button.form-save", (event) => {
+  var i;
+  var correct = true;
+  var obj = objects[event.currentTarget.getAttribute("object")];
+  var index = objects[event.currentTarget.getAttribute("index")];
+  var elems = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
+  for (i = 0; i < elems.length; i++) {
+    var $elem = $(elems[i]);
+    if (typeof $elem.attr("from") !== typeof undefined) $elem = $("#" + $elem.attr("from"));
+    if ($elem.attr("required") && $elem.val() === "" && $elem.attr("type") !== "checkbox") {
+      $elem.addClass("invalid");
+      Materialize.toast("O campo '" + $elem.attr("title") + "' é obrigatório", 2000);
+      correct = false;
+    }
+  }
+  if (correct) {
+    let params = [elems[0].value];
+    let query = "insert into " + obj.table + " values (?";
+    for (i = 1; i < elems.length; i++) {
+      query += ", ?";
+      if (elems[i].type === "checkbox")
+        params.push(elems[i].checked);
+      else params.push(elems[i].value);
+    }
+    query += ")";
+    console.log("LOG_INFO[.form-save click, 1]: " + query);
+    console.log("LOG_INFO[.form-save click, 2]: " + params);
+    db.run(query, params, function(err) {
+      if (err !== null) {
+        console.log("LOG_ERR[.form-save click, 3]: " + err);
+        Materialize.toast(err, 3000);
+      } else {
+        Materialize.toast("Registro salvo com sucesso!", 2000);
+        $("div.form[object=" + obj.name + "]").find("input").val("");
+      }
+    });
+  }
+});
+
+function initAutocomplete(err, nrows) {
   if (typeof err === typeof undefined || err === null) {
     if (typeof nrows !== typeof undefined)
-      console.log("LOG_INFO[initForms, 1]: done loading " + nrows + " rows");
-
+      console.log("LOG_INFO[initAutocomplete, 1]: done loading " + nrows + " rows");
     $(".autocomplete").autocomplete(autocompleteOptions);
-
-    $(".autocomplete").change((event) => {
-      if (event.currentTarget.value === "") {
-        var obj = objects[event.currentTarget.getAttribute("owner-object")];
-        $.each(obj.primaryKey, function(i, key) {
-          $("#" + obj.table + "-" + obj.fields[key] + "-id" + event.currentTarget.getAttribute("index")).val("");
-        });
-      }
-    });
-
-    $(".form-delete").click((event) => {
-      var $target = $(event.currentTarget);
-      var $row = $target.closest("div.row");
-      var obj = objects[$target.attr("object")];
-      var index = $target.attr("index");
-      var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-      var query = queryParams(obj, objects.QUERY_TYPE_DELETE);
-      query.string = "delete from " + obj.table + " where " + query.string;
-      console.log("LOG_INFO[.form-delete click, 3]: " + query.string);
-      db.run(query.string, query.params, (err) => {
-        if (err === null) {
-          $row.remove();
-          Materialize.toast("Item deletado com sucesso!", 1000);
-          console.log("LOG_INFO[.form-delete click, 1]: successfully deleted item.");
-        } else {
-          Materialize.toast(err, 2000);
-          console.log("LOG_ERR[.form-delete click, 2]: " + err);
-        }
-      });
-    });
-
-    $(".form-save").click((event) => {
-      var i;
-      var correct = true;
-      var obj = objects[event.currentTarget.getAttribute("object")];
-      var index = objects[event.currentTarget.getAttribute("index")];
-      var elems = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-      for (i = 0; i < elems.length; i++) {
-        var $elem = $(elems[i]);
-        if (typeof $elem.attr("from") !== typeof undefined) $elem = $("#" + $elem.attr("from"));
-        if ($elem.attr("required") && $elem.val() === "" && $elem.attr("type") !== "checkbox") {
-          $elem.addClass("invalid");
-          Materialize.toast("O campo '" + $elem.attr("title") + "' é obrigatório", 2000);
-          correct = false;
-        }
-      }
-      if (correct) {
-        let params = [elems[0].value];
-        let query = "insert into " + obj.table + " values (?";
-        for (i = 1; i < elems.length; i++) {
-          query += ", ?";
-          if (elems[i].type === "checkbox")
-            params.push(elems[i].checked);
-          else params.push(elems[i].value);
-        }
-        query += ")";
-        console.log("LOG_INFO[.form-save click, 1]: " + query);
-        console.log("LOG_INFO[.form-save click, 2]: " + params);
-        db.run(query, params, function(err) {
-          if (err !== null) {
-            console.log("LOG_ERR[.form-save click, 3]: " + err);
-            Materialize.toast(err, 3000);
-          } else {
-            Materialize.toast("Registro salvo com sucesso!", 2000);
-            $("div.form[object=" + obj.name + "]").find("input").val("");
-          }
-        });
-      }
-    });
-  } else console.log("LOG_ERR[initForms, 2]: " + err);
+  } else console.log("LOG_ERR[initAutocomplete, 2]: " + err);
 }
 
 function queryParams(obj, type) {
@@ -413,7 +412,7 @@ function $buildForm(obj, clazz) {
     db.each(query, function(err, row) {
       if (err === null) $form.append($buildListRow(obj, row, rownum++));
       else console.log("LOG_ERR[$buildForm, 1]: error fectching " + obj.table + " rows.");
-    }, initForms);
+    }, initAutocomplete);
   }
   return $form;
 }
