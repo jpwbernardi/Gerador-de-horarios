@@ -91,11 +91,11 @@ buildMenu();
 $(".button-collapse").sideNav();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
-initAutocomplete();
+// initAutocomplete();
 
-function initAutocomplete() {
-  $(".autocomplete").autocomplete(autocompleteOptions);
-}
+// function initAutocomplete() {
+//   $(".autocomplete").autocomplete(autocompleteOptions);
+// }
 
 $("main").on("change", ".autocomplete", (event) => {
   if (event.currentTarget.value === "") {
@@ -591,6 +591,7 @@ function $buildRow(obj, tuple, rownum) {
         if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
           $input.attr("required", "required");
         if ($input.val() !== "") $input.attr("disabled", "disabled");
+        $input.autocomplete(autocompleteOptions);
         $col.append($input);
         $col.append($createTextualElement("label", {
           "for": obj.table + "-" + fo.table + rownum,
