@@ -72,11 +72,30 @@ var autocompleteOptions = {
   }
 };
 
+// var observerConf = {
+//   childList: true
+// };
+// var formObserver = new MutationObserver(function(mutations, observer) {
+//   initAutocomplete();
+// });
+
+// observer.observe(document, observerConf);
+// $.each($("div.form"), (i, form) => {
+//   formObserver.observe(form, observerConf);
+// });
+// $.each($("div.list"), (i, list) => {
+//   formObserver.observe(list, observerConf);
+// });
+
 buildMenu();
 $(".button-collapse").sideNav();
 buildForm("form");
-buildForm("list");
+setTimeout(buildForm, 0, "list");
 initAutocomplete();
+
+function initAutocomplete() {
+  $(".autocomplete").autocomplete(autocompleteOptions);
+}
 
 $("main").on("change", ".autocomplete", (event) => {
   if (event.currentTarget.value === "") {
@@ -140,14 +159,6 @@ $("main").on("click", "button.form-save", (event) => {
     });
   }
 });
-
-function initAutocomplete(err, nrows) {
-  if (typeof err === typeof undefined || err === null) {
-    if (typeof nrows !== typeof undefined)
-      console.log("LOG_INFO[initAutocomplete, 1]: done loading " + nrows + " rows.");
-    $(".autocomplete").autocomplete(autocompleteOptions);
-  } else console.log("LOG_ERR[initAutocomplete, 2]: " + err);
-}
 
 function valuesFormatted(obj, fields, type) {
   var query = {
@@ -248,15 +259,18 @@ function getForeignObjects(o) {
   var fobjs = [],
     front = 0,
     back = -1;
-  var queue = foreignPrimaryKeys(o, visited);
+  var queue = o.foreignKeys || [];
   back += queue.length;
   while (front <= back) {
     let obj = queue[front++];
     visited[obj] = true;
     fobjs.push(obj);
-    let fpk = foreignPrimaryKeys(obj, visited);
-    queue = queue.concat(fpk);
-    back += fpk.length;
+    $.each(obj.foreignKeys, (i, fk) => {
+      if (typeof visited[fk] === typeof undefined) {
+        queue.push(fk);
+        back++;
+      }
+    });
   }
   return fobjs;
 }
@@ -323,7 +337,7 @@ function decodeType(obj, findex) {
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
     default:
-      console.log("LOG_WARN[decodeType, 1]: unknown type '" + obj.fieldTypes[findex] + "'");
+      console.log("LOG_WARN[decodeType, 1]: unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -442,10 +456,17 @@ function $buildForm(obj, clazz) {
     let rownum = 0;
     let query = selectAllJoins(obj);
     db.each(query, function(err, row) {
-      if (err === null) $form.append($buildListRow(obj, row, rownum++));
-      else console.log("LOG_ERR[$buildForm, 1]: error fectching " + obj.table + " rows.");
-    }, initAutocomplete);
+      if (err === null)
+        setTimeout(function(rownum) {
+          $form.append($buildListRow(obj, row, rownum));
+        }, 0, rownum++);
+      else console.log("LOG_ERR[$buildForm, 1]: error fetching " + obj.table + " rows.");
+    }, (err, nrows) => {
+      if (err === null) console.log("LOG_INFO[$buildForm, 2]: done loading " + nrows + " row(s).");
+      else console.log("LOG_ERR[$buildForm, 3]: " + err);
+    });
   }
+  // formObserver.observe($form[0], observerConf);
   return $form;
 }
 
@@ -512,10 +533,8 @@ function appendNewRow(obj, fields) {
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      }
-      else console.log("LOG_ERR[appendNewRow, 4]: tuple is undefined.");
-    }
-    else console.log("LOG_ERR[appendNewRow, 3]: " + err);
+      } else console.log("LOG_ERR[appendNewRow, 4]: tuple is undefined.");
+    } else console.log("LOG_ERR[appendNewRow, 3]: " + err);
   });
 }
 
@@ -542,7 +561,7 @@ function $buildRow(obj, tuple, rownum) {
         });
         $.each(fo.primaryKey, function(l, pk) {
           $input = $createElement("input", {
-            "type": decodeType(fo, fo.fieldTypes[pk]),
+            "type": decodeType(fo, pk),
             "id": fo.table + "-" + fo.fields[pk] + "-id" + rownum,
             "class": obj.name + rownum,
             "object": obj.name,

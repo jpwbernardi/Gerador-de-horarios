@@ -133,7 +133,7 @@ Semester.table = "semester";
 Semester.fields = ["sem"];
 Semester.fieldRequired = [true];
 Semester.titles = ["Semestre"];
-Semester.fieldTypes = [FIELD_TYPE_TEXT];
+Semester.fieldTypes = [FIELD_TYPE_NUMBER];
 Semester.col = {
   "s": [12],
   "m": [2],
@@ -161,12 +161,12 @@ Subject.col = {
   "m": [5, 7],
   "l": [2, 3]
 };
-Subject.primaryKey = [0];
+Subject.primaryKey = [0, 3];
 Subject.foreignTitle = 1;
 Subject.foreignKeys = [Semester, Shift];
 Subject.selectFields = [0, 1];
 Subject.orderBy = {
-  "fields": [Subject.fields[1]]
+  "fields": [Subject.fields[1], Shift.fields[0], Semester.fields[0]]
 };
 
 function ProfessorSubject(siape, subject) {
