@@ -160,24 +160,42 @@ $("main").on("click", "button.form-save", (event) => {
   }
 });
 
-function valuesFormatted(obj, fields, type) {
+function valuesFormatted(obj, fields, vtype) {
   var query = {
     string: [],
     params: []
   };
-  var objFields = undefined,
-    sep = "";
-  if (type === objects.VALUES_INSERT) {
+  var tf = 0, ff = 0, sep = "";
+  var objFields = undefined, fobjs = getForeignObjects(obj);
+  if (vtype === objects.VALUES_INSERT) {
     objFields = allOwnFields(obj);
     sep = ", ";
   } else {
     objFields = allPrimaryFields(obj);
     sep = " and ";
   }
-  $.each(objFields, (i, field) => {
-    if (type === objects.VALUES_INSERT) query.string.push("?")
-    else query.string.push(field + " = ?");
-    query.params.push(valueOf(fields[i]));
+  $.each(obj.fieldTypes, (ti, type) => {
+    if (tf >= objFields.length) return false;
+    // console.log("");
+    // console.log("curr tf: " + objFields[tf]);
+
+    // console.log("obj[ti]: " + obj.fields[ti]);
+    // console.log("type: " + decodeType(obj, ti));
+    // console.log("fobj: " + fobjs[ff].name);
+    var field = "";
+    if (type === objects.FIELD_TYPE_FK) {
+      $.each(fobjs[ff].fields, (i, fname) => {
+        if (fname === objFields[tf])
+        { field = fname; ff++; return false; }
+      });
+    } else if (obj.fields[ti] === objFields[tf]) field = obj.fields[ti];
+    // console.log("chosen field: " + field);
+    if (field !== "") {
+      if (vtype === objects.VALUES_INSERT) query.string.push("?")
+      else query.string.push(objFields[tf] + " = ?");
+      query.params.push(valueOf(fields[tf]));
+      tf++;
+    }
   });
   query.string = query.string.join(sep);
   return query;
@@ -336,6 +354,8 @@ function decodeType(obj, findex) {
       return "number";
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
+    // case objects.FIELD_TYPE_FK:
+    //   return "fk";
     default:
       console.log("LOG_WARN[decodeType, 1]: unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
@@ -527,6 +547,7 @@ function appendNewRow(obj, fields) {
   console.log("LOG_INFO[appendNewRow, 1]: " + query.string);
   console.log("LOG_INFO[appendNewRow, 2]: " + query.params);
   db.get(query.string, query.params, (err, tuple) => {
+    console.log(tuple);
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
         $("div.list[object=" + obj.name + "]").append($buildListRow(obj, tuple, lastRow + 1));
