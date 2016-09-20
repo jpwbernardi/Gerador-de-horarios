@@ -34,17 +34,17 @@ var autocompleteOptions = {
             params.push($whereField.val());
           }
         } else {
-          console.log("LOG_ERR[autocompleteOptions, 4]: " + obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          sislog("LOG_ERR", "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
-      } else console.log("LOG_WARN[autocompleteOptions, 3]: " + obj.name + " has no selectWhere[" + fieldIndex + "]");
-    } else console.log("LOG_INFO[autocompleteOptions, 2]: " + obj.name + " has no selectWhere");
+      } else sislog("LOG_WARN", "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else sislog("LOG_INFO", "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
     if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
-    console.log("LOG_INFO[autocompleteOptions, 1]: " + query);
-    console.log("LOG_INFO[autocompleteOptions, 5]: " + params);
+    sislog("LOG_INFO", "autocompleteOptions", 1, query);
+    sislog("LOG_INFO", "autocompleteOptions", 5, params);
     db.each(query, params, function(err, row) {
       var keys = autocompleteFields(ownerObj);
       var label = row[keys[0]];
@@ -58,7 +58,7 @@ var autocompleteOptions = {
         $.each(ownerObj.primaryKey, function(i, key) {
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[key] + "-id"] = row[ownerObj.fields[key]];
         });
-        console.log("LOG_INFO[autocompleteOptions, 6]: " + JSON.stringify(rowJson));
+        sislog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
@@ -114,16 +114,16 @@ $("main").on("click", "button.form-delete", (event) => {
   var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
   var query = valuesWhere(obj, fields);
   query.string = "delete from " + obj.table + " where " + query.string;
-  console.log("LOG_INFO[.form-delete click, 3]: " + query.string);
-  console.log("LOG_INFO[.form-delete click, 3]: " + query.params);
+  sislog("LOG_INFO", ".form-delete click", 3, query.string);
+  sislog("LOG_INFO", ".form-delete click", 3, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
       $row.remove();
       Materialize.toast("Item deletado com sucesso!", 2000);
-      console.log("LOG_INFO[.form-delete click, 1]: successfully deleted item.");
+      sislog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
     } else {
       Materialize.toast(err, 3000);
-      console.log("LOG_ERR[.form-delete click, 2]: " + err);
+      sislog("LOG_ERR", ".form-delete click", 2, err);
     }
   });
 });
@@ -146,11 +146,11 @@ $("main").on("click", "button.form-save", (event) => {
   if (correct) {
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    console.log("LOG_INFO[.form-save click, 1]: " + query.string);
-    console.log("LOG_INFO[.form-save click, 2]: " + query.params);
+    sislog("LOG_INFO", ".form-save click", 1, query.string);
+    sislog("LOG_INFO", ".form-save click", 2, query.params);
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
-        console.log("LOG_ERR[.form-save click, 3]: " + err);
+        sislog("LOG_ERR", ".form-save click", 3, err);
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
@@ -302,7 +302,7 @@ function autocompleteFields(obj) {
     } else {
       fields = obj.fields; // all fields from the 'select *'
     }
-  } else console.log("LOG_WARN[autocompleteFields, 1]: obj is undefined!");
+  } else sislog("LOG_WARN", "autocompleteFields", 1, "obj is undefined!");
   return fields;
 }
 
@@ -357,7 +357,7 @@ function decodeType(obj, findex) {
     // case objects.FIELD_TYPE_FK:
     //   return "fk";
     default:
-      console.log("LOG_WARN[decodeType, 1]: unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      sislog("LOG_WARN" , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -369,7 +369,7 @@ function decodeOrder(type) {
     case -1:
       return "desc";
     default:
-      console.log("LOG_WARN[decodeOrder, 1]: unknown order by, type '" + type + "'!");
+      sislog("LOG_WARN", "decodeOrder", 1, "unknown order by, type '" + type + "'!");
       return "";
   }
 }
@@ -392,7 +392,7 @@ function groupBy(fields) {
     group = fields[0];
     for (let i = 1; i < fields.length; i++)
       group += ", " + fields[i];
-  } else console.log("LOG_WARN[groupBy, 1]: empty 'fields' parameter");
+  } else sislog("LOG_WARN", "groupBy", 1, "empty 'fields' parameter");
   return group;
 }
 
@@ -455,6 +455,10 @@ function buttons($ul) {
   $item.append($createTextualElement("a", {
     "href": "ccr.html"
   }, "CCR"));
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "assoc.html"
+  }, "Associações"));
   $ul.append($item);
 }
 
@@ -465,7 +469,7 @@ function buildForm(clazz) {
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
       $(elem).append($buildForm(obj, clazz));
-    else console.log("LOG_ERR[buildForm('" + clazz + "'), 1]: object " + o + " not found!");
+    else sislog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
   });
 }
 
@@ -480,10 +484,10 @@ function $buildForm(obj, clazz) {
         setTimeout(function(rownum) {
           $form.append($buildListRow(obj, row, rownum));
         }, 0, rownum++);
-      else console.log("LOG_ERR[$buildForm, 1]: error fetching " + obj.table + " rows.");
+      else sislog("LOG_ERR", "$buildForm", 1, "error fetching " + obj.table + " rows.");
     }, (err, nrows) => {
-      if (err === null) console.log("LOG_INFO[$buildForm, 2]: done loading " + nrows + " row(s).");
-      else console.log("LOG_ERR[$buildForm, 3]: " + err);
+      if (err === null) sislog("LOG_INFO", "$buildForm", 2, "done loading " + nrows + " row(s).");
+      else sislog("LOG_ERR", "$buildForm", 3, err);
     });
   }
   // formObserver.observe($form[0], observerConf);
@@ -544,8 +548,8 @@ function appendNewRow(obj, fields) {
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  console.log("LOG_INFO[appendNewRow, 1]: " + query.string);
-  console.log("LOG_INFO[appendNewRow, 2]: " + query.params);
+  sislog("LOG_INFO","appendNewRow", 1,  query.string);
+  sislog("LOG_INFO","appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
     console.log(tuple);
     if (err === null) {
@@ -554,8 +558,8 @@ function appendNewRow(obj, fields) {
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      } else console.log("LOG_ERR[appendNewRow, 4]: tuple is undefined.");
-    } else console.log("LOG_ERR[appendNewRow, 3]: " + err);
+      } else sislog("LOG_ERR", "appendNewRow", 4, "tuple is undefined.");
+    } else sislog("LOG_ERR", "appendNewRow", 3, err);
   });
 }
 
@@ -657,4 +661,8 @@ function $buildRow(obj, tuple, rownum) {
     }
   });
   return $row;
+}
+
+function sislog(LOG_LEVEL_INFO, functionName, cod, message){
+  console.log(LOG_LEVEL_INFO, functionName, cod, message);
 }
