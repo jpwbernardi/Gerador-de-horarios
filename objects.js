@@ -47,7 +47,7 @@ Professor.table = "professor";
 Professor.fields = ["siape", "name"];
 Professor.fieldRequired = [true, true];
 Professor.titles = ["SIAPE", "Nome do professor"];
-Professor.fieldTypes = [FIELD_TYPE_NUMBER, FIELD_TYPE_TEXT];
+Professor.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_TEXT];
 Professor.col = {
   "s": [12, 12],
   "m": [5, 7],
