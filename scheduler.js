@@ -94,7 +94,7 @@ setTimeout(buildForm, 0, "list");
 // initAutocomplete();
 
 // function initAutocomplete() {
-//   $(".autocomplete").autocomplete(autocompleteOptions);
+  $(".autocomplete").autocomplete(autocompleteOptions);
 // }
 
 $("main").on("change", ".autocomplete", (event) => {
@@ -202,12 +202,40 @@ function valuesFormatted(obj, fields, vtype) {
 }
 
 function valuesInsert(obj, fields) {
-  return valuesFormatted(obj, fields, objects.VALUES_INSERT);
+  var objFields = allOwnFields(obj);
+  var query = {
+    string: "",
+    params: []
+  };
+  $.each(objFields, (i) => {
+    if (i > 0) query.string += ", ";
+    query.string += "?";
+    query.params.push(valueOf(fields[i]));
+  });
+  return query;
 }
 
 function valuesWhere(obj, fields) {
-  return valuesFormatted(obj, fields, objects.VALUES_WHERE);
+  var objFields = allPrimaryFields(obj);
+  var query = {
+    string: "",
+    params: []
+  };
+  console.log(objFields);
+  $.each(objFields, (i, primaryKey) => {
+    if (i > 0) query.string += ", ";
+    query.string += primaryKey + " = " + "?";
+    $.each(fields, (j, field) => {
+      // if (field.)
+    });
+    query.params.push(valueOf(fields[i]));
+  });
+  return query;
 }
+
+// function valuesWhere(obj, fields) {
+//   return valuesFormatted(obj, fields, objects.VALUES_WHERE);
+// }
 
 function valueOf(field) {
   if (field.type === "checkbox") return field.checked;
@@ -439,22 +467,27 @@ function buttons($ul) {
   var $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "index.html"
-  }, "Página inicial"));
+  }, "Grade"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "restrictions.html"
   }, "Restrições"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "professor.html"
   }, "Professores"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "ccr.html"
   }, "CCR"));
+  $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "assoc.html"
@@ -590,6 +623,7 @@ function $buildRow(obj, tuple, rownum) {
             "id": fo.table + "-" + fo.fields[pk] + "-id" + rownum,
             "class": obj.name + rownum,
             "object": obj.name,
+            "field": fo.fields[pk],
             "from": obj.table + "-" + fo.table + rownum,
             "value": tuple[fo.fields[pk]],
             "hidden": "hidden"
@@ -636,6 +670,7 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("id", obj.table + "-" + obj.fields[i] + rownum);
       $input.attr("class", obj.name + rownum);
       $input.attr("object", obj.name);
+      $input.attr("field", obj.fields[i]);
       $input.attr("value", tuple[obj.fields[i]]);
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
