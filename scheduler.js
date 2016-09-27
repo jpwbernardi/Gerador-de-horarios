@@ -106,7 +106,15 @@ $("main").on("change", ".autocomplete", (event) => {
   }
 });
 
+
 $("main").on("click", "button.form-delete", (event) => {
+  $("div#modal-delete.modal").openModal();
+  $("a#modal-delete-confirm").off("click.delete");
+  $("a#modal-delete-confirm").on("click.delete", function(){deleteRow(event);});
+});
+
+
+function deleteRow(event){
   var $target = $(event.currentTarget);
   var $row = $target.closest("div.row");
   var obj = objects[$target.attr("object")];
@@ -126,7 +134,7 @@ $("main").on("click", "button.form-delete", (event) => {
       sislog("LOG_ERR", ".form-delete click", 2, err);
     }
   });
-});
+}
 
 $("main").on("click", "button.form-save", (event) => {
   var i;

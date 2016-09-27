@@ -1,3 +1,11 @@
+.greenhover:hover {
+  color: green;
+}
+
+.redhover:hover {
+  color: red;
+}
+
 .marbot-20px {
   margin-bottom: 20px;
 }
