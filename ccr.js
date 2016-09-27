@@ -6,6 +6,6 @@ $('.modalzinho').on('click', function () {
 $(document).ready(function() {
   $('select').material_select();
   $('.modal-trigger').leanModal();
-  $(".modal-content").append('aa'); //Colocar aqui select do banco
+  $(".modalzinho.modal-content").append('aa'); //Colocar aqui select do banco
   // var $modal = $(".modal-content")
 });
