@@ -34,17 +34,17 @@ var autocompleteOptions = {
             params.push($whereField.val());
           }
         } else {
-          sislog("LOG_ERR", "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          syslog("LOG_ERR", "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
-      } else sislog("LOG_WARN", "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
-    } else sislog("LOG_INFO", "autocompleteOptions", 2, obj.name + " has no selectWhere");
+      } else syslog("LOG_WARN", "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else syslog("LOG_INFO", "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
     if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
-    sislog("LOG_INFO", "autocompleteOptions", 1, query);
-    sislog("LOG_INFO", "autocompleteOptions", 5, params);
+    syslog("LOG_INFO", "autocompleteOptions", 1, query);
+    syslog("LOG_INFO", "autocompleteOptions", 5, params);
     db.each(query, params, function(err, row) {
       var keys = autocompleteFields(ownerObj);
       var label = row[keys[0]];
@@ -58,7 +58,7 @@ var autocompleteOptions = {
         $.each(ownerObj.primaryKey, function(i, key) {
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[key] + "-id"] = row[ownerObj.fields[key]];
         });
-        sislog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
+        syslog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
@@ -94,7 +94,7 @@ setTimeout(buildForm, 0, "list");
 // initAutocomplete();
 
 // function initAutocomplete() {
-//   $(".autocomplete").autocomplete(autocompleteOptions);
+  $(".autocomplete").autocomplete(autocompleteOptions);
 // }
 
 $("main").on("change", ".autocomplete", (event) => {
@@ -122,16 +122,16 @@ function deleteRow(event){
   var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
   var query = valuesWhere(obj, fields);
   query.string = "delete from " + obj.table + " where " + query.string;
-  sislog("LOG_INFO", ".form-delete click", 3, query.string);
-  sislog("LOG_INFO", ".form-delete click", 3, query.params);
+  syslog("LOG_INFO", ".form-delete click", 3, query.string);
+  syslog("LOG_INFO", ".form-delete click", 3, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
       $row.remove();
       Materialize.toast("Item deletado com sucesso!", 2000);
-      sislog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
+      syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
     } else {
       Materialize.toast(err, 3000);
-      sislog("LOG_ERR", ".form-delete click", 2, err);
+      syslog("LOG_ERR", ".form-delete click", 2, err);
     }
   });
 }
@@ -154,11 +154,11 @@ $("main").on("click", "button.form-save", (event) => {
   if (correct) {
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    sislog("LOG_INFO", ".form-save click", 1, query.string);
-    sislog("LOG_INFO", ".form-save click", 2, query.params);
+    syslog("LOG_INFO", ".form-save click", 1, query.string);
+    syslog("LOG_INFO", ".form-save click", 2, query.params);
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
-        sislog("LOG_ERR", ".form-save click", 3, err);
+        syslog("LOG_ERR", ".form-save click", 3, err);
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
@@ -168,53 +168,35 @@ $("main").on("click", "button.form-save", (event) => {
   }
 });
 
-function valuesFormatted(obj, fields, vtype) {
+function valuesInsert(obj, fields) {
+  var objFields = allOwnFields(obj);
   var query = {
-    string: [],
+    string: "",
     params: []
   };
-  var tf = 0, ff = 0, sep = "";
-  var objFields = undefined, fobjs = getForeignObjects(obj);
-  if (vtype === objects.VALUES_INSERT) {
-    objFields = allOwnFields(obj);
-    sep = ", ";
-  } else {
-    objFields = allPrimaryFields(obj);
-    sep = " and ";
-  }
-  $.each(obj.fieldTypes, (ti, type) => {
-    if (tf >= objFields.length) return false;
-    // console.log("");
-    // console.log("curr tf: " + objFields[tf]);
-
-    // console.log("obj[ti]: " + obj.fields[ti]);
-    // console.log("type: " + decodeType(obj, ti));
-    // console.log("fobj: " + fobjs[ff].name);
-    var field = "";
-    if (type === objects.FIELD_TYPE_FK) {
-      $.each(fobjs[ff].fields, (i, fname) => {
-        if (fname === objFields[tf])
-        { field = fname; ff++; return false; }
-      });
-    } else if (obj.fields[ti] === objFields[tf]) field = obj.fields[ti];
-    // console.log("chosen field: " + field);
-    if (field !== "") {
-      if (vtype === objects.VALUES_INSERT) query.string.push("?")
-      else query.string.push(objFields[tf] + " = ?");
-      query.params.push(valueOf(fields[tf]));
-      tf++;
-    }
+  $.each(objFields, (i) => {
+    if (i > 0) query.string += ", ";
+    query.string += "?";
+    query.params.push(valueOf(fields[i]));
   });
-  query.string = query.string.join(sep);
   return query;
 }
 
-function valuesInsert(obj, fields) {
-  return valuesFormatted(obj, fields, objects.VALUES_INSERT);
-}
-
 function valuesWhere(obj, fields) {
-  return valuesFormatted(obj, fields, objects.VALUES_WHERE);
+  var objFields = allPrimaryFields(obj);
+  var query = {
+    string: "",
+    params: []
+  };
+  $.each(objFields, (i, primaryKey) => {
+    if (i > 0) query.string += " and ";
+    query.string += primaryKey + " = " + "?";
+    $.each(fields, (j, input) => {
+      if (input.getAttribute("field") === primaryKey)
+        query.params.push(valueOf(input));
+    });
+  });
+  return query;
 }
 
 function valueOf(field) {
@@ -310,7 +292,7 @@ function autocompleteFields(obj) {
     } else {
       fields = obj.fields; // all fields from the 'select *'
     }
-  } else sislog("LOG_WARN", "autocompleteFields", 1, "obj is undefined!");
+  } else syslog("LOG_WARN", "autocompleteFields", 1, "obj is undefined!");
   return fields;
 }
 
@@ -365,7 +347,7 @@ function decodeType(obj, findex) {
     // case objects.FIELD_TYPE_FK:
     //   return "fk";
     default:
-      sislog("LOG_WARN" , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      syslog("LOG_WARN" , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -377,7 +359,7 @@ function decodeOrder(type) {
     case -1:
       return "desc";
     default:
-      sislog("LOG_WARN", "decodeOrder", 1, "unknown order by, type '" + type + "'!");
+      syslog("LOG_WARN", "decodeOrder", 1, "unknown order by, type '" + type + "'!");
       return "";
   }
 }
@@ -400,7 +382,7 @@ function groupBy(fields) {
     group = fields[0];
     for (let i = 1; i < fields.length; i++)
       group += ", " + fields[i];
-  } else sislog("LOG_WARN", "groupBy", 1, "empty 'fields' parameter");
+  } else syslog("LOG_WARN", "groupBy", 1, "empty 'fields' parameter");
   return group;
 }
 
@@ -447,22 +429,27 @@ function buttons($ul) {
   var $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "index.html"
-  }, "Página inicial"));
+  }, "Grade"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "restrictions.html"
   }, "Restrições"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "professor.html"
   }, "Professores"));
   $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "ccr.html"
   }, "CCR"));
+  $ul.append($item);
+
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "assoc.html"
@@ -477,7 +464,7 @@ function buildForm(clazz) {
     var obj = objects[o];
     if (typeof obj !== typeof undefined)
       $(elem).append($buildForm(obj, clazz));
-    else sislog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+    else syslog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
   });
 }
 
@@ -492,10 +479,10 @@ function $buildForm(obj, clazz) {
         setTimeout(function(rownum) {
           $form.append($buildListRow(obj, row, rownum));
         }, 0, rownum++);
-      else sislog("LOG_ERR", "$buildForm", 1, "error fetching " + obj.table + " rows.");
+      else syslog("LOG_ERR", "$buildForm", 1, "error fetching " + obj.table + " rows.");
     }, (err, nrows) => {
-      if (err === null) sislog("LOG_INFO", "$buildForm", 2, "done loading " + nrows + " row(s).");
-      else sislog("LOG_ERR", "$buildForm", 3, err);
+      if (err === null) syslog("LOG_INFO", "$buildForm", 2, "done loading " + nrows + " row(s).");
+      else syslog("LOG_ERR", "$buildForm", 3, err);
     });
   }
   // formObserver.observe($form[0], observerConf);
@@ -556,18 +543,17 @@ function appendNewRow(obj, fields) {
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  sislog("LOG_INFO","appendNewRow", 1,  query.string);
-  sislog("LOG_INFO","appendNewRow", 2, query.params);
+  syslog("LOG_INFO","appendNewRow", 1,  query.string);
+  syslog("LOG_INFO","appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
-    console.log(tuple);
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
         $("div.list[object=" + obj.name + "]").append($buildListRow(obj, tuple, lastRow + 1));
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      } else sislog("LOG_ERR", "appendNewRow", 4, "tuple is undefined.");
-    } else sislog("LOG_ERR", "appendNewRow", 3, err);
+      } else syslog("LOG_ERR", "appendNewRow", 4, "tuple is undefined.");
+    } else syslog("LOG_ERR", "appendNewRow", 3, err);
   });
 }
 
@@ -598,6 +584,7 @@ function $buildRow(obj, tuple, rownum) {
             "id": fo.table + "-" + fo.fields[pk] + "-id" + rownum,
             "class": obj.name + rownum,
             "object": obj.name,
+            "field": fo.fields[pk],
             "from": obj.table + "-" + fo.table + rownum,
             "value": tuple[fo.fields[pk]],
             "hidden": "hidden"
@@ -644,6 +631,7 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("id", obj.table + "-" + obj.fields[i] + rownum);
       $input.attr("class", obj.name + rownum);
       $input.attr("object", obj.name);
+      $input.attr("field", obj.fields[i]);
       $input.attr("value", tuple[obj.fields[i]]);
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
@@ -671,6 +659,6 @@ function $buildRow(obj, tuple, rownum) {
   return $row;
 }
 
-function sislog(LOG_LEVEL_INFO, functionName, cod, message){
+function syslog(LOG_LEVEL_INFO, functionName, cod, message){
   console.log(LOG_LEVEL_INFO, functionName, cod, message);
 }
