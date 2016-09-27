@@ -160,47 +160,6 @@ $("main").on("click", "button.form-save", (event) => {
   }
 });
 
-function valuesFormatted(obj, fields, vtype) {
-  var query = {
-    string: [],
-    params: []
-  };
-  var tf = 0, ff = 0, sep = "";
-  var objFields = undefined, fobjs = getForeignObjects(obj);
-  if (vtype === objects.VALUES_INSERT) {
-    objFields = allOwnFields(obj);
-    sep = ", ";
-  } else {
-    objFields = allPrimaryFields(obj);
-    sep = " and ";
-  }
-  $.each(obj.fieldTypes, (ti, type) => {
-    if (tf >= objFields.length) return false;
-    // console.log("");
-    // console.log("curr tf: " + objFields[tf]);
-
-    // console.log("obj[ti]: " + obj.fields[ti]);
-    // console.log("type: " + decodeType(obj, ti));
-    // console.log("fobj: " + fobjs[ff].name);
-    var field = "";
-    if (type === objects.FIELD_TYPE_FK) {
-      $.each(fobjs[ff].fields, (i, fname) => {
-        if (fname === objFields[tf])
-        { field = fname; ff++; return false; }
-      });
-    } else if (obj.fields[ti] === objFields[tf]) field = obj.fields[ti];
-    // console.log("chosen field: " + field);
-    if (field !== "") {
-      if (vtype === objects.VALUES_INSERT) query.string.push("?")
-      else query.string.push(objFields[tf] + " = ?");
-      query.params.push(valueOf(fields[tf]));
-      tf++;
-    }
-  });
-  query.string = query.string.join(sep);
-  return query;
-}
-
 function valuesInsert(obj, fields) {
   var objFields = allOwnFields(obj);
   var query = {
@@ -221,21 +180,16 @@ function valuesWhere(obj, fields) {
     string: "",
     params: []
   };
-  console.log(objFields);
   $.each(objFields, (i, primaryKey) => {
-    if (i > 0) query.string += ", ";
+    if (i > 0) query.string += " and ";
     query.string += primaryKey + " = " + "?";
-    $.each(fields, (j, field) => {
-      // if (field.)
+    $.each(fields, (j, input) => {
+      if (input.getAttribute("field") === primaryKey)
+        query.params.push(valueOf(input));
     });
-    query.params.push(valueOf(fields[i]));
   });
   return query;
 }
-
-// function valuesWhere(obj, fields) {
-//   return valuesFormatted(obj, fields, objects.VALUES_WHERE);
-// }
 
 function valueOf(field) {
   if (field.type === "checkbox") return field.checked;
@@ -584,7 +538,6 @@ function appendNewRow(obj, fields) {
   syslog("LOG_INFO","appendNewRow", 1,  query.string);
   syslog("LOG_INFO","appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
-    console.log(tuple);
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
         $("div.list[object=" + obj.name + "]").append($buildListRow(obj, tuple, lastRow + 1));
