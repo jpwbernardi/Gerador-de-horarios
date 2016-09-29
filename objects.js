@@ -22,6 +22,7 @@ module.exports = {
   Shift: Shift,
   Time: Time,
   DowShiftTime: DowShiftTime,
+  ProfessorSubject: ProfessorSubject,
   ProfessorRestriction: ProfessorRestriction,
   QUERY_TYPE_INSERT: QUERY_TYPE_INSERT,
   QUERY_TYPE_UPDATE: QUERY_TYPE_UPDATE,
@@ -174,21 +175,14 @@ function ProfessorSubject(siape, subject) {
   this.subject = subject;
 }
 ProfessorSubject.table = "professor_subject";
-// ProfessorSubject.fields = [];
 ProfessorSubject.fieldRequired = [true, true];
-// ProfessorSubject.titles = [];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
-// ProfessorSubject.col = {
-//   "s": [],
-//   "m": [],
-//   "l": []
-// };
 ProfessorSubject.primaryKey = [0, 1];
 ProfessorSubject.foreignKeys = [Professor, Subject];
-ProfessorSubject.selectWhere = [undefined, {
-  "object": [Subject],
-  "field": Semester.primaryKey // this is an array!
-}];
+// ProfessorSubject.selectWhere = [undefined, {
+//   "object": [Subject],
+//   "field": Semester.primaryKey // this is an array!
+// }];
 // ProfessorSubject.orderBy = {
   // "fields": ProfessorSubject.fields
 // };

@@ -168,6 +168,17 @@ $("main").on("click", "button.form-save", (event) => {
   }
 });
 
+function hasPrimaryNotForeign(obj) {
+  var has = false;
+  $.each(obj.primaryKey, (i, key) => {
+    if (obj.fieldTypes[i] !== objects.FIELD_TYPE_FK) {
+      has = true;
+      return false; // this return is for $.each
+    }
+  });
+  return has;
+}
+
 function valuesInsert(obj, fields) {
   var objFields = allOwnFields(obj);
   var query = {
@@ -263,12 +274,11 @@ function foreignPrimaryKeys(obj, visited) {
 }
 
 function getForeignObjects(o) {
+  var queue = o.foreignKeys || [];
   var visited = {};
   var fobjs = [],
     front = 0,
-    back = -1;
-  var queue = o.foreignKeys || [];
-  back += queue.length;
+    back = queue.length - 1;
   while (front <= back) {
     let obj = queue[front++];
     visited[obj] = true;
@@ -568,12 +578,8 @@ function $buildRow(obj, tuple, rownum) {
     var $col = null,
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      let fobj = obj.foreignKeys[_i];
-      let fobjs = getForeignObjects(fobj);
-      // if fobjs.length === 0, then fobj has no PK that is also FK
-      // which means it should be an autocomplete, instead of
-      // being split in many autocompletes
-      if (fobjs.length === 0) fobjs.push(fobj);
+      let fobj = obj.foreignKeys[_i], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
+      fobjs = fobjs.concat(getForeignObjects(fobj));
       $.each(fobjs, function(k, fo) {
         $col = $createElement("div", {
           "class": "input-field col"
@@ -595,6 +601,7 @@ function $buildRow(obj, tuple, rownum) {
         if (rownum !== "") {
           let afs = autocompleteFields(fo);
           $.each(afs, function(i, af) {
+            if (i > 0) autocompleteValue += ", ";
             autocompleteValue += tuple[af];
           });
         }
