@@ -55,8 +55,9 @@ var autocompleteOptions = {
           "label": label,
           "pk": {}
         };
-        $.each(ownerObj.primaryKey, function(i, key) {
-          rowJson.pk[ownerObj.table + "-" + ownerObj.fields[key] + "-id"] = row[ownerObj.fields[key]];
+        $.each(ownerObj.primaryKey, function(i, pk) {
+          if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
+          rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });
         syslog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
@@ -585,6 +586,7 @@ function $buildRow(obj, tuple, rownum) {
           "class": "input-field col"
         });
         $.each(fo.primaryKey, function(l, pk) {
+          if (fo.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
           $input = $createElement("input", {
             "type": decodeType(fo, pk),
             "id": fo.table + "-" + fo.fields[pk] + "-id" + rownum,

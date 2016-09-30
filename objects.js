@@ -142,6 +142,7 @@ Semester.col = {
 };
 Semester.primaryKey = [0];
 Semester.foreignTitle = 0;
+Semester.groupBy = [Semester.fields[0]];
 Semester.orderBy = {
   "fields": [Semester.fields[0]]
 };
@@ -166,6 +167,13 @@ Subject.primaryKey = [0, 3];
 Subject.foreignTitle = 1;
 Subject.foreignKeys = [Semester, Shift];
 Subject.selectFields = [0, 1];
+Subject.selectWhere = [{
+  "object": [Subject],
+  "field": [Subject.primaryKey[0]] // this is an array!
+}, {
+  "object": [Subject, Semester],
+  "field": [Subject.primaryKey[0], Semester.primaryKey[0]] // this is an array!
+}];
 Subject.orderBy = {
   "fields": [Subject.fields[1], Shift.fields[0], Semester.fields[0]]
 };
