@@ -169,10 +169,10 @@ Subject.foreignKeys = [Semester, Shift];
 Subject.selectFields = [0, 1];
 Subject.selectWhere = [{
   "object": [Subject],
-  "field": [Subject.primaryKey[0]] // this is an array!
+  "field": [Subject.primaryKey[0]]
 }, {
   "object": [Subject, Semester],
-  "field": [Subject.primaryKey[0], Semester.primaryKey[0]] // this is an array!
+  "field": [Subject.primaryKey[0], Semester.primaryKey[0]]
 }];
 Subject.orderBy = {
   "fields": [Subject.fields[1], Shift.fields[0], Semester.fields[0]]
@@ -187,13 +187,6 @@ ProfessorSubject.fieldRequired = [true, true];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
 ProfessorSubject.primaryKey = [0, 1];
 ProfessorSubject.foreignKeys = [Professor, Subject];
-// ProfessorSubject.selectWhere = [undefined, {
-//   "object": [Subject],
-//   "field": Semester.primaryKey // this is an array!
-// }];
-// ProfessorSubject.orderBy = {
-  // "fields": ProfessorSubject.fields
-// };
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;

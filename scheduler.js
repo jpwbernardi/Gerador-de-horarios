@@ -22,7 +22,8 @@ var autocompleteOptions = {
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
         if (typeof obj.selectWhere[fieldIndex].object !== typeof undefined && obj.selectWhere[fieldIndex].object.length > 0 && obj.selectWhere[fieldIndex].object.length === obj.selectWhere[fieldIndex].field.length) {
           for (let i = 0; i < obj.selectWhere[fieldIndex].object.length; i++) {
-            let $whereField = $("#" + obj.selectWhere[fieldIndex].object[i].table + "-" + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + "-id" + $this.attr("index"));
+            let whereFieldId = "#" + obj.selectWhere[fieldIndex].object[i].table + "-" + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + "-id" + $this.attr("index");
+            let $whereField = $(whereFieldId);
             if ($whereField.val() === "") {
               let $whereFrom = $("#" + $whereField.attr("from"));
               $whereFrom.addClass("invalid");
@@ -115,7 +116,7 @@ $("main").on("click", "button.form-delete", (event) => {
 });
 
 
-function deleteRow(event){
+function deleteRow(event) {
   var $target = $(event.currentTarget);
   var $row = $target.closest("div.row");
   var obj = objects[$target.attr("object")];
@@ -196,6 +197,7 @@ function valuesInsert(obj, fields) {
 
 function valuesWhere(obj, fields) {
   var objFields = allPrimaryFields(obj);
+  // console.log(objFields);
   var query = {
     string: "",
     params: []
@@ -272,6 +274,21 @@ function foreignPrimaryKeys(obj, visited) {
     }
   });
   return fpks;
+}
+
+function getForeignPrimaryObjects(o) {
+  var visited = {};
+  var queue = foreignPrimaryKeys(o, visited);
+  var fobjs = [], front = 0, back = queue.length - 1;
+  while (front <= back) {
+    let obj = queue[front++];
+    visited[obj] = true;
+    fobjs.push(obj);
+    let fpks = foreignPrimaryKeys(o, visited);
+    back += fpks.length;
+    queue = queue.concat(fpks);
+  }
+  return fobjs;
 }
 
 function getForeignObjects(o) {
@@ -580,7 +597,7 @@ function $buildRow(obj, tuple, rownum) {
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
       let fobj = obj.foreignKeys[_i], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
-      fobjs = fobjs.concat(getForeignObjects(fobj));
+      fobjs = fobjs.concat(getForeignPrimaryObjects(fobj));
       $.each(fobjs, function(k, fo) {
         $col = $createElement("div", {
           "class": "input-field col"
@@ -613,8 +630,8 @@ function $buildRow(obj, tuple, rownum) {
           "class": "autocomplete validate",
           "title": fo.titles[fo.foreignTitle],
           "object": fobj.name,
-          "index": rownum,
           "owner-object": fo.name,
+          "index": rownum,
           "value": autocompleteValue
         });
         if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
@@ -668,6 +685,6 @@ function $buildRow(obj, tuple, rownum) {
   return $row;
 }
 
-function syslog(LOG_LEVEL_INFO, functionName, cod, message){
-  console.log(LOG_LEVEL_INFO, functionName, cod, message);
+function syslog(level, functionName, code, message) {
+  console.log(level, functionName, code, message);
 }
