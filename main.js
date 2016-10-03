@@ -33,7 +33,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', function() {
   global.db = new sqlite3.Database('scheduler.db', function(err) {
-    console.log("Error opening the database: " + err);
+    if (err !== null) console.log("Error opening the database: " + err);
   });
   global.db.on('open', function() {
     console.log('Dabase opened successfully!');
@@ -63,7 +63,7 @@ app.on('activate', function() {
 
 app.on('quit', function() {
   global.db.close(function(err) {
-    console.log("Error closing the database: " + err);
+    if (err !== null) console.log("Error closing the database: " + err);
   });
 })
 

@@ -5,41 +5,16 @@
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!--Import materialize.css-->
   <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection"/>
+  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
 
   <!--Let browser know website is optimized for mobile-->
   <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0"/>
-  <script>
-  window.nodeRequire = require;
-  delete window.require;
-  delete window.exports;
-  delete window.module;
-  </script>
 
   <title>Gerador de horários</title>
 </head>
 
 <body>
-  <nav style="margin-bottom: 20px;">
-    <div class="nav-wrapper teal darken-3">
-      <div class="container">
-        <a href="index.html" class="brand-logo">Gerador de horários</a>
-        <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-        <ul class="right hide-on-med-and-down">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="#!">Professores</a></li>
-          <li><a href="#!">CCRs</a></li>
-        </ul>
-        <ul class="side-nav" id="mobile-demo">
-          <li><a href="index.html">Página inicial</a></li>
-          <li><a href="restrictions.html">Restrições</a></li>
-          <li><a href="#!">Professores</a></li>
-          <li><a href="#!">CCRs</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+  <div class="sch-menu"></div>
   <main>
     <div class="container">
       <div class="row">
@@ -95,12 +70,11 @@
 
   <script>
   // You can also require other files to run in this process
-  nodeRequire('./renderer.js');
+  require('./renderer.js');
   </script>
-  <!--Import jQuery before materialize.js-->
-  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-  <script type="text/javascript" src="scheduler.js"></script>
-  <script type="text/javascript" src="backtrack.js"></script>
+  <script type="text/javascript" async src="scheduler.js"></script>
+  <script type="text/javascript" async src="backtrack.js"></script>
 </body>
 </html>
