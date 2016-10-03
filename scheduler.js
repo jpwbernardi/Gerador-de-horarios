@@ -18,7 +18,7 @@ var autocompleteOptions = {
     var params = [];
     var query = selectAllJoins(obj);
     if (typeof obj.selectWhere !== typeof undefined) {
-      let fieldIndex = obj.foreignKeys.indexOf(ownerObj);
+      let fieldIndex = obj.foreignKey.indexOf(ownerObj);
       if (typeof obj.selectWhere[fieldIndex] !== typeof undefined) {
         if (typeof obj.selectWhere[fieldIndex].object !== typeof undefined && obj.selectWhere[fieldIndex].object.length > 0 && obj.selectWhere[fieldIndex].object.length === obj.selectWhere[fieldIndex].field.length) {
           for (let i = 0; i < obj.selectWhere[fieldIndex].object.length; i++) {
@@ -197,7 +197,6 @@ function valuesInsert(obj, fields) {
 
 function valuesWhere(obj, fields) {
   var objFields = allPrimaryFields(obj);
-  // console.log(objFields);
   var query = {
     string: "",
     params: []
@@ -222,21 +221,18 @@ function objFields(obj, filter) {
   var fields = [];
   var f = 0,
     fk = 0;
-  var isForeign = false,
-    index = 0;
   var types = (filter === objects.FILTER_ALL_PRIMARY ? obj.primaryKey : obj.fieldTypes),
     nextFilter = (filter === objects.FILTER_ALL ? objects.FILTER_ALL : objects.FILTER_ALL_PRIMARY);
   $.each(types, (i, type) => {
-    isForeign = false;
     if (filter === objects.FILTER_ALL_PRIMARY) {
-      if (obj.fieldTypes[type] === objects.FIELD_TYPE_FK) isForeign = true;
-      else index = type;
+      if (obj.fieldTypes[type] === objects.FIELD_TYPE_FK)
+        fields = fields.concat(objFields(obj.foreignKey[type], nextFilter));
+      else fields.push(obj.fields[type]);
     } else {
-      if (type === objects.FIELD_TYPE_FK) isForeign = true;
-      else index = f++;
+      if (type === objects.FIELD_TYPE_FK)
+        fields = fields.concat(objFields(obj.foreignKey[i], nextFilter));
+      else fields.push(obj.fields[f++]);
     }
-    if (isForeign) fields = fields.concat(objFields(obj.foreignKeys[fk++], nextFilter));
-    else fields.push(obj.fields[index]);
   });
   return fields;
 }
@@ -266,11 +262,10 @@ function selectAllJoins(obj) {
 }
 
 function foreignPrimaryKeys(obj, visited) {
-  var fk = 0;
   var fpks = [];
   $.each(obj.primaryKey, function(i, pk) {
-    if (obj.fieldTypes[pk] === objects.FIELD_TYPE_FK && typeof visited[obj.foreignKeys[fk]] === typeof undefined) {
-      fpks.push(obj.foreignKeys[fk++]);
+    if (obj.fieldTypes[pk] === objects.FIELD_TYPE_FK && typeof visited[obj.foreignKey[pk]] === typeof undefined) {
+      fpks.push(obj.foreignKey[pk]);
     }
   });
   return fpks;
@@ -284,7 +279,7 @@ function getForeignPrimaryObjects(o) {
     let obj = queue[front++];
     visited[obj] = true;
     fobjs.push(obj);
-    let fpks = foreignPrimaryKeys(o, visited);
+    let fpks = foreignPrimaryKeys(obj, visited);
     back += fpks.length;
     queue = queue.concat(fpks);
   }
@@ -292,16 +287,17 @@ function getForeignPrimaryObjects(o) {
 }
 
 function getForeignObjects(o) {
-  var queue = o.foreignKeys || [];
+  var queue = o.foreignKey || [];
   var visited = {};
   var fobjs = [],
     front = 0,
     back = queue.length - 1;
   while (front <= back) {
     let obj = queue[front++];
+    if (typeof obj === typeof undefined) continue;
     visited[obj] = true;
     fobjs.push(obj);
-    $.each(obj.foreignKeys, (i, fk) => {
+    $.each(obj.foreignKey, (i, fk) => {
       if (typeof visited[fk] === typeof undefined) {
         queue.push(fk);
         back++;
@@ -586,8 +582,7 @@ function appendNewRow(obj, fields) {
 }
 
 function $buildRow(obj, tuple, rownum) {
-  var i = 0,
-    _i = 0;
+  var i = 0;
   var $row = $createElement("div", {
     "class": "row"
   });
@@ -596,7 +591,7 @@ function $buildRow(obj, tuple, rownum) {
     var $col = null,
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      let fobj = obj.foreignKeys[_i], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
+      let fobj = obj.foreignKey[j], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
       fobjs = fobjs.concat(getForeignPrimaryObjects(fobj));
       $.each(fobjs, function(k, fo) {
         $col = $createElement("div", {
@@ -647,7 +642,6 @@ function $buildRow(obj, tuple, rownum) {
         $col.addClass(buildColClasses(fo, fo.foreignTitle));
         $row.append($col);
       });
-      _i++;
     } else {
       $col = $createElement("div", {
         "class": "input-field col"

@@ -59,7 +59,6 @@ create table semester(
 );
 insert into semester values (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
--- pode ter uma ccr com mesmo código, período e semestre?
 create table subject(
   code   varchar(8),
   title  varchar(64),

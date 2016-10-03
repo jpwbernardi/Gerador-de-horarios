@@ -165,7 +165,7 @@ Subject.col = {
 };
 Subject.primaryKey = [0, 3];
 Subject.foreignTitle = 1;
-Subject.foreignKeys = [Semester, Shift];
+Subject.foreignKey = [undefined, undefined, Semester, Shift];
 Subject.selectFields = [0, 1];
 Subject.selectWhere = [{
   "object": [Subject],
@@ -186,7 +186,7 @@ ProfessorSubject.table = "professor_subject";
 ProfessorSubject.fieldRequired = [true, true];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
 ProfessorSubject.primaryKey = [0, 1];
-ProfessorSubject.foreignKeys = [Professor, Subject];
+ProfessorSubject.foreignKey = [Professor, Subject];
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;
@@ -196,7 +196,7 @@ function DowShiftTime(dayOfWeek, shift, time) {
 DowShiftTime.table = "dow_shift_time";
 DowShiftTime.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK, FIELD_TYPE_FK];
 DowShiftTime.primaryKey = [0, 1, 2];
-DowShiftTime.foreignKeys = [DayOfWeek, Shift, Time];
+DowShiftTime.foreignKey = [DayOfWeek, Shift, Time];
 DowShiftTime.selectWhere = [undefined, {
   "object": [DayOfWeek],
   "field": DayOfWeek.primaryKey // this is an array!
@@ -221,7 +221,7 @@ ProfessorRestriction.col = {
   "l": [1]
 }
 ProfessorRestriction.primaryKey = [0, 1];
-ProfessorRestriction.foreignKeys = [Professor, DowShiftTime];
+ProfessorRestriction.foreignKey = [Professor, DowShiftTime, undefined];
 
 // function Test(a, b, c) {
 //   this.a = a;
