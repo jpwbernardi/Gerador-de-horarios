@@ -167,13 +167,14 @@ Subject.primaryKey = [0, 3];
 Subject.foreignTitle = 1;
 Subject.foreignKey = [undefined, undefined, Semester, Shift];
 Subject.selectFields = [0, 1];
-Subject.selectWhere = [{
+Subject.selectWhere = [undefined, undefined, {
   "object": [Subject],
   "field": [Subject.primaryKey[0]]
 }, {
-  "object": [Subject, Semester],
-  "field": [Subject.primaryKey[0], Semester.primaryKey[0]]
+  "object": [Subject],
+  "field": [Subject.primaryKey[0]]
 }];
+Subject.groupBy = [Subject.fields[0]];
 Subject.orderBy = {
   "fields": [Subject.fields[1], Shift.fields[0], Semester.fields[0]]
 };
