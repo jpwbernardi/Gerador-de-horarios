@@ -74,30 +74,10 @@ var autocompleteOptions = {
   }
 };
 
-// var observerConf = {
-//   childList: true
-// };
-// var formObserver = new MutationObserver(function(mutations, observer) {
-//   initAutocomplete();
-// });
-
-// observer.observe(document, observerConf);
-// $.each($("div.form"), (i, form) => {
-//   formObserver.observe(form, observerConf);
-// });
-// $.each($("div.list"), (i, list) => {
-//   formObserver.observe(list, observerConf);
-// });
-
 buildMenu();
 $(".button-collapse").sideNav();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
-// initAutocomplete();
-
-// function initAutocomplete() {
-  $(".autocomplete").autocomplete(autocompleteOptions);
-// }
 
 $("main").on("change", ".autocomplete", (event) => {
   if (event.currentTarget.value === "") {
@@ -108,42 +88,54 @@ $("main").on("change", ".autocomplete", (event) => {
   }
 });
 
-
 $("main").on("click", "button.form-delete", (event) => {
   $("div#modal-delete.modal").openModal();
   $("a#modal-delete-confirm").off("click.delete");
-  $("a#modal-delete-confirm").on("click.delete", function(){deleteRow(event);});
+  $("a#modal-delete-confirm").on("click.delete", function() {
+    deleteRow(event);
+  });
 });
 
+function deleteObject(object, fields) {
+  var error = null;
+  var query = valuesWhere(object, fields);
+  query.string = "delete from " + object.table + " where " + query.string;
+  syslog("LOG_INFO", "deleteObject", 1, query.string);
+  syslog("LOG_INFO", "deleteObject", 2, query.params);
+  db.run(query.string, query.params, (err) => {
+    if (err === null) {
+      syslog("LOG_INFO", "deleteObject", 1, "successfully deleted item.");
+    } else {
+      syslog("LOG_ERR", "deleteObject", 2, err);
+      error = err;
+    }
+  });
+  return error;
+}
 
 function deleteRow(event) {
   var $target = $(event.currentTarget);
   var $row = $target.closest("div.row");
   var obj = objects[$target.attr("object")];
-  var index = $target.attr("index");
-  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-  var query = valuesWhere(obj, fields);
-  query.string = "delete from " + obj.table + " where " + query.string;
-  syslog("LOG_INFO", ".form-delete click", 3, query.string);
-  syslog("LOG_INFO", ".form-delete click", 3, query.params);
-  db.run(query.string, query.params, (err) => {
-    if (err === null) {
-      $row.remove();
-      Materialize.toast("Item deletado com sucesso!", 2000);
-      syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
-    } else {
-      Materialize.toast(err, 3000);
-      syslog("LOG_ERR", ".form-delete click", 2, err);
-    }
-  });
+  var index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
+  var fields = $("input." + obj.name + index);
+  var error = deleteObject(obj, fields);
+  if (error === null) {
+    $row.remove();
+    Materialize.toast("Item deletado com sucesso!", 2000);
+    syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
+  } else {
+    Materialize.toast(error, 3000);
+    syslog("LOG_ERR", ".form-delete click", 2, err);
+  }
 }
 
 $("main").on("click", "button.form-save", (event) => {
   var i;
   var correct = true;
   var obj = objects[event.currentTarget.getAttribute("object")];
-  var index = objects[event.currentTarget.getAttribute("index")];
-  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
+  var index = event.currentTarget.hasAttribute("index") ? event.currentTarget.getAttribute("index") : "";
+  var fields = $("input." + obj.name + index);
   for (i = 0; i < fields.length; i++) {
     var $field = $(fields[i]);
     if (typeof $field.attr("from") !== typeof undefined) $field = $("#" + $field.attr("from"));
@@ -164,10 +156,45 @@ $("main").on("click", "button.form-save", (event) => {
         Materialize.toast(err, 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
-        appendNewRow(obj, fields);
+        // yeah, editing is insert new + delete old...
+        if (event.currentTarget.hasAttribute("editing") === true) deleteObject(obj, fields);
+        else appendNewRow(obj, fields);
       }
+      // remove "editing" attribute here because db.run is non-blocking
+      event.currentTarget.removeAttribute("editing");
     });
+    if (event.currentTarget.hasAttribute("editing") === true) {
+      event.currentTarget.children[0].innerHTML = "edit";
+      $(event.currentTarget).addClass("form-edit");
+      $(event.currentTarget).removeClass("form-save");
+      $.each(fields, (index, field) => {
+        if (field.hasAttribute("from")) {
+          document.getElementById(field.getAttribute("from")).setAttribute("disabled", "disabled");
+        } else {
+          field.setAttribute("disabled", "disabled");
+        }
+      });
+    }
   }
+});
+
+$("main").on("click", "button.form-edit", (event) => {
+  var obj = objects[event.currentTarget.getAttribute("object")];
+  var index = event.currentTarget.hasAttribute("index") ? event.currentTarget.getAttribute("index") : "";
+  var fields = $("input." + obj.name + index);
+  event.currentTarget.setAttribute("editing", "editing");
+  event.currentTarget.children[0].innerHTML = "save";
+  $(event.currentTarget).addClass("form-save");
+  $(event.currentTarget).removeClass("form-edit");
+  $.each(fields, (index, field) => {
+    if (field.hasAttribute("from")) {
+      let $field = $("#" + field.getAttribute("from"));
+      $field.removeAttr("disabled");
+      // $field.autocomplete(autocompleteOptions);
+    } else {
+      field.removeAttribute("disabled");
+    }
+  });
 });
 
 function hasPrimaryNotForeign(obj) {
@@ -486,16 +513,19 @@ function buildForm(clazz) {
   $elems.each(function(index, elem) {
     var o = elem.getAttribute("object");
     var obj = objects[o];
-    if (typeof obj !== typeof undefined)
+    if (typeof obj !== typeof undefined) {
       $(elem).append($buildForm(obj, clazz));
-    else syslog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+    } else {
+      syslog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+    }
   });
 }
 
 function $buildForm(obj, clazz) {
   var $form = $createElement("div");
-  if (clazz === "form") $form.append($buildFormRow(obj));
-  else if (clazz === "list") {
+  if (clazz === "form") {
+    $form.append($buildFormRow(obj));
+  } else if (clazz === "list") {
     let rownum = 0;
     let query = selectAllJoins(obj);
     db.each(query, function(err, row) {
@@ -509,7 +539,6 @@ function $buildForm(obj, clazz) {
       else syslog("LOG_ERR", "$buildForm", 3, err);
     });
   }
-  // formObserver.observe($form[0], observerConf);
   return $form;
 }
 
