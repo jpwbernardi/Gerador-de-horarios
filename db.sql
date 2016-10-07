@@ -145,18 +145,18 @@ insert into subject values
 ("GEX033", "Cálculo II", 4, 3),
 
 ("GEX091", "Banco de dados II", 5, 3),
-("GEX102", "ngenharia de software I", 5, 3),
+("GEX102", "Engenharia de software I", 5, 3),
 ("GCH008", "Iniciação à prática científica", 5, 3),
 ("GEX104", "Teoria da computação", 5, 3),
 ("GEN039", "Grafos", 5, 3),
 
-("GCH029", "Historia da fronteira Sul", 6, 3),
+("GCH029", "História da fronteira Sul", 6, 3),
 ("GEX103", "Engenharia software II", 6, 3),
 ("GEX101", "Linguagens formais e autômatos", 6, 3),
 ("GCS010", "Direitos e cidadania", 6, 3),
 ("GEX036", "Cálculo numérico", 6, 3),
 
-("GCH012", "Fundamentos da crŕtica social", 7, 3),
+("GCH012", "Fundamentos da crítica social", 7, 3),
 ("GEX109", "Inteligência artificial", 7, 3),
 ("GEX108", "Construção de compiladores", 7, 3),
 ("GEX107", "Computação gráfica", 7, 3),
