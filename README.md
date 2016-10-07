@@ -26,6 +26,12 @@ $ ./node_modules/.bin/electron-rebuild
 $ npm start
 ```
 
+- Se acontecer algum erro ao executar npm install, pode ser resolvido com o seguinte comando:
+```
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+```
+Para mais informações: http://www.hostingadvice.com/how-to/install-nodejs-ubuntu-14-04/
+
 # Para gerar o executável para o cliente:
 
 Dependências:
