@@ -30,3 +30,8 @@ function buildGrid(){
     $(".materias").append($div);
   });
 }
+
+$('#calendar').fullCalendar({
+  locale: 'pt-br'
+  // put your options and callbacks here
+});
