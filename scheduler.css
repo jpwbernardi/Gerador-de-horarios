@@ -1,3 +1,7 @@
+.fc-today{
+  background-color: inherit !important;
+}
+
 .greenhover:hover {
   color: green;
 }
