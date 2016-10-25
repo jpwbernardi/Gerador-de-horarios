@@ -24,7 +24,8 @@
 //   return $form;
 // }
 buildGrid();
-function buildGrid(){
+
+function buildGrid() {
   db.each("select * from professor_subject natural join professor natural join subject", function(err, row) {
     var $div = $createTextualElement("p", {}, row.name + " - " + row.title + " - " + row.sem + "ª fase");
     $(".materias").append($div);
@@ -32,6 +33,37 @@ function buildGrid(){
 }
 
 $('#calendar').fullCalendar({
-  locale: 'pt-br'
-  // put your options and callbacks here
+  header: {
+    left: '',
+    center: '',
+    right: ''
+  },
+  locale: 'pt-br',
+  editable: true,
+  hiddenDays: [0],
+  columnFormat: 'dddd',
+  slotLabelFormat: 'k',
+  defaultView: 'agendaWeek',
+  slotDuration: '01:00:00',
+  minTime: '01:00:00',
+  maxTime: '17:00:00',
+  aspectRatio: 3,
+  allDaySlot: false,
+  slotEventOverlap: false,
+  businessHours: [ // specify an array instead
+    {
+      dow: [1, 2, 3, 4, 5, 6],
+      start: '01:00:00', // 8am
+      end: '06:00:00' // 6pm
+    }, {
+      dow: [1, 2, 3, 4, 5],
+      start: '07:00:00',
+      end: '12:00:00'
+    }, {
+      dow: [1, 2, 3, 4, 5],
+      start: '13:00:00',
+      end: '17:00:00'
+    }
+  ],
+  eventConstraint: 'businessHours'
 });
