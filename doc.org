@@ -1,0 +1,86 @@
+# -*- coding: utf-8 after-save-hook: (lambda nil (org-html-export-to-html)) -*-
+#+INFOJS_OPT: path:org-info.js view:overview toc:nil ltoc:nil
+#+OPTIONS: H:2
+#+STARTUP: showeverything
+#+LANGUAGE: pt
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu:400,700" rel="stylesheet" type="text/css">
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="https://urionlinejudge.r.worldssl.net/repository/contest.css" />
+#+HTML_HEAD_EXTRA: <style type="text/css"> p{ margin-top: 1em; margin-bottom: 1em; } </style>
+#+TITLE: Ajuda
+
+* CCR
+
+** Adicionar CCR
+
+   Para adicionar um novo CCR, deve ser acessada a tela "CCR" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser preenchidos os campos,
+onde "Código" corresponde ao código do CCR, "Componente curricular" à seu nome, "Fase" à fase cujo CCR pertence (1 a 10) e "Turno do dia" ao turno em que o CCR
+será ofertado (matutino, vespertino ou noturno). Os campos "Fase" e "Turno do dia" devem ser preenchidos clicando-se no campo e, a partir da utilização das setas
+para cima e para baixo, selecionando uma das opções apresentadas através de um enter ou de um clique com o botão direito do mouse. Por fim, o CCR deve ser salvo através
+do botão de salvar (ícone de disquete).
+
+** Visualizar CCR
+   
+   Para visualizar os CCRs cadastrados, deve ser acessada a tela "CCR" a partir do menu contido na parte superior da aplicação.
+   
+** Excluir CCR
+
+   Para excluir um CCR, deve ser acessada a tela "CCR" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizado o CCR na lista
+apresentada e clicado no botão de deletar (ícone de lixeira).
+
+* Professores
+
+** Adicionar professor
+
+   Para adicionar um novo professor, deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser preencidos
+os campos "SIAPE" e "Nome do professor" e clicado no botão de salvar (ícone de disquete).
+
+** Visualizar professores
+
+   Para visualizar os professores cadastrados, deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação.
+
+** Excluir professor
+
+   Para excluir um professor, deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizado o
+professor na lista apresentada e clicado no botão de deletar (ícone de lixeira).
+
+* Restrição
+
+** Adicionar restrição
+
+** Visualizar restrições
+
+   Para visualizar as restrições cadastradas, deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação.
+
+** Excluir restrição
+
+   Para excluir uma restrição, deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizada a
+restrição na lista apresentada e clicado no botão de deletar (ícone de lixeira).
+
+* Associação de CCR e professor
+
+** Associar CCR a professor
+
+   Para associar um CCR a um professor, deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser
+preencidos os campos "Nome do professor", "Componente curricular" e "Turno do dia". Os campos devem ser preenchidos clicando-se no campo e, a partir da utilização das
+setas para cima e para baixo, selecionando uma das opções apresentadas através de um enter ou de um clique com o botão direito do mouse. Por fim, a associação deve
+ser salva através do botão de salvar (ícone de disquete).
+
+** Visualizar associação de CCRs a professores
+
+   Para visualizar as associações cadastradas, deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação.
+
+** Excluir associação de professor e CCR
+
+   Para excluir uma associação, deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizada a
+associação na lista apresentada e clicado no botão de deletar (ícone de lixeira).
+
+* Outros
+
+** Limpar tela
+
+** Limpar grade
+
+** Fixar CCR em horário
+
+** Gerar PDF dos horários gerados
+
