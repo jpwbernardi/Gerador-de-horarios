@@ -32,21 +32,39 @@ var drake = dragula(dragulaOptions);
 buildGrid();
 
 function $buildTimeTable(tab, shift) {
-  var i = 0, times = 0;
+  var i = 0,
+    times = 0;
   var $table = $createElement("table", {
-      "id": "timetable-" + tab + "-" + shift,
+      "tab": tab,
+      "shift": shift,
       "class": "timetable our-bordered centered"
     }),
     $tsec = $createElement("thead"),
     $tr = $createElement("tr");
-  $tr.append($createElement("th", {"width": "5%"}));
-  $tr.append($createElement("th", {"width": "5%"}));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Segunda-feira"));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Terça-feira"));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Quarta-feira"));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Quinta-feira"));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Sexta-feira"));
-  $tr.append($createTextualElement("th", {"width": "15%"}, "Sábado"));
+  $tr.append($createElement("th", {
+    "width": "5%"
+  }));
+  $tr.append($createElement("th", {
+    "width": "5%"
+  }));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Segunda-feira"));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Terça-feira"));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Quarta-feira"));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Quinta-feira"));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Sexta-feira"));
+  $tr.append($createTextualElement("th", {
+    "width": "15%"
+  }, "Sábado"));
   $tsec.append($tr);
   $table.append($tsec);
   $tsec = $createElement("tbody");
@@ -54,21 +72,34 @@ function $buildTimeTable(tab, shift) {
   times = 6;
   $tr = $createElement("tr");
   if (shift === 0) {
-    $tr.append($createTextualElement("td", {"class": "vertical-text", "rowspan": 5}, "Matutino"));
+    $tr.append($createTextualElement("td", {
+      "class": "vertical-text",
+      "rowspan": 5
+    }, "Matutino"));
   } else if (shift === 1) {
-    $tr.append($createTextualElement("td", {"class": "vertical-text", "rowspan": 5}, "Vespertino"));
+    $tr.append($createTextualElement("td", {
+      "class": "vertical-text",
+      "rowspan": 5
+    }, "Vespertino"));
   } else {
     times = 5;
-    $tr.append($createTextualElement("td", {"class": "vertical-text", "rowspan": 4}, "Noturno"));
+    $tr.append($createTextualElement("td", {
+      "class": "vertical-text",
+      "rowspan": 4
+    }, "Noturno"));
   }
   for (var i = 1; i < times; i++) {
     $tr.append($createTextualElement("td", {}, i + "º"));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
-    $tr.append($createElement("td", {"class": "putable", "style": "padding: 0;"}));
+    for (var j = 0; j < 6; j++) {
+      $tr.append($createElement("td", {
+        "tab": tab,
+        "shift": shift,
+        "day": j,
+        "time": i,
+        "class": "putable",
+        "style": "padding: 0;"
+      }));
+    }
     $tsec.append($tr);
     if (i < times - 1) {
       $tr = $createElement("tr");
@@ -79,7 +110,8 @@ function $buildTimeTable(tab, shift) {
 }
 
 function buildGrid() {
-  var i = 0, j = 0;
+  var i = 0,
+    j = 0;
   var $wizard = $("#wizard");
   for (i = 1; i < 11; i++) {
     let $sec = $createElement("section");
