@@ -31,11 +31,11 @@ const dragulaOptions = {
 var drake = dragula(dragulaOptions);
 buildGrid();
 
-function $buildTimeTable(tab, shift) {
+function $buildTimeTable(semester, shift) {
   var i = 0,
     times = 0;
   var $table = $createElement("table", {
-      "tab": tab,
+      "semester": semester,
       "shift": shift,
       "class": "timetable our-bordered centered"
     }),
@@ -69,30 +69,30 @@ function $buildTimeTable(tab, shift) {
   $table.append($tsec);
   $tsec = $createElement("tbody");
 
-  times = 6;
+  times = 5;
   $tr = $createElement("tr");
-  if (shift === 0) {
+  if (shift === 1) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
       "rowspan": 5
     }, "Matutino"));
-  } else if (shift === 1) {
+  } else if (shift === 2) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
       "rowspan": 5
     }, "Vespertino"));
   } else {
-    times = 5;
+    times = 4;
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
       "rowspan": 4
     }, "Noturno"));
   }
-  for (var i = 1; i < times; i++) {
+  for (var i = 1; i <= times; i++) {
     $tr.append($createTextualElement("td", {}, i + "º"));
-    for (var j = 0; j < 6; j++) {
+    for (var j = 2; j <= 7; j++) {
       $tr.append($createElement("td", {
-        "tab": tab,
+        "semester": semester,
         "shift": shift,
         "day": j,
         "time": i,
@@ -101,7 +101,7 @@ function $buildTimeTable(tab, shift) {
       }));
     }
     $tsec.append($tr);
-    if (i < times - 1) {
+    if (i < times) {
       $tr = $createElement("tr");
     }
   }
@@ -109,49 +109,55 @@ function $buildTimeTable(tab, shift) {
   return $table;
 }
 
+function buildClasses(semester, shift) {
+  var $row = $createElement("div", {
+    "semester": semester,
+    "shift": shift,
+    "class": "row putable"
+  });
+  var query = {
+    string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?;",
+    params: [semester, shift]
+  };
+  var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
+  db.each(query.string, query.params, function(err, row) {
+    // professor.name (siape) - subject.title (code)
+    let $div = $createTextualElement("div", {
+      "class": "draggable",
+      "style": "width: 100%; height: 50%;"
+    }, row.name);
+    $(rowSelector).append($div);
+  }, function(err, nrows) {
+  });
+  return $row;
+}
+
 function buildGrid() {
   var i = 0,
     j = 0;
   var $wizard = $("#wizard");
-  for (i = 1; i < 11; i++) {
+  for (i = 1; i <= 10; i++) {
     let $sec = $createElement("section");
     $wizard.append($sec);
     $wizard.append($createTextualElement("h1", undefined, i + "ª\nfase", undefined));
-
-    let $row = $createElement("div", {
-      "class": "row"
-    });
-    let $col = undefined;
-
-    ////////////////////////////
-
-    for (j = 0; j < 3; j++) {
-      $col = $createElement("div", {
+    for (j = 1; j <= 3; j++) {
+      let $row = $createElement("div", {
+        "class": "row"
+      });
+      let $col = $createElement("div", {
         "class": "col s12"
       });
       $col.append($buildTimeTable(i, j));
       $row.append($col);
+
+      $col = $createElement("div", {
+        "class": "col s12"
+      });
+      $col.append(buildClasses(i, j));
+      $row.append($col);
+
+      $sec.append($row);
     }
-
-    ////////////////////////////
-
-    $row.append($col);
-
-    // $col = $createElement("div", {
-    //   "class": "col s2"
-    // });
-    // let $title = $createTextualElement("h5", undefined, i + "ª fase", undefined);
-
-    // $col.append($title);
-    $row.append($col);
-
-    $sec.append($row);
   }
   $wizard.steps(stepsSettings);
 }
-
-
-$(".clear").on("click", function() {
-  // <a class="waves-effect waves-light btn clear">Limpar</a>
-  $( this ).parent().find( "tbody tr td .draggable" ).remove();
-});
