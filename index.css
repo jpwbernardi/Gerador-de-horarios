@@ -9,3 +9,14 @@ table td {
 table tbody td.borderless {
   border: none;
 }
+
+div#wizard > div.content {
+  min-height: 100px;
+}
+
+div#wizard > div.content > section {
+  width: 100%;
+  height: auto;
+  padding: 15px;
+  position: relative;
+}
