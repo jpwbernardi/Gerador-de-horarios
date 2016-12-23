@@ -133,7 +133,7 @@ function Semester(sem) {
 Semester.table = "semester";
 Semester.fields = ["sem"];
 Semester.fieldRequired = [true];
-Semester.titles = ["Semestre"];
+Semester.titles = ["Fase"];
 Semester.fieldTypes = [FIELD_TYPE_NUMBER];
 Semester.col = {
   "s": [12],

@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--Import Google Icon Font-->
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!--Import materialize.css-->
-  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection"/>
-  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
   <link type="text/css" rel='stylesheet' href='node_modules/jquery-steps/demo/css/jquery.steps.css' media="screen,projection" />
-  <link type="text/css" rel='stylesheet' href='node_modules/fullcalendar/dist/fullcalendar.css' media="screen,projection" />
-
+  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="node_modules/dragula/dist/dragula.min.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="index.css" media="screen,projection" />
   <!--Let browser know website is optimized for mobile-->
-  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
 
   <title>Gerador de horários</title>
 </head>
@@ -19,38 +20,162 @@
   <div class="sch-menu"></div>
   <main>
     <div class="container">
-      <div class="row">
-        <div class="materias">
-          <div id='calendar'>
+      <div id="wizard">
+        <div class="row">
+          <div class="col s12">
+            
+          </div>
+          <div class="col s12">
+            <div class="container">
+              <div class="row putable">
+                <div class="col s2 draggable red">Mat1</div>
+                <div class="col s2 draggable orange">Mat2</div>
+                <div class="col s2 draggable cyan">Mat3</div>
+                <div class="col s2 draggable teal">Mat4</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div id="wizard">
-          <h1>First Step</h1>
-          <div>First Content</div>
 
-          <h1>Second Step</h1>
-          <div>Second Content</div>
+        <div class="row">
+          <div class="col s12">
+            <table class="our-bordered centered">
+              <thead>
+                <tr>
+                  <th width="5%"></th>
+                  <th width="5%"></th>
+                  <th width="15%">Segunda-feira</th>
+                  <th width="15%">Terça-feira</th>
+                  <th width="15%">Quarta-feira</th>
+                  <th width="15%">Quinta-feira</th>
+                  <th width="15%">Sexta-feira</th>
+                  <th width="15%">Sábado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td width="5%" class="vertical-text" rowspan=5>Vespertino</td>
+                  <td width="5%">1º</td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                </tr>
+                <tr>
+                  <td>2º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>3º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>4º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>5º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col s12">
+            <table class="our-bordered centered">
+              <thead>
+                <tr>
+                  <th width="5%"></th>
+                  <th width="5%"></th>
+                  <th width="15%">Segunda-feira</th>
+                  <th width="15%">Terça-feira</th>
+                  <th width="15%">Quarta-feira</th>
+                  <th width="15%">Quinta-feira</th>
+                  <th width="15%">Sexta-feira</th>
+                  <th width="15%">Sábado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td width="5%" class="vertical-text" rowspan=5>Noturno</td>
+                  <td width="5%">1º</td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                  <td width="15%"></td>
+                </tr>
+                <tr>
+                  <td>2º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>3º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>4º</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
   <script>
-  // You can also require other files to run in this process
-  require('./renderer.js');
+    // You can also require other files to run in this process
+    require('./renderer.js');
   </script>
-  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+  <!-- <script type="text/javascript" src="jquery/jquery-ui.min.js"></script> -->
   <script type="text/javascript" src="node_modules/jquery-steps/build/jquery.steps.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-  <script type="text/javascript" src="node_modules/moment/min/moment-with-locales.min.js"></script>
-  <script type="text/javascript" src="node_modules/fullcalendar/dist/fullcalendar.js"></script>
+  <script type="text/javascript" src="node_modules/dragula/dist/dragula.min.js"></script>
   <script type="text/javascript" async src="scheduler.js"></script>
   <script type="text/javascript" async src="backtrack.js"></script>
   <script type="text/javascript" async src="index.js"></script>
-  <script>
-    $("#wizard").steps();
-  </script>
 </body>
+
 </html>

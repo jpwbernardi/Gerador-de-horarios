@@ -22,11 +22,10 @@
   },
   "homepage": "https://github.com/jpwbernardi/Gerador-de-horarios",
   "dependencies": {
-    "fullcalendar": "^3.0.1",
+    "dragula": "^3.7.2",
     "jquery": "^3.1.0",
     "jquery-steps": "^1.1.0",
     "materialize-css": "^0.97.7",
-    "moment": "^2.15.2",
     "sqlite3": "^3.1.4"
   },
   "devDependencies": {

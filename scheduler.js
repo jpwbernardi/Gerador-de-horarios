@@ -74,10 +74,20 @@ var autocompleteOptions = {
   }
 };
 
+setTimeout(mainInit, 0);
 buildMenu();
 $(".button-collapse").sideNav();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
+
+function mainInit() {
+  let vt = document.getElementsByClassName("vertical-text");
+  for (let i = 0; i < vt.length; i++) {
+    let text = vt[i].innerText;
+    text = text.split("").join("\n");
+    vt[i].innerText = text;
+  }
+}
 
 $("main").on("change", ".autocomplete", (event) => {
   if (event.currentTarget.value === "") {
@@ -564,15 +574,15 @@ function $buildListRow(obj, tuple, rownum) {
   var $col = $createElement("div", {
     "class": "input-field col s4 m2 l2"
   });
-  $button = $createTextualElement("button", {
-    "class": "btn btn-short waves-effect waves-light form-edit",
-    "object": obj.name,
-    "index": rownum,
-    "title": "Editar"
-  }, $createTextualElement("i", {
-    "class": "material-icons"
-  }, "edit"));
-  $col.append($button);
+  // $button = $createTextualElement("button", {
+  //   "class": "btn btn-short waves-effect waves-light form-edit",
+  //   "object": obj.name,
+  //   "index": rownum,
+  //   "title": "Editar"
+  // }, $createTextualElement("i", {
+  //   "class": "material-icons"
+  // }, "edit"));
+  // $col.append($button);
   $button = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-delete",
     "object": obj.name,

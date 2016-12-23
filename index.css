@@ -1,0 +1,11 @@
+table {
+  border-collapse: collapse;
+}
+
+table td {
+  border: 1px solid #e0e0e0;
+}
+
+table tbody td.borderless {
+  border: none;
+}

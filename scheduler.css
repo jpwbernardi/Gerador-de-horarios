@@ -1,4 +1,4 @@
-.fc-today{
+.fc-today {
   background-color: inherit !important;
 }
 
@@ -27,7 +27,89 @@
   padding: 0 0.65rem;
 }
 
+
+/* Jquery Steps */
+
+.wizard>.steps>ul>li {
+  width: 20%;
+}
+
+.wizard>.steps>ul[role="tablist"]>li[role="tab"] {
+  border-radius: 100%;
+}
+
+.fc-today {
+  background-color: inherit !important;
+}
+
+.greenhover:hover {
+  color: green;
+}
+
+.redhover:hover {
+  color: red;
+}
+
+.marbot-20px {
+  margin-bottom: 20px;
+}
+
+.combo-caret {
+  cursor: pointer;
+}
+
+.btn {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.btn-short {
+  padding: 0 0.65rem;
+}
+
+
+/* Jquery Steps */
+
+.wizard>.steps>ul>li {
+  width: 7%;
+  margin-right: 2%;
+  margin-left: 2%;
+}
+
+
+/* itens das abinhas */
+
+.wizard>.steps a, .wizard>.steps a:hover, .wizard>.steps a:active {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  background: #80cbc4;
+  color: #fff;
+  text-align: center;
+}
+
+.wizard>.steps .current a, .wizard>.steps .current a:hover, .wizard>.steps .current a:active {
+  background: #00695c;
+  color: #fff;
+  cursor: default;
+}
+
+.wizard>.steps .done a, .wizard>.steps .done a:hover, .wizard>.steps .done a:active {
+  background: #80cbc4;
+  color: #fff;
+}
+
+.wizard>.content {
+  background: white;
+}
+
+.wizard>.steps .number {
+  display: none;
+}
+
+
 /* jQuery Autocomplete */
+
 .ui-helper-hidden-accessible {
   display: none;
 }
@@ -64,7 +146,9 @@
   background-color: #eee;
 }
 
+
 /* Materialize container overwrite */
+
 .container {
   width: 95% !important;
 }
@@ -73,10 +157,39 @@
   .container {
     width: 90% !important;
   }
+  .wizard>.steps>ul>li {
+    width: 8.6%;
+    margin-left: 0.5%;
+    margin-right: 0.5%;
+  }
 }
 
 @media only screen and (min-width: 993px) {
-  .container {
+  100% .container {
     width: 85% !important;
   }
+  .wizard>.steps>ul>li {
+    width: 7%;
+    margin-left: 1.5%;
+    margin-right: 1.5%;
+  }
+}
+
+
+/* FullCalendar */
+
+.fc-axis.fc-time.fc-widget-content {
+  display: none;
+}
+
+.fc-toolbar {
+  margin: 0px 0px 0px 0px !important;
+}
+
+section[role="tabpanel"].body {
+  padding: 2.5% 0px 0px 0px !important;
+}
+
+.caltest {
+  height: 100% !important;
 }
