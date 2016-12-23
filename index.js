@@ -149,3 +149,9 @@ function buildGrid() {
   }
   $wizard.steps(stepsSettings);
 }
+
+
+$(".clear").on("click", function() {
+  // <a class="waves-effect waves-light btn clear">Limpar</a>
+  $( this ).parent().find( "tbody tr td .draggable" ).remove();
+});
