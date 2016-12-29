@@ -10,6 +10,11 @@ table tbody td.borderless {
   border: none;
 }
 
+table tbody tr td.putable {
+  padding: 0;
+  height: 100px;
+}
+
 div#wizard > div.content {
   min-height: 100px;
 }
@@ -22,7 +27,15 @@ div#wizard > div.content > section {
 }
 
 .draggable {
-  color: white;
+  margin: 0;
+  height: 100px;
+  max-width: 15%;
+  max-height: 100px;
+  overflow: hidden;
+  text-align: left;
+  border: none !important;
+  border-radius: 2px !important;
+  line-height: inherit !important;
 }
 
 .draggable:hover {

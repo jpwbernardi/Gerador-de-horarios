@@ -36,17 +36,72 @@ const dragulaSourceOptions = {
   ignoreInputTextSelection: false // if true, allows users to select input text
 }
 var drake = dragula(dragulaSourceOptions);
-drake.on('drop', function(el, target, source, sibling) {
+drake.on("over", function(el, container, source) {
   var $el = $(el);
-  if ($el.children('.delete-class').children().length === 0) {
-    // <i class='close material-icons'>close</i>
-    $el.children('.delete-class').append($createTextualElement("i", {"class": "close material-icons"}, "close"));
+  // var sourceSiblings = $(source).children();
+  var $newSiblings = $($(container).children());
+  $el.css("max-width", "100%");
+  // check sourceSiblings first because el might be included
+  // in that array and would screw up el's new size
+  // if(!source.classList.contains("dragula-source")) {
+  //   // if the container el is coming from is not .dragula-source
+  //   // and has another class, restore the size of that class
+  //   if (sourceSiblings.length > 0) {
+  //     $(sourceSiblings).css("max-height", "100%");
+  //   }
+  // }
+  if (!container.classList.contains("dragula-source")) {
+    // if the container el is going to is not .dragula-source
+    // and already has a class, shrink both classes sizes
+    if ($newSiblings.length > 0) {
+      $el.css("max-height", "50%");
+      $newSiblings.css("max-height", "50%");
+    } else {
+      // else, if it doesn't already have a class, restore
+      // this el size because it might have been shrunk
+      $el.css("max-height", "100%");
+    }
   }
 });
-drake.on('over', function(el, container, source) {
+drake.on("drop", function(el, target, source, sibling) {
   var $el = $(el);
-  $el.css("width", "100%");
-})
+  // add close button just once
+  if ($el.children(".delete-class").children().length === 0) {
+    // <i class="close material-icons">close</i>
+    $el.children(".delete-class").append($createTextualElement("i", {"class": "close material-icons"}, "close"));
+  }
+});
+drake.on("out", function(el, container, source) {
+  var $el = $(el);
+  var $siblings = $($(container).children());
+  if (source.classList.contains("dragula-source")) {
+    // hack to occupy whole td
+    $el.css("height", "100%");
+    $el.css("display", "block");
+  }
+
+  if ($el.hasClass("gu-transit") && $siblings.length > 1) {
+    // if it's just passing by and went out of a container
+    // that has a class, restore its size
+    $siblings.css("max-height", "100%");
+  } else {
+    // if it was dropped and there was already some
+    // class there, shrink. Else, restore size
+    if ($siblings.length > 1) {
+      $siblings.css("max-height", "50%");
+    } else {
+      $siblings.css("max-height", "100%");
+    }
+  }
+});
+drake.on("cancel", function(el, container, source) {
+  var $siblings = $($(container).children());
+  if ($siblings.length > 1) {
+    $siblings.css("max-height", "50%");
+  } else {
+    $siblings.css("max-height", "100%");
+  }
+});
 buildGrid();
 
 function $buildTimeTable(semester, shift) {
@@ -113,8 +168,7 @@ function $buildTimeTable(semester, shift) {
         "shift": shift,
         "day": j,
         "time": i,
-        "class": "putable",
-        "style": "padding: 0;"
+        "class": "putable"
       }));
     }
     $tsec.append($tr);
@@ -159,6 +213,7 @@ function buildClasses(semester, shift) {
   var $row = $createElement("div", {
     "semester": semester,
     "shift": shift,
+    "style": "margin-top: 10px;",
     "class": "row putable dragula-source"
   });
   var query = {
@@ -171,9 +226,8 @@ function buildClasses(semester, shift) {
     let variation = row.siape % (colorVariations.length + 1);
     let $div = $createTextualElement("div", {
       "title": row.name + "\n" + row.title + " (" + row.code + ")",
-      "class": "chip draggable " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation]),
-      "style": "width: 15%; height: 100%; margin: 0; text-align: left; border-radius: 0 !important; line-height: inherit !important;"
-    }, "<span class='delete-class'></span><span style='overflow: hidden'>" + naming(row.name) + " - " + row.title + "</span>");
+      "class": "chip draggable hoverable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
+    }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
     $(rowSelector).append($div);
   }, function(err, nrows) {
   });
