@@ -167,9 +167,11 @@ function buildClasses(semester, shift) {
   };
   var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
   db.each(query.string, query.params, function(err, row) {
+    let color = row.siape % colors.length;
+    let variation = row.siape % (colorVariations.length + 1);
     let $div = $createTextualElement("div", {
       "title": row.name + "\n" + row.title + " (" + row.code + ")",
-      "class": "chip draggable",
+      "class": "chip draggable " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation]),
       "style": "width: 15%; height: 100%; margin: 0; text-align: left; border-radius: 0 !important; line-height: inherit !important;"
     }, "<span class='delete-class'></span><span style='overflow: hidden'>" + naming(row.name) + " - " + row.title + "</span>");
     $(rowSelector).append($div);

@@ -21,6 +21,10 @@ div#wizard > div.content > section {
   position: relative;
 }
 
+.draggable {
+  color: white;
+}
+
 .draggable:hover {
   cursor: grab;
   cursor: -webkit-grab;

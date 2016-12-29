@@ -6,6 +6,8 @@
 
 const db = nodeRequire("electron").remote.getGlobal('db');
 const objects = nodeRequire("./objects");
+const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
+const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
 var autocompleteOptions = {
   minLength: 0,
   // autoFocus: true, // automatically focus the first item in result list
