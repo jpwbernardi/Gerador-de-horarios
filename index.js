@@ -80,18 +80,14 @@ drake.on("out", function(el, container, source) {
     $el.css("display", "block");
   }
 
-  if ($el.hasClass("gu-transit") && $siblings.length > 1) {
-    // if it's just passing by and went out of a container
-    // that has a class, restore its size
-    $siblings.css("max-height", "100%");
+  if (!$el.hasClass("gu-transit") && $siblings.length > 1) {
+    // if it was dropped and there was
+    // already some class there, shrink
+    $siblings.css("max-height", "50%");
   } else {
-    // if it was dropped and there was already some
-    // class there, shrink. Else, restore size
-    if ($siblings.length > 1) {
-      $siblings.css("max-height", "50%");
-    } else {
-      $siblings.css("max-height", "100%");
-    }
+    // else, or if it's just passing by and went out
+    // of a container that has a class, restore size
+    $siblings.css("max-height", "100%");
   }
 });
 drake.on("cancel", function(el, container, source) {
