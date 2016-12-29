@@ -137,7 +137,7 @@ function deleteRow(event) {
     Materialize.toast("Item deletado com sucesso!", 2000);
     syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
   } else {
-    Materialize.toast(error, 3000);
+    Materialize.toast("Erro na deleção", 3000);
     syslog("LOG_ERR", ".form-delete click", 2, err);
   }
 }
@@ -165,7 +165,7 @@ $("main").on("click", "button.form-save", (event) => {
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
         syslog("LOG_ERR", ".form-save click", 3, err);
-        Materialize.toast(err, 3000);
+        Materialize.toast("Entrada já cadastrada!", 3000);
       } else {
         Materialize.toast("Registro salvo com sucesso!", 2000);
         // yeah, editing is insert new + delete old...
