@@ -1,3 +1,4 @@
+const nameLen = 16;
 const stepsSettings = {
   headerTag: "h1",
   bodyTag: "section",
@@ -5,7 +6,7 @@ const stepsSettings = {
   enableKeyNavigation: true,
   enablePagination: false
 };
-const dragulaOptions = {
+const dragulaSourceOptions = {
   isContainer: function(el) {
     return el.classList.contains("putable");
     // return false; // only elements in drake.containers will be taken into account
@@ -14,21 +15,38 @@ const dragulaOptions = {
     return el.classList.contains("draggable");
     // return true; // elements are always draggable by default
   },
-  accepts: function(el, target, source, sibling) {
-    return true; // elements can be dropped in any of the `containers` by default
-  },
+  // accepts: function(el, target, source, sibling) {
+  //   return true; // elements can be dropped in any of the `containers` by default
+  // },
   invalid: function(el, handle) {
     return false; // don't prevent any drags from initiating by default
   },
+  copy: function (el, source) {
+    return source.classList.contains("dragula-source");
+  },
+  accepts: function (el, target) {
+    return !target.classList.contains("dragula-source");
+  },
   direction: 'vertical', // Y axis is considered when determining where an element would be dropped
-  copy: false, // elements are moved by default, not copied
+  // copy: true, // elements are moved by default, not copied
   copySortSource: false, // elements in copy-source containers can be reordered
-  revertOnSpill: false, // spilling will put the element back where it was dragged from, if this is true
-  removeOnSpill: true, // spilling will `.remove` the element, if this is true
+  revertOnSpill: true, // spilling will put the element back where it was dragged from, if this is true
+  removeOnSpill: false, // spilling will `.remove` the element, if this is true
   mirrorContainer: document.body, // set the element that gets mirror elements appended
-  ignoreInputTextSelection: true // allows users to select input text, see details below
+  ignoreInputTextSelection: false // if true, allows users to select input text
 }
-var drake = dragula(dragulaOptions);
+var drake = dragula(dragulaSourceOptions);
+drake.on('drop', function(el, target, source, sibling) {
+  var $el = $(el);
+  if ($el.children('.delete-class').children().length === 0) {
+    // <i class='close material-icons'>close</i>
+    $el.children('.delete-class').append($createTextualElement("i", {"class": "close material-icons"}, "close"));
+  }
+});
+drake.on('over', function(el, container, source) {
+  var $el = $(el);
+  $el.css("width", "100%");
+})
 buildGrid();
 
 function $buildTimeTable(semester, shift) {
@@ -68,7 +86,6 @@ function $buildTimeTable(semester, shift) {
   $tsec.append($tr);
   $table.append($tsec);
   $tsec = $createElement("tbody");
-
   times = 5;
   $tr = $createElement("tr");
   if (shift === 1) {
@@ -109,11 +126,40 @@ function $buildTimeTable(semester, shift) {
   return $table;
 }
 
+function firstName(fullname) {
+  var sep = fullname.indexOf(" ");
+  if (sep !== -1) return fullname.substring(0, sep);
+  return fullname;
+}
+
+function lastName(fullname) {
+  var sep = fullname.lastIndexOf(" ");
+  if (sep !== -1) return fullname.substring(sep + 1);
+  return null;
+}
+
+function naming(fullname) {
+  if (fullname.length <= nameLen) return fullname;
+
+  var firstname = firstName(fullname);
+  if (firstname.length === nameLen || firstname.length + 1 === nameLen) // + 1 por causa do espaço com o sobrenome
+    return firstname;
+  if (firstname.length > nameLen) return firstname.substring(0, nameLen - 3) + "...";
+
+  var lastname = lastName(fullname);
+  if (lastname !== null) {
+    var name = firstname + " " + lastname;
+    if (name.length <= nameLen) return name;
+    return name.substring(0, nameLen - 3) + "...";
+  }
+  return firstname;
+}
+
 function buildClasses(semester, shift) {
   var $row = $createElement("div", {
     "semester": semester,
     "shift": shift,
-    "class": "row putable"
+    "class": "row putable dragula-source"
   });
   var query = {
     string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?;",
@@ -121,11 +167,11 @@ function buildClasses(semester, shift) {
   };
   var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
   db.each(query.string, query.params, function(err, row) {
-    // professor.name (siape) - subject.title (code)
     let $div = $createTextualElement("div", {
-      "class": "draggable",
-      "style": "width: 100%; height: 50%;"
-    }, row.name);
+      "title": row.name + "\n" + row.title + " (" + row.code + ")",
+      "class": "chip draggable",
+      "style": "width: 15%; height: 100%; margin: 0; text-align: left; border-radius: 0 !important; line-height: inherit !important;"
+    }, "<span class='delete-class'></span><span style='overflow: hidden'>" + naming(row.name) + " - " + row.title + "</span>");
     $(rowSelector).append($div);
   }, function(err, nrows) {
   });

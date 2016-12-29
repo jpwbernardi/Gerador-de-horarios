@@ -20,3 +20,13 @@ div#wizard > div.content > section {
   padding: 15px;
   position: relative;
 }
+
+.draggable:hover {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+.draggable:active, .gu-mirror {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}
