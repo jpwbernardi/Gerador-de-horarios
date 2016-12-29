@@ -510,13 +510,19 @@ function buttons($ul) {
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "ccr.html"
-  }, "CCR"));
+  }, "CCRs"));
   $ul.append($item);
 
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "assoc.html"
   }, "Associações"));
+  $ul.append($item);
+
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "help.html"
+  }, "Ajuda"));
   $ul.append($item);
 }
 
