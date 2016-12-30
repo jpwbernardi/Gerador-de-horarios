@@ -4,6 +4,12 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
 // https://github.com/mapbox/node-sqlite3/wiki/API
 
+
+$(document).ready(function(){
+  // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+  $(".modal").modal();
+});
+
 const db = nodeRequire("electron").remote.getGlobal('db');
 const objects = nodeRequire("./objects");
 const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
@@ -101,9 +107,10 @@ $("main").on("change", ".autocomplete", (event) => {
 });
 
 $("main").on("click", "button.form-delete", (event) => {
-  $("div#modal-delete.modal").openModal();
-  $("a#modal-delete-confirm").off("click.delete");
-  $("a#modal-delete-confirm").on("click.delete", function() {
+  $("#modal-delete").modal("open");
+  // we need the original event
+  $("#modal-delete-confirm").off("click.delete");
+  $("#modal-delete-confirm").on("click.delete", () => {
     deleteRow(event);
   });
 });
@@ -134,10 +141,10 @@ function deleteRow(event) {
   var error = deleteObject(obj, fields);
   if (error === null) {
     $row.remove();
-    Materialize.toast("Item deletado com sucesso!", 2000);
+    Materialize.toast("Excluído com sucesso!", 2000);
     syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
   } else {
-    Materialize.toast("Erro na deleção", 3000);
+    Materialize.toast("Erro na exclusão!", 3000);
     syslog("LOG_ERR", ".form-delete click", 2, err);
   }
 }
@@ -165,9 +172,9 @@ $("main").on("click", "button.form-save", (event) => {
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
         syslog("LOG_ERR", ".form-save click", 3, err);
-        Materialize.toast("Entrada já cadastrada!", 3000);
+        Materialize.toast("Este registro já está cadastrado!", 3000);
       } else {
-        Materialize.toast("Registro salvo com sucesso!", 2000);
+        Materialize.toast("Salvo com sucesso!", 2000);
         // yeah, editing is insert new + delete old...
         if (event.currentTarget.hasAttribute("editing") === true) deleteObject(obj, fields);
         else appendNewRow(obj, fields);
@@ -368,7 +375,9 @@ function $createElement(tag, attributes, events) {
   }
   if (typeof events != typeof undefined) {
     $.each(events, function(key, value) {
-      $element[0].addEventListener(key, value);
+      console.log(key, value);
+      $element.on(key, value);
+      // $element[0].addEventListener(key, value);
     });
   }
   return $element;
@@ -482,7 +491,7 @@ function buildMenu() {
   $wrapper.append($ul);
 
   var $nav = $createElement("nav", {
-    "class": "marbot-20px teal darken-3"
+    "class": "marbot-25px teal darken-3"
   });
   $nav.append($wrapper);
   $(".sch-menu").append($nav);

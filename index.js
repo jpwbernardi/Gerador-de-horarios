@@ -21,10 +21,10 @@ const dragulaSourceOptions = {
   invalid: function(el, handle) {
     return false; // don't prevent any drags from initiating by default
   },
-  copy: function (el, source) {
+  copy: function(el, source) {
     return source.classList.contains("dragula-source");
   },
-  accepts: function (el, target) {
+  accepts: function(el, target) {
     return !target.classList.contains("dragula-source");
   },
   direction: 'vertical', // Y axis is considered when determining where an element would be dropped
@@ -68,7 +68,9 @@ drake.on("drop", function(el, target, source, sibling) {
   // add close button just once
   if ($el.children(".delete-class").children().length === 0) {
     // <i class="close material-icons">close</i>
-    $el.children(".delete-class").append($createTextualElement("i", {"class": "close material-icons"}, "close"));
+    $el.children(".delete-class").append($createTextualElement("i", {
+      "class": "close material-icons"
+    }, "close"));
   }
 });
 drake.on("out", function(el, container, source) {
@@ -100,6 +102,22 @@ drake.on("cancel", function(el, container, source) {
 });
 buildGrid();
 
+$("main").on("click", ".clear-single", (event) => {
+  var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
+  $(selector).empty();
+});
+
+$("main").on("click", ".clear-all", (event) => {
+  $("#modal-clear-all-semester").html(event.currentTarget.getAttribute("semester"));
+  $("#modal-clear-all").modal("open");
+  // precisamos do evento original
+  $("#modal-clear-all-confirm").off("click.clear-all");
+  $("#modal-clear-all-confirm").on("click", () => {
+    var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "]";
+    $(selector).empty();
+  });
+});
+
 function $buildTimeTable(semester, shift) {
   var i = 0,
     times = 0;
@@ -110,12 +128,15 @@ function $buildTimeTable(semester, shift) {
     }),
     $tsec = $createElement("thead"),
     $tr = $createElement("tr");
-  $tr.append($createElement("th", {
-    "width": "5%"
-  }));
-  $tr.append($createElement("th", {
-    "width": "5%"
-  }));
+  $tr.append($createTextualElement("th", {
+    "width": "10%",
+    "colspan": "2"
+  }, $createTextualElement("button", {
+    "semester": semester,
+    "shift": shift,
+    "title": "Limpar turno " + shiftText(shift) + " da " + semester + "ª fase",
+    "class": "btn waves-effect waves-light teal darken-3 light clear-single"
+  }, "LIMPAR")));
   $tr.append($createTextualElement("th", {
     "width": "15%"
   }, "Segunda-feira"));
@@ -139,6 +160,8 @@ function $buildTimeTable(semester, shift) {
   $tsec = $createElement("tbody");
   times = 5;
   $tr = $createElement("tr");
+  // "não dá" pra usar shiftText aqui porque
+  // tem os rowspan e o times no noturno...
   if (shift === 1) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
@@ -222,12 +245,23 @@ function buildClasses(semester, shift) {
     let variation = row.siape % (colorVariations.length + 1);
     let $div = $createTextualElement("div", {
       "title": row.name + "\n" + row.title + " (" + row.code + ")",
-      "class": "chip draggable hoverable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
+      "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
     }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
     $(rowSelector).append($div);
-  }, function(err, nrows) {
-  });
+  }, function(err, nrows) {});
   return $row;
+}
+
+function shiftText(number) {
+  switch (number) {
+    case 1:
+      return "matutino";
+    case 2:
+      return "vespertino";
+    case 3:
+      return "noturno";
+  }
+  return "";
 }
 
 function buildGrid() {
@@ -237,12 +271,26 @@ function buildGrid() {
   for (i = 1; i <= 10; i++) {
     let $sec = $createElement("section");
     $wizard.append($sec);
-    $wizard.append($createTextualElement("h1", undefined, i + "ª\nfase", undefined));
+    $wizard.append($createTextualElement("h1", undefined, i + "ª\nfase"));
+    let $row = $createElement("div", {
+      "class": "row"
+    });
+    let $col = $createElement("div", {
+      "class": "col s12"
+    });
+    let $clearAll = $createTextualElement("button", {
+      "semester": i,
+      "title": "Remover todos os horários da " + i + "ª fase",
+      "class": "btn waves-effect waves-light teal darken-3 clear-all right"
+    }, "Limpar " + i + "ª fase");
+    $col.append($clearAll);
+    $row.append($col);
+    $sec.append($row);
     for (j = 1; j <= 3; j++) {
-      let $row = $createElement("div", {
+      $row = $createElement("div", {
         "class": "row"
       });
-      let $col = $createElement("div", {
+      $col = $createElement("div", {
         "class": "col s12"
       });
       $col.append($buildTimeTable(i, j));

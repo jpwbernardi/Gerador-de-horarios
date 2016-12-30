@@ -1,3 +1,7 @@
+.clear-all:hover {
+  cursor: pointer;
+}
+
 table {
   border-collapse: collapse;
 }
@@ -13,17 +17,6 @@ table tbody td.borderless {
 table tbody tr td.putable {
   padding: 0;
   height: 100px;
-}
-
-div#wizard > div.content {
-  min-height: 100px;
-}
-
-div#wizard > div.content > section {
-  width: 100%;
-  height: auto;
-  padding: 15px;
-  position: relative;
 }
 
 .draggable {
@@ -46,4 +39,49 @@ div#wizard > div.content > section {
 .draggable:active, .gu-mirror {
   cursor: grabbing;
   cursor: -webkit-grabbing;
+}
+
+/* Jquery Steps */
+
+.wizard > .steps > ul > li {
+  width: 9% !important;
+  height: 9% !important;
+  margin: 0.5% !important;
+}
+
+.wizard > .steps a, .wizard > .steps a:hover, .wizard > .steps a:active {
+  color: #fff;
+  border-radius: 2px;
+  text-align: center;
+  background: #80cbc4;
+  margin: 0.5% !important;
+}
+
+.wizard > .steps .current a, .wizard > .steps .current a:hover, .wizard > .steps .current a:active {
+  color: #fff;
+  cursor: default;
+  background: #00695c;
+  margin: 0.5% !important;
+}
+
+div#wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active {
+  color: #fff;
+  background: #80cbc4;
+  margin: 0.5% !important;
+}
+
+div#wizard > .steps .number {
+  display: none;
+}
+
+div#wizard > div.content {
+  min-height: 100px;
+  background: white;
+}
+
+div#wizard > div.content > section {
+  width: 100%;
+  height: auto;
+  padding: 15px;
+  position: relative;
 }
