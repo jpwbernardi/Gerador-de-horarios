@@ -37,21 +37,31 @@ Projeto: Gerador automático dos horários do semestre
 - Adicionar o Python 2 à [PATH](https://www.java.com/en/download/help/path.xml) - **apenas para Windows**
   + Foi instalado na pasta `C:\Users\<your_user>\.windows-build-tools\python27` com o comando acima
 
+- Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh` (magicamente funciona no Windows também)
+
 - Após clonar o repositório e estando na pasta raiz do projeto, executar:
 
   ```
   npm install
-  ./node_modules/.bin/electron-rebuild
-  npm start
   ```
 
-  Se no Windows ou ocorrer algum erro com a versão do SQLite ao executar o `electron-rebuild`, pode-se tentar o seguinte comando:
+  E então, para Linux:
+
+  ```
+  ./node_modules/.bin/electron-rebuild
+  ```
+
+  Para Windows:
 
   ```
   ./node_modules/.bin/electron-rebuild -w sqlite3 -p
   ```
 
-- Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh` (magicamente funciona no Windows também)
+  Finalmente, para executar o projeto:
+
+  ```
+  npm start
+  ```
 
 # Para gerar o executável para o cliente (testado apenas em Linux):
 
