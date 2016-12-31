@@ -21,12 +21,17 @@ Projeto: Gerador automático dos horários do semestre
 - Instalar o Node.js/npm:
   + Via [package manager](https://nodejs.org/en/download/package-manager/#windows) (recomendado)
   + A partir do instalador do [site](https://nodejs.org/en/download/)
+- Algumas versões do Ubuntu e derivados têm problemas com os nomes dos executáveis. Caso o `npm install` falhe, pode-se tentar a seguinte solução:
+  ```
+  sudo ln -s /usr/bin/nodejs /usr/bin/node
+  ```
 - Executar como administrador - **apenas para Windows** ([fonte](http://stackoverflow.com/questions/21658832/npm-install-error-msb3428-could-not-load-the-visual-c-component-vcbuild-ex#answer-39235952)):
 
   ```
   npm install --global --production windows-build-tools
   ```
-
+- Adicionar o Python 2 à PATH - **apenas para Windows**
+  + Foi instalado na pasta `C:\Users\<your_user>\.windows-build-tools\python27` com o comando acima
 - Após clonar o repositório e estando na pasta raiz do projeto:
 
   ```
@@ -34,6 +39,12 @@ Projeto: Gerador automático dos horários do semestre
   ./node_modules/.bin/electron-rebuild
   npm start
   ```
+  Se no Windows ou ocorrer algum erro com a versão do SQLite ao executar o `electron-rebuild`, pode-se tentar o seguinte comando:
+  ```
+  ./node_modules/.bin/electron-rebuild -w sqlite3 -p
+  ```
+
+- Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh` (magicamente funciona no Windows também)
 
 # Para gerar o executável para o cliente (testado apenas em Linux):
 
