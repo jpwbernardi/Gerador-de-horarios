@@ -34,7 +34,7 @@ Projeto: Gerador automático dos horários do semestre
   npm install --global --production windows-build-tools
   ```
 
-- Adicionar o Python 2 à PATH - **apenas para Windows**
+- Adicionar o Python 2 à [PATH](https://www.java.com/en/download/help/path.xml) - **apenas para Windows**
   + Foi instalado na pasta `C:\Users\<your_user>\.windows-build-tools\python27` com o comando acima
 
 - Após clonar o repositório e estando na pasta raiz do projeto, executar:
