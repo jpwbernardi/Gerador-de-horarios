@@ -57,7 +57,7 @@ Projeto: Gerador automático dos horários do semestre
   ./node_modules/.bin/electron-rebuild -w sqlite3 -p
   ```
 
-  Finalmente, para executar o projeto:
+- Finalmente, para executar o projeto:
 
   ```
   npm start
