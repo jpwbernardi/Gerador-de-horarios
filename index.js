@@ -38,39 +38,28 @@ const dragulaSourceOptions = {
 var drake = dragula(dragulaSourceOptions);
 drake.on("over", function(el, container, source) {
   var $el = $(el);
-  // var sourceSiblings = $(source).children();
   var $newSiblings = $($(container).children());
   $el.css("max-width", "100%");
-  // check sourceSiblings first because el might be included
-  // in that array and would screw up el's new size
-  // if(!source.classList.contains("dragula-source")) {
-  //   // if the container el is coming from is not .dragula-source
-  //   // and has another class, restore the size of that class
-  //   if (sourceSiblings.length > 0) {
-  //     $(sourceSiblings).css("max-height", "100%");
-  //   }
-  // }
   if (!container.classList.contains("dragula-source")) {
     // if the container el is going to is not .dragula-source
-    // and already has a class, shrink both classes sizes
-    if ($newSiblings.length > 0) {
-      $el.css("max-height", "50%");
-      $newSiblings.css("max-height", "50%");
-    } else {
-      // else, if it doesn't already have a class, restore
-      // this el size because it might have been shrunk
-      $el.css("max-height", "100%");
-    }
+    $newSiblings.push($el);
+    adjustSize($newSiblings);
   }
 });
 drake.on("drop", function(el, target, source, sibling) {
   var $el = $(el);
-  // add close button just once
-  if ($el.children(".delete-class").children().length === 0) {
-    // <i class="close material-icons">close</i>
-    $el.children(".delete-class").append($createTextualElement("i", {
-      "class": "close material-icons"
-    }, "close"));
+  var $siblings = $($(target).children());
+  if ($siblings.length > 2) {
+    Materialize.toast("Você não pode colocar mais de duas disciplinas no mesmo horário!", 2000);
+    drake.cancel(true);
+  } else {
+    // add close button just once
+    if ($el.children(".delete-class").children().length === 0) {
+      // <i class="close material-icons">close</i>
+      $el.children(".delete-class").append($createTextualElement("i", {
+        "class": "close material-icons"
+      }, "close"));
+    }
   }
 });
 drake.on("out", function(el, container, source) {
@@ -82,22 +71,22 @@ drake.on("out", function(el, container, source) {
     $el.css("display", "block");
   }
 
-  if (!$el.hasClass("gu-transit") && $siblings.length > 1) {
-    // if it was dropped and there was
-    // already some class there, shrink
-    $siblings.css("max-height", "50%");
+  // if does not have .gu-transit, it means it was dropped into container
+  if (!$el.hasClass("gu-transit")) {
+    adjustSize($siblings);
   } else {
     // else, or if it's just passing by and went out
     // of a container that has a class, restore size
-    $siblings.css("max-height", "100%");
+    /**
+     * @TODO removeFrom($siblings, $el);
+     */
+    adjustSize($siblings);
   }
 });
 drake.on("cancel", function(el, container, source) {
   var $siblings = $($(container).children());
-  if ($siblings.length > 1) {
-    $siblings.css("max-height", "50%");
-  } else {
-    $siblings.css("max-height", "100%");
+  if (!container.classList.contains("dragula-source")) {
+    adjustSize($siblings);
   }
 });
 buildGrid();
@@ -117,6 +106,18 @@ $("main").on("click", ".clear-all", (event) => {
     $(selector).empty();
   });
 });
+
+function adjustSize($elements) {
+  if (typeof $elements !== typeof undefined && $elements !== null) {
+    var ratio = 100.0 / $elements.length;
+    // $elements.css("max-height", ratio);
+    $.each($elements, (index, element) => {
+      $(element).css("max-height", ratio);
+    });
+  } else {
+    syslog("LOG_WARN", "adjustSize", 1, "Invalid $elements argument");
+  }
+}
 
 function $buildTimeTable(semester, shift) {
   var i = 0,
