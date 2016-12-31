@@ -37,7 +37,9 @@ Projeto: Gerador automático dos horários do semestre
 - Adicionar o Python 2 à [PATH](https://www.java.com/en/download/help/path.xml) - **apenas para Windows**
   + Foi instalado na pasta `C:\Users\<your_user>\.windows-build-tools\python27` com o comando acima
 
-- Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh` (magicamente funciona no Windows também)
+- Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh`
+  + Extrair em uma pasta da sua escolha
+  + Adicionar ao PATH também
 
 - Após clonar o repositório e estando na pasta raiz do projeto, executar:
 
