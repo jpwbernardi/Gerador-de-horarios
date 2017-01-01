@@ -25,7 +25,7 @@ const dragulaSourceOptions = {
     return source.classList.contains("dragula-source");
   },
   accepts: function(el, target) {
-    return !target.classList.contains("dragula-source");
+    return !target.classList.contains("dragula-source") && el.getAttribute("period") === target.getAttribute("shift");
   },
   direction: 'vertical', // Y axis is considered when determining where an element would be dropped
   // copy: true, // elements are moved by default, not copied
@@ -291,10 +291,13 @@ function buildClasses(semester, shift) {
 function shiftText(number) {
   switch (number) {
     case 1:
+    case "1":
       return "matutino";
     case 2:
+    case "2":
       return "vespertino";
     case 3:
+    case "3":
       return "noturno";
   }
   return "";
