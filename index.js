@@ -43,7 +43,7 @@ drake.on("over", function(el, container, source) {
   if (!container.classList.contains("dragula-source")) {
     // if the container el is going to is not .dragula-source
     $newSiblings.push($el);
-    adjustSize($newSiblings);
+    adjustHeight($newSiblings);
   }
 });
 drake.on("drop", function(el, target, source, sibling) {
@@ -70,23 +70,21 @@ drake.on("out", function(el, container, source) {
     $el.css("height", "100%");
     $el.css("display", "block");
   }
-
-  // if does not have .gu-transit, it means it was dropped into container
-  if (!$el.hasClass("gu-transit")) {
-    adjustSize($siblings);
-  } else {
-    // else, or if it's just passing by and went out
-    // of a container that has a class, restore size
-    /**
-     * @TODO removeFrom($siblings, $el);
-     */
-    adjustSize($siblings);
+  if (!container.classList.contains("dragula-source")) {
+    if (!$el.hasClass("gu-transit")) {
+      adjustHeight($siblings);
+    } else {
+      // else, or if it's just passing by and went out
+      // of a container that has a class, restore size
+      withoutShadow($siblings, $el);
+      adjustHeight($siblings);
+    }
   }
 });
 drake.on("cancel", function(el, container, source) {
   var $siblings = $($(container).children());
   if (!container.classList.contains("dragula-source")) {
-    adjustSize($siblings);
+    adjustHeight($siblings);
   }
 });
 buildGrid();
@@ -107,7 +105,27 @@ $("main").on("click", ".clear-all", (event) => {
   });
 });
 
-function adjustSize($elements) {
+function isSameClass(theClass, otherClass) {
+  if (otherClass.classList.contains("gu-transit")
+    && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
+    && theClass.getAttribute("code") === otherClass.getAttribute("code")
+    && theClass.getAttribute("period") === otherClass.getAttribute("period"))
+      return true;
+  return  false;
+}
+
+function withoutShadow($elements, $el) {
+  var i;
+  for (i = 0; i < $elements.length; i++)
+    if (isSameClass($el[0], $elements[i])) break;
+  if (i < $elements.length) {
+    $elements.splice(i, 1);
+    return true;
+  }
+  return false;
+}
+
+function adjustHeight($elements) {
   if (typeof $elements !== typeof undefined && $elements !== null) {
     var ratio = 100.0 / $elements.length;
     // $elements.css("max-height", ratio);
@@ -115,7 +133,7 @@ function adjustSize($elements) {
       $(element).css("max-height", ratio);
     });
   } else {
-    syslog("LOG_WARN", "adjustSize", 1, "Invalid $elements argument");
+    syslog("LOG_WARN", "adjustHeight", 1, "Invalid $elements argument");
   }
 }
 
@@ -245,6 +263,9 @@ function buildClasses(semester, shift) {
     let color = row.siape % colors.length;
     let variation = row.siape % (colorVariations.length + 1);
     let $div = $createTextualElement("div", {
+      "siape": row.siape,
+      "code": row.code,
+      "period": row.period,
       "title": row.name + "\n" + row.title + " (" + row.code + ")",
       "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
     }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
