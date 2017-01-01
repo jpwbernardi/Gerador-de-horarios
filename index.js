@@ -56,9 +56,17 @@ drake.on("drop", function(el, target, source, sibling) {
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       // <i class="close material-icons">close</i>
-      $el.children(".delete-class").append($createTextualElement("i", {
+      let $remove = $createTextualElement("i", {
         "class": "close material-icons"
-      }, "close"));
+      }, "close");
+      $remove.on("click", (event) => {
+        var $target = $(event.currentTarget.parentNode.parentNode);
+        var $siblings = $($($target[0].parentNode).children());
+        $target.addClass("removed");
+        without($siblings, $target, "removed");
+        adjustHeight($siblings);
+      });
+      $el.children(".delete-class").append($remove);
     }
   }
 });
@@ -76,7 +84,7 @@ drake.on("out", function(el, container, source) {
     } else {
       // else, or if it's just passing by and went out
       // of a container that has a class, restore size
-      withoutShadow($siblings, $el);
+      without($siblings, $el, "gu-transit");
       adjustHeight($siblings);
     }
   }
@@ -105,8 +113,8 @@ $("main").on("click", ".clear-all", (event) => {
   });
 });
 
-function isSameClass(theClass, otherClass) {
-  if (otherClass.classList.contains("gu-transit")
+function isSame(theClass, otherClass, classFilter) {
+  if (otherClass.classList.contains(classFilter)
     && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
     && theClass.getAttribute("code") === otherClass.getAttribute("code")
     && theClass.getAttribute("period") === otherClass.getAttribute("period"))
@@ -114,10 +122,10 @@ function isSameClass(theClass, otherClass) {
   return  false;
 }
 
-function withoutShadow($elements, $el) {
+function without($elements, $el, classFilter) {
   var i;
   for (i = 0; i < $elements.length; i++)
-    if (isSameClass($el[0], $elements[i])) break;
+    if (isSame($el[0], $elements[i], classFilter)) break;
   if (i < $elements.length) {
     $elements.splice(i, 1);
     return true;
