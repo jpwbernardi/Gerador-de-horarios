@@ -79,12 +79,18 @@ drake.on("out", function(el, container, source) {
     $el.css("display", "block");
   }
   if (!container.classList.contains("dragula-source")) {
-    if (!$el.hasClass("gu-transit")) {
+    // if (!$el.hasClass("gu-transit")) {
+    if (!drake.dragging) {
       adjustHeight($siblings);
+      // when we are sure we got out of source,
+      // adjust sizes there
+      if (!source.classList.contains("dragula-source")) adjustHeight($($(source).children()));
     } else {
-      // else, or if it's just passing by and went out
-      // of a container that has a class, restore size
-      without($siblings, $el, "gu-transit");
+      // else, if it's just passing by and went out
+      // of a container that has a class, restore sizes
+      // but when we fly over our source, do not
+      // remove el from the height ratio
+      if (container !== source) without($siblings, $el, "gu-transit");
       adjustHeight($siblings);
     }
   }
