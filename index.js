@@ -119,6 +119,10 @@ $("main").on("click", ".clear-all", (event) => {
   });
 });
 
+$("main").on("click", ".make-pdf", (event) => {
+  // incluir ação
+});
+
 function isSame(theClass, otherClass, classFilter) {
   if (otherClass.classList.contains(classFilter)
     && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
@@ -323,6 +327,11 @@ function buildGrid() {
       "class": "btn waves-effect waves-light teal darken-3 clear-all right"
     }, "Limpar " + i + "ª fase");
     $col.append($clearAll);
+    let $makePDF = $createTextualElement("button", {
+      "title": "Gerar PDF",
+      "class": "btn waves-effect waves-light teal darken-3 make-pdf right"
+    }, "Gerar PDF");
+    $col.append($makePDF);
     $row.append($col);
     $sec.append($row);
     for (j = 1; j <= 3; j++) {
