@@ -1,20 +1,17 @@
 # Gerador-de-horarios
 
-Alunos: Acácia, Davi, Gabriel, Harold, João Pedro, Matheus e Vladimir
+Projeto: Gerador de horários do semestre
 
-Cliente: Marco (coordenador do curso)
+Time: Acácia dos Campos da Terra, Davi Rizzotto Pegoraro, Gabriel Batista Galli, Harold Cristien Santos Becker, João Pedro Winckler Bernardi, Matheus Henrique Trichez e Vladimir Belinski
 
-Projeto: Gerador automático dos horários do semestre
+P.O.: Prof. Marco Aurélio Spohn (coordenador do curso de Ciência da Computação da Universidade Federal da Fronteira Sul - UFFS)
 
+Descrição do projeto:
 
-- Funcionaria como um facilitador para geração dos horários do semestre (em relação aos componentes curriculares);
-- Poderia gerar os horários automaticamente ou possibilitar que o usuário monte manualmente os horários, nesse caso apresentando uma interface gráfica onde os componentes podem ser arrastados a "espaços disponíveis no horário";
-- Apresentar as possibilidades de encaixe dos componentes de maneira visual ao usuário (alterando a cor dos espaços possíveis para o componente selecionado);
-- Respeitar restrições da universidade (matérias de tronco comum, questões de turnos em que um professor pode estar em sala...);
-- Respeitar limitações individuais dos professores;
-- Priorizar a quebra dos componentes (para um componente não ocupar um turno inteiro);
-- O software não é voltado para a grade de horários dos alunos individualmente;
-- O software não tem relação com horários de ônibus, ou vans, ou afins.
+- O software desenvolvido visa ser uma ferramenta facilitadora para a geração dos horários do semestre (em relação aos componentes curriculares) do curso de Ciência da Computação da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de professores, componentes curriculares, associações, restrições de professores, restrições legais e a montagem das grades das 10 fases do curso para os turnos matutino, vespertino e noturno;
+- Na montagem da grade os elementos que as comporão podem ser facilmente arrastados para posições sugeridas, facilitando assim o trabalho de quem está realizando a montagem da grade, ao passo que também respeitam as restrições de professores (limitações individuais dos professores) e as restrições legais (da universidade) ativas no momento;
+- O software possibilita grande flexibilidade na montagem de horários em relação a disposição de associações pela grade, também possibilitando que o usuário priorize a quebra dos componentes (para um CCR não ocupar um turno inteiro);
+- O software não é voltado para a grade de horários dos alunos individualmente, tal como não apresenta relação com horários de transporte.
 
 # Para contribuir com o projeto:
 
