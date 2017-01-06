@@ -82,7 +82,7 @@ var autocompleteOptions = {
   }
 };
 
-$(document).ready(function(){
+$(document).ready(function() {
   $(".modal").modal();
 });
 setTimeout(mainInit, 0);
@@ -295,7 +295,9 @@ function foreignPrimaryKeys(obj, visited) {
 function getForeignPrimaryObjects(o) {
   var visited = {};
   var queue = foreignPrimaryKeys(o, visited);
-  var fobjs = [], front = 0, back = queue.length - 1;
+  var fobjs = [],
+    front = 0,
+    back = queue.length - 1;
   while (front <= back) {
     let obj = queue[front++];
     visited[obj] = true;
@@ -391,10 +393,10 @@ function decodeType(obj, findex) {
       return "number";
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
-    // case objects.FIELD_TYPE_FK:
-    //   return "fk";
+      // case objects.FIELD_TYPE_FK:
+      //   return "fk";
     default:
-      syslog(LOG_W , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      syslog(LOG_W, "decodeType", 1, "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -566,15 +568,6 @@ function $buildListRow(obj, tuple, rownum) {
   var $col = $createElement("div", {
     "class": "input-field col s4 m2 l2"
   });
-  // $button = $createTextualElement("button", {
-  //   "class": "btn btn-short waves-effect waves-light form-edit",
-  //   "object": obj.name,
-  //   "index": rownum,
-  //   "title": "Editar"
-  // }, $createTextualElement("i", {
-  //   "class": "material-icons"
-  // }, "edit"));
-  // $col.append($button);
   $button = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-delete",
     "object": obj.name,
@@ -598,8 +591,8 @@ function appendNewRow(obj, fields) {
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  syslog(LOG_I,"appendNewRow", 1,  query.string);
-  syslog(LOG_I,"appendNewRow", 2, query.params);
+  syslog(LOG_I, "appendNewRow", 1, query.string);
+  syslog(LOG_I, "appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
@@ -622,7 +615,8 @@ function $buildRow(obj, tuple, rownum) {
     var $col = null,
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      let fobj = obj.foreignKey[j], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
+      let fobj = obj.foreignKey[j],
+        fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
       fobjs = fobjs.concat(getForeignPrimaryObjects(fobj));
       $.each(fobjs, function(k, fo) {
         $col = $createElement("div", {
@@ -686,8 +680,17 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("value", tuple[obj.fields[i]]);
       $input.attr("index", rownum);
       $input.attr("title", obj.titles[i]);
-      if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+      // only on .list forms
+      if (rownum !== "") {
+        $input.attr("editable", "editable");
+        $input.on("change", saveForm);
+      }
+      if (typeof obj.fieldRequired !== typeof undefined &&
+        typeof obj.fieldRequired[j] !== typeof undefined &&
+        obj.fieldRequired[j] === true) {
         $input.attr("required", "required");
+      }
+      // only checkboxes are allowed to be directly updated
       if (typeof tuple[obj.fields[i]] !== typeof undefined && type !== objects.FIELD_TYPE_BOOLEAN)
         $input.attr("disabled", "disabled");
       var $label = $createTextualElement("label", {
@@ -695,9 +698,7 @@ function $buildRow(obj, tuple, rownum) {
         "title": obj.titles[i]
       }, obj.titles[i]);
       if (type === objects.FIELD_TYPE_BOOLEAN) {
-        $input.attr("editable", "editable");
         $input.addClass("filled-in");
-        $input.on("click", saveForm);
         if (tuple[obj.fields[i]] === 1 || rownum === "")
           $input.attr("checked", "checked");
       } else if ($input.val() !== "") {
