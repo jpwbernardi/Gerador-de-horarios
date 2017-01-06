@@ -49,10 +49,10 @@ drake.on("over", function(el, container, source) {
 drake.on("drop", function(el, target, source, sibling) {
   var $el = $(el);
   var $siblings = $($(target).children());
-  if ($siblings.length > 2) {
-    Materialize.toast("Você não pode colocar mais de duas disciplinas no mesmo horário!", 2000);
-    drake.cancel(true);
-  } else {
+  // if ($siblings.length > 2) {
+    // Materialize.toast("Você não pode colocar mais de duas disciplinas no mesmo horário!", 2000);
+    // drake.cancel(true);
+  // } else {
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       // <i class="close material-icons">close</i>
@@ -68,7 +68,7 @@ drake.on("drop", function(el, target, source, sibling) {
       });
       $el.children(".delete-class").append($remove);
     }
-  }
+  // }
 });
 drake.on("out", function(el, container, source) {
   var $el = $(el);
