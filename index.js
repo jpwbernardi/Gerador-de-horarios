@@ -1,3 +1,4 @@
+var professorRestrictions = {};
 const nameLen = 16;
 const stepsSettings = {
   headerTag: "h1",
@@ -36,6 +37,9 @@ const dragulaSourceOptions = {
   ignoreInputTextSelection: false // if true, allows users to select input text
 }
 var drake = dragula(dragulaSourceOptions);
+drake.on("drag", function(el, source) {
+  $(professorRestrictions[el.getAttribute("siape")]).addClass("red restricted");
+});
 drake.on("over", function(el, container, source) {
   var $el = $(el);
   var $newSiblings = $($(container).children());
@@ -49,10 +53,10 @@ drake.on("over", function(el, container, source) {
 drake.on("drop", function(el, target, source, sibling) {
   var $el = $(el);
   var $siblings = $($(target).children());
-  // if ($siblings.length > 2) {
-    // Materialize.toast("Você não pode colocar mais de duas disciplinas no mesmo horário!", 2000);
-    // drake.cancel(true);
-  // } else {
+  if (target.classList.contains("restricted")) {
+    Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
+    drake.cancel(true);
+  } else {
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       // <i class="close material-icons">close</i>
@@ -68,7 +72,7 @@ drake.on("drop", function(el, target, source, sibling) {
       });
       $el.children(".delete-class").append($remove);
     }
-  // }
+  }
 });
 drake.on("out", function(el, container, source) {
   var $el = $(el);
@@ -79,12 +83,12 @@ drake.on("out", function(el, container, source) {
     $el.css("display", "block");
   }
   if (!container.classList.contains("dragula-source")) {
-    // if (!$el.hasClass("gu-transit")) {
     if (!drake.dragging) {
       adjustHeight($siblings);
       // when we are sure we got out of source,
       // adjust sizes there
       if (!source.classList.contains("dragula-source")) adjustHeight($($(source).children()));
+      $(professorRestrictions[el.getAttribute("siape")]).removeClass("red restricted");
     } else {
       // else, if it's just passing by and went out
       // of a container that has a class, restore sizes
@@ -100,8 +104,10 @@ drake.on("cancel", function(el, container, source) {
   if (!container.classList.contains("dragula-source")) {
     adjustHeight($siblings);
   }
+  $(professorRestrictions[el.getAttribute("siape")]).removeClass("red restricted");
 });
 buildGrid();
+queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
   var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
@@ -122,6 +128,28 @@ $("main").on("click", ".clear-all", (event) => {
 $("main").on("click", ".make-pdf", (event) => {
   // incluir ação
 });
+
+function queryProfessorRestrictions() {
+  var professorQuery = {
+    string: "select siape from professor_restriction group by siape;",
+    params: []
+  };
+  db.each(professorQuery.string, professorQuery.params, (err, row) => {
+    var query = {
+      string: "select 'td[shift=' || period || '][day=' || dow || '][time=' || block || ']' as restriction from professor_restriction where siape = ? and active = 1;",
+      params: [row.siape]
+    };
+    db.all(query.string, query.params, (err, rows) => {
+      if (err === null) {
+        professorRestrictions[row.siape] = rows[0].restriction;
+        for (let i = 1; i < rows.length; i++) professorRestrictions[row.siape] += ", " + rows[i].restriction;
+        syslog(LOG_I, "queryProfessorRestrictions", 1, "Loaded " + rows.length + " professor restrictions for SIAPE " + row.siape);
+      } else {
+        syslog(LOG_E, "queryProfessorRestrictions", 2, err);
+      }
+    });
+  });
+}
 
 function isSame(theClass, otherClass, classFilter) {
   if (otherClass.classList.contains(classFilter)
@@ -151,7 +179,7 @@ function adjustHeight($elements) {
       $(element).css("max-height", ratio);
     });
   } else {
-    syslog("LOG_WARN", "adjustHeight", 1, "Invalid $elements argument");
+    syslog(LOG_W, "adjustHeight", 1, "Invalid $elements argument");
   }
 }
 

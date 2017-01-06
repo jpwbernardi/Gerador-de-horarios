@@ -4,11 +4,11 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
 // https://github.com/mapbox/node-sqlite3/wiki/API
 
-
-$(document).ready(function(){
-  // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
-  $(".modal").modal();
-});
+const LOG_V = 0;
+const LOG_D = 1;
+const LOG_I = 2;
+const LOG_W = 3;
+const LOG_E = 4;
 
 const db = nodeRequire("electron").remote.getGlobal('db');
 const objects = nodeRequire("./objects");
@@ -43,17 +43,17 @@ var autocompleteOptions = {
             params.push($whereField.val());
           }
         } else {
-          syslog("LOG_ERR", "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          syslog(LOG_E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
-      } else syslog("LOG_WARN", "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
-    } else syslog("LOG_INFO", "autocompleteOptions", 2, obj.name + " has no selectWhere");
+      } else syslog(LOG_W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else syslog(LOG_I, "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
     if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
-    syslog("LOG_INFO", "autocompleteOptions", 1, query);
-    syslog("LOG_INFO", "autocompleteOptions", 5, params);
+    syslog(LOG_I, "autocompleteOptions", 1, query);
+    syslog(LOG_I, "autocompleteOptions", 5, params);
     db.each(query, params, function(err, row) {
       var keys = autocompleteFields(ownerObj);
       var label = row[keys[0]];
@@ -68,7 +68,7 @@ var autocompleteOptions = {
           if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });
-        syslog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
+        syslog(LOG_I, "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
@@ -82,6 +82,9 @@ var autocompleteOptions = {
   }
 };
 
+$(document).ready(function(){
+  $(".modal").modal();
+});
 setTimeout(mainInit, 0);
 buildMenu();
 $(".button-collapse").sideNav();
@@ -119,13 +122,13 @@ function deleteObject(object, fields) {
   var error = null;
   var query = valuesWhere(object, fields);
   query.string = "delete from " + object.table + " where " + query.string;
-  syslog("LOG_INFO", "deleteObject", 1, query.string);
-  syslog("LOG_INFO", "deleteObject", 2, query.params);
+  syslog(LOG_I, "deleteObject", 1, query.string);
+  syslog(LOG_I, "deleteObject", 2, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
-      syslog("LOG_INFO", "deleteObject", 1, "successfully deleted item.");
+      syslog(LOG_I, "deleteObject", 1, "successfully deleted item");
     } else {
-      syslog("LOG_ERR", "deleteObject", 2, err);
+      syslog(LOG_E, "deleteObject", 2, err);
       error = err;
     }
   });
@@ -142,10 +145,10 @@ function deleteRow(event) {
   if (error === null) {
     $row.remove();
     Materialize.toast("Excluído com sucesso!", 2000);
-    syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
+    syslog(LOG_I, ".form-delete click", 1, "successfully deleted item");
   } else {
     Materialize.toast("Erro na exclusão!", 3000);
-    syslog("LOG_ERR", ".form-delete click", 2, err);
+    syslog(LOG_E, ".form-delete click", 2, err);
   }
 }
 
@@ -172,11 +175,11 @@ function saveForm(event) {
     if (editable) deleteObject(obj, fields);
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    syslog("LOG_INFO", ".form-save click", 1, query.string);
-    syslog("LOG_INFO", ".form-save click", 2, query.params);
+    syslog(LOG_I, ".form-save click", 1, query.string);
+    syslog(LOG_I, ".form-save click", 2, query.params);
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
-        syslog("LOG_ERR", ".form-save click", 3, err);
+        syslog(LOG_E, ".form-save click", 3, err);
         Materialize.toast("Este registro já está cadastrado!", 3000);
       } else {
         if (!editable) {
@@ -334,7 +337,7 @@ function autocompleteFields(obj) {
     } else {
       fields = obj.fields; // all fields from the 'select *'
     }
-  } else syslog("LOG_WARN", "autocompleteFields", 1, "obj is undefined!");
+  } else syslog(LOG_W, "autocompleteFields", 1, "obj is undefined!");
   return fields;
 }
 
@@ -391,7 +394,7 @@ function decodeType(obj, findex) {
     // case objects.FIELD_TYPE_FK:
     //   return "fk";
     default:
-      syslog("LOG_WARN" , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      syslog(LOG_W , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -403,7 +406,7 @@ function decodeOrder(type) {
     case -1:
       return "desc";
     default:
-      syslog("LOG_WARN", "decodeOrder", 1, "unknown order by, type '" + type + "'!");
+      syslog(LOG_W, "decodeOrder", 1, "unknown order by, type '" + type + "'!");
       return "";
   }
 }
@@ -413,7 +416,7 @@ function orderBy(fields, types) {
   var defaultOrder = false;
   if (typeof types !== typeof undefined && types.length > 0) {
     if (fields.length !== types.length)
-      throw new RangeError("Ordering type must be specified for every field, if any.");
+      throw new RangeError("Ordering type must be specified for every field, if any");
   } else defaultOrder = true;
   for (let i = 0; i < fields.length; i++)
     order += fields[i] + " " + decodeOrder(defaultOrder === true ? ORDER_TYPE_ASC : types[i]);
@@ -426,7 +429,7 @@ function groupBy(fields) {
     group = fields[0];
     for (let i = 1; i < fields.length; i++)
       group += ", " + fields[i];
-  } else syslog("LOG_WARN", "groupBy", 1, "empty 'fields' parameter");
+  } else syslog(LOG_W, "groupBy", 1, "empty 'fields' parameter");
   return group;
 }
 
@@ -515,7 +518,7 @@ function buildForm(clazz) {
     if (typeof obj !== typeof undefined) {
       $(elem).append($buildForm(obj, clazz));
     } else {
-      syslog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+      syslog(LOG_E, "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
     }
   });
 }
@@ -532,10 +535,10 @@ function $buildForm(obj, clazz) {
         setTimeout(function(rownum) {
           $form.append($buildListRow(obj, row, rownum));
         }, 0, rownum++);
-      else syslog("LOG_ERR", "$buildForm", 1, "error fetching " + obj.table + " rows.");
+      else syslog(LOG_E, "$buildForm", 1, "error fetching " + obj.table + " rows");
     }, (err, nrows) => {
-      if (err === null) syslog("LOG_INFO", "$buildForm", 2, "done loading " + nrows + " row(s).");
-      else syslog("LOG_ERR", "$buildForm", 3, err);
+      if (err === null) syslog(LOG_I, "$buildForm", 2, "done loading " + nrows + " row(s)");
+      else syslog(LOG_E, "$buildForm", 3, err);
     });
   }
   return $form;
@@ -595,8 +598,8 @@ function appendNewRow(obj, fields) {
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  syslog("LOG_INFO","appendNewRow", 1,  query.string);
-  syslog("LOG_INFO","appendNewRow", 2, query.params);
+  syslog(LOG_I,"appendNewRow", 1,  query.string);
+  syslog(LOG_I,"appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
@@ -604,8 +607,8 @@ function appendNewRow(obj, fields) {
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      } else syslog("LOG_ERR", "appendNewRow", 4, "tuple is undefined.");
-    } else syslog("LOG_ERR", "appendNewRow", 3, err);
+      } else syslog(LOG_E, "appendNewRow", 4, "tuple is undefined");
+    } else syslog(LOG_E, "appendNewRow", 3, err);
   });
 }
 
@@ -711,5 +714,24 @@ function $buildRow(obj, tuple, rownum) {
 }
 
 function syslog(level, functionName, code, message) {
-  console.log(level, functionName, code, message);
+  var log = "";
+  switch (level) {
+    case LOG_V:
+      log = "VERBOSE: ";
+      break;
+    case LOG_D:
+      log = "DEBUG: ";
+      break;
+    case LOG_I:
+      log = "INFO: ";
+      break;
+    case LOG_W:
+      log = "WARNING: ";
+      break;
+    case LOG_E:
+      log = "ERROR: ";
+      break;
+  }
+  log += message + " at " + functionName + " (code: " + code + ")";
+  console.log(log);
 }
