@@ -149,7 +149,9 @@ function deleteRow(event) {
   }
 }
 
-$("main").on("click", "button.form-save", (event) => {
+$("main").on("click", "button.form-save", saveForm);
+
+function saveForm(event) {
   var i;
   var correct = true;
   var obj = objects[event.currentTarget.getAttribute("object")];
@@ -165,6 +167,9 @@ $("main").on("click", "button.form-save", (event) => {
     }
   }
   if (correct) {
+    // yeah, editable is delete old + insert new ...
+    let editable = event.currentTarget.hasAttribute("editable") === true;
+    if (editable) deleteObject(obj, fields);
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
     syslog("LOG_INFO", ".form-save click", 1, query.string);
@@ -174,47 +179,14 @@ $("main").on("click", "button.form-save", (event) => {
         syslog("LOG_ERR", ".form-save click", 3, err);
         Materialize.toast("Este registro já está cadastrado!", 3000);
       } else {
-        Materialize.toast("Salvo com sucesso!", 2000);
-        // yeah, editing is insert new + delete old...
-        if (event.currentTarget.hasAttribute("editing") === true) deleteObject(obj, fields);
-        else appendNewRow(obj, fields);
-      }
-      // remove "editing" attribute here because db.run is non-blocking
-      event.currentTarget.removeAttribute("editing");
-    });
-    if (event.currentTarget.hasAttribute("editing") === true) {
-      event.currentTarget.children[0].innerHTML = "edit";
-      $(event.currentTarget).addClass("form-edit");
-      $(event.currentTarget).removeClass("form-save");
-      $.each(fields, (index, field) => {
-        if (field.hasAttribute("from")) {
-          document.getElementById(field.getAttribute("from")).setAttribute("disabled", "disabled");
-        } else {
-          field.setAttribute("disabled", "disabled");
+        if (!editable) {
+          Materialize.toast("Salvo com sucesso!", 2000);
+          appendNewRow(obj, fields);
         }
-      });
-    }
+      }
+    });
   }
-});
-
-$("main").on("click", "button.form-edit", (event) => {
-  var obj = objects[event.currentTarget.getAttribute("object")];
-  var index = event.currentTarget.hasAttribute("index") ? event.currentTarget.getAttribute("index") : "";
-  var fields = $("input." + obj.name + index);
-  event.currentTarget.setAttribute("editing", "editing");
-  event.currentTarget.children[0].innerHTML = "save";
-  $(event.currentTarget).addClass("form-save");
-  $(event.currentTarget).removeClass("form-edit");
-  $.each(fields, (index, field) => {
-    if (field.hasAttribute("from")) {
-      let $field = $("#" + field.getAttribute("from"));
-      $field.removeAttr("disabled");
-      // $field.autocomplete(autocompleteOptions);
-    } else {
-      field.removeAttribute("disabled");
-    }
-  });
-});
+}
 
 function hasPrimaryNotForeign(obj) {
   var has = false;
@@ -614,12 +586,12 @@ function $buildListRow(obj, tuple, rownum) {
 }
 
 function appendNewRow(obj, fields) {
-  var lastRow = -Infinity;
+  var lastRow = -1;
   var rownums = $("div.row").map(function() {
-    return this.getAttribute("index");
+    return Number(this.getAttribute("index"));
   });
-  rownums.each((i, num) => {
-    if (num > lastRow) lastRow = num;
+  rownums.each((i, rowNumber) => {
+    if (rowNumber > lastRow) lastRow = rowNumber;
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
@@ -709,17 +681,20 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("object", obj.name);
       $input.attr("field", obj.fields[i]);
       $input.attr("value", tuple[obj.fields[i]]);
+      $input.attr("index", rownum);
       $input.attr("title", obj.titles[i]);
       if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
         $input.attr("required", "required");
-      if (typeof tuple[obj.fields[i]] !== typeof undefined)
+      if (typeof tuple[obj.fields[i]] !== typeof undefined && type !== objects.FIELD_TYPE_BOOLEAN)
         $input.attr("disabled", "disabled");
       var $label = $createTextualElement("label", {
         "for": obj.table + "-" + obj.fields[i] + rownum,
         "title": obj.titles[i]
       }, obj.titles[i]);
       if (type === objects.FIELD_TYPE_BOOLEAN) {
+        $input.attr("editable", "editable");
         $input.addClass("filled-in");
+        $input.on("click", saveForm);
         if (tuple[obj.fields[i]] === 1 || rownum === "")
           $input.attr("checked", "checked");
       } else if ($input.val() !== "") {
