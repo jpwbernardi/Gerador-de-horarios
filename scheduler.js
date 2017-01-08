@@ -714,25 +714,17 @@ function $buildRow(obj, tuple, rownum) {
   return $row;
 }
 
-function syslog(level, functionName, code, message) {
-  var log = "";
+function logLevelToString(level) {
   switch (level) {
-    case LOG_V:
-      log = "VERBOSE: ";
-      break;
-    case LOG_D:
-      log = "DEBUG: ";
-      break;
-    case LOG_I:
-      log = "INFO: ";
-      break;
-    case LOG_W:
-      log = "WARNING: ";
-      break;
-    case LOG_E:
-      log = "ERROR: ";
-      break;
+    case LOG_V: return "VERBOSE";
+    case LOG_D: return "DEBUG";
+    case LOG_I: return "INFO";
+    case LOG_W: return "WARNING";
+    case LOG_E: return "ERROR";
   }
-  log += message + " at " + functionName + " (code: " + code + ")";
-  console.log(log);
+  return "undefined";
+}
+
+function syslog(level, functionName, code, message) {
+  console.log(logLevelToString(level) + ": " + message, "(code " + code + " at " + functionName + ")");
 }
