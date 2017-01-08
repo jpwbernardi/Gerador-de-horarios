@@ -35,7 +35,7 @@ const dragulaSourceOptions = {
   removeOnSpill: false, // spilling will `.remove` the element, if this is true
   mirrorContainer: document.body, // set the element that gets mirror elements appended
   ignoreInputTextSelection: false // if true, allows users to select input text
-}
+};
 var drake = dragula(dragulaSourceOptions);
 drake.on("drag", function(el, source) {
   $(professorRestrictions[el.getAttribute("siape")]).addClass("red restricted");
@@ -142,26 +142,6 @@ function queryProfessorRestrictions() {
       });
     }
   });
-}
-
-function isSame(theClass, otherClass, classFilter) {
-  if (otherClass.classList.contains(classFilter)
-    && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
-    && theClass.getAttribute("code") === otherClass.getAttribute("code")
-    && theClass.getAttribute("period") === otherClass.getAttribute("period"))
-      return true;
-  return  false;
-}
-
-function without($elements, $el, classFilter) {
-  var i;
-  for (i = 0; i < $elements.length; i++)
-    if (isSame($el[0], $elements[i], classFilter)) break;
-  if (i < $elements.length) {
-    $elements.splice(i, 1);
-    return true;
-  }
-  return false;
 }
 
 function $buildTimeTable(semester, shift) {
@@ -273,7 +253,7 @@ function buildClasses(semester, shift) {
     if (err !== null) {
       syslog(LOG_E, "buildClasses", 1, err);
     } else {
-      let $div = $createClass(row);
+      let $div = $createClass(row, false);
       $(rowSelector).append($div);
     }
   });

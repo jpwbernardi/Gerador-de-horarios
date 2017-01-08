@@ -81,8 +81,6 @@ const autocompleteOptions = {
   }
 };
 
-var classes = undefined;
-
 $(".modal").modal();
 $(".button-collapse").sideNav();
 setTimeout(mainInit, 0);
@@ -90,6 +88,21 @@ setTimeout(loadClasses, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
+
+function logLevelToString(level) {
+  switch (level) {
+    case LOG_V: return "VERBOSE";
+    case LOG_D: return "DEBUG";
+    case LOG_I: return "INFO";
+    case LOG_W: return "WARNING";
+    case LOG_E: return "ERROR";
+  }
+  return "undefined";
+}
+
+function syslog(level, functionName, code, message) {
+  console.log(logLevelToString(level) + ": " + message, "(code " + code + " at " + functionName + ")");
+}
 
 function mainInit() {
   let vt = document.getElementsByClassName("vertical-text");
@@ -731,6 +744,26 @@ function naming(fullname) {
   return firstname;
 }
 
+function isSame(theClass, otherClass, classFilter) {
+  if (otherClass.classList.contains(classFilter)
+    && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
+    && theClass.getAttribute("code") === otherClass.getAttribute("code")
+    && theClass.getAttribute("period") === otherClass.getAttribute("period"))
+      return true;
+  return  false;
+}
+
+function without($elements, $el, classFilter) {
+  var i;
+  for (i = 0; i < $elements.length; i++)
+    if (isSame($el[0], $elements[i], classFilter)) break;
+  if (i < $elements.length) {
+    $elements.splice(i, 1);
+    return true;
+  }
+  return false;
+}
+
 function addCloseButton($el) {
   // <i class="close material-icons">close</i>
   let $remove = $createTextualElement("i", {
@@ -746,7 +779,7 @@ function addCloseButton($el) {
   $el.children(".delete-class").append($remove);
 }
 
-function $createClass(row) {
+function $createClass(row, addClose) {
   var color = row.siape % colors.length;
   var variation = row.siape % (colorVariations.length + 1);
   var $class = $createTextualElement("div", {
@@ -756,7 +789,7 @@ function $createClass(row) {
     "title": row.name + "\n" + row.title + " (" + row.code + ")",
     "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
   }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
-  addCloseButton($class);
+  if (addClose) addCloseButton($class);
   return $class;
 }
 
@@ -773,7 +806,7 @@ function adjustHeight($elements) {
 }
 
 function loadClasses() {
-  classes = [];
+  var classes = [];
   var timeQuery = {
     string: "select distinct semester, dow, period, block from class;",
     params: []
@@ -789,12 +822,11 @@ function loadClasses() {
         params: [timeRow.semester, timeRow.dow, timeRow.period, timeRow.block]
       };
       let selector = "td.putable[semester=" + timeRow.semester + "][shift=" + timeRow.period + "][day=" + timeRow.dow + "][time=" + timeRow.block + "]";
-      console.log(selector);
       db.each(classQuery.string, classQuery.params, function(classErr, classRow) {
         if (classErr !== null) {
           syslog(LOG_E, "loadClasses", 1, classErr);
         } else {
-          let $class = $createClass(classRow);
+          let $class = $createClass(classRow, true);
           $class.css("width", "100%");
           $class.css("display", "block");
           classes.push($class);
@@ -811,17 +843,6 @@ function loadClasses() {
   });
 }
 
-function logLevelToString(level) {
-  switch (level) {
-    case LOG_V: return "VERBOSE";
-    case LOG_D: return "DEBUG";
-    case LOG_I: return "INFO";
-    case LOG_W: return "WARNING";
-    case LOG_E: return "ERROR";
-  }
-  return "undefined";
-}
+function saveGrid() {
 
-function syslog(level, functionName, code, message) {
-  console.log(logLevelToString(level) + ": " + message, "(code " + code + " at " + functionName + ")");
 }

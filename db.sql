@@ -492,10 +492,10 @@ create table class(
   block     integer,
   siape     integer,
   code      varchar(8),
-  primary key(semester, dow, period, block, siape, code),
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
   foreign key(siape, code) references professor_subject(siape, code) on delete cascade
 );
+insert into class values (6, 2, 1, 1, 1645173, "GEX108");
 insert into class values (6, 2, 1, 1, 1645173, "GEX108");
 insert into class values (6, 2, 1, 1, 1835372, "GEX105");
 
