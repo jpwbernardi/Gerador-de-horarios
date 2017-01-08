@@ -9,6 +9,7 @@ const LOG_D = 1;
 const LOG_I = 2;
 const LOG_W = 3;
 const LOG_E = 4;
+const nameLen = 16;
 const objects = require("./objects");
 const db = require("electron").remote.getGlobal('db');
 const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
@@ -725,6 +726,18 @@ function $buildRow(obj, tuple, rownum) {
     }
   });
   return $row;
+}
+
+function firstName(fullname) {
+  var sep = fullname.indexOf(" ");
+  if (sep !== -1) return fullname.substring(0, sep);
+  return fullname;
+}
+
+function lastName(fullname) {
+  var sep = fullname.lastIndexOf(" ");
+  if (sep !== -1) return fullname.substring(sep + 1);
+  return null;
 }
 
 function naming(fullname) {

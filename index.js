@@ -1,5 +1,4 @@
 var professorRestrictions = {};
-const nameLen = 16;
 const stepsSettings = {
   headerTag: "h1",
   bodyTag: "section",
@@ -100,6 +99,7 @@ queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
   var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
+  console.log(selector);
   $(selector).empty();
 });
 
@@ -223,18 +223,6 @@ function $buildTimeTable(semester, shift) {
   }
   $table.append($tsec);
   return $table;
-}
-
-function firstName(fullname) {
-  var sep = fullname.indexOf(" ");
-  if (sep !== -1) return fullname.substring(0, sep);
-  return fullname;
-}
-
-function lastName(fullname) {
-  var sep = fullname.lastIndexOf(" ");
-  if (sep !== -1) return fullname.substring(sep + 1);
-  return null;
 }
 
 function buildClasses(semester, shift) {
