@@ -9,12 +9,11 @@ const LOG_D = 1;
 const LOG_I = 2;
 const LOG_W = 3;
 const LOG_E = 4;
-
-const db = require("electron").remote.getGlobal('db');
 const objects = require("./objects");
-const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
+const db = require("electron").remote.getGlobal('db');
 const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
-var autocompleteOptions = {
+const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
+const autocompleteOptions = {
   minLength: 0,
   // autoFocus: true, // automatically focus the first item in result list
   source: function(request, response) {
@@ -82,9 +81,12 @@ var autocompleteOptions = {
   }
 };
 
+var classes = undefined;
+
 $(".modal").modal();
 $(".button-collapse").sideNav();
 setTimeout(mainInit, 0);
+setTimeout(loadClasses, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
@@ -710,6 +712,103 @@ function $buildRow(obj, tuple, rownum) {
     }
   });
   return $row;
+}
+
+function naming(fullname) {
+  if (fullname.length <= nameLen) return fullname;
+
+  var firstname = firstName(fullname);
+  if (firstname.length === nameLen || firstname.length + 1 === nameLen) // + 1 por causa do espaço com o sobrenome
+    return firstname;
+  if (firstname.length > nameLen) return firstname.substring(0, nameLen - 3) + "...";
+
+  var lastname = lastName(fullname);
+  if (lastname !== null) {
+    var name = firstname + " " + lastname;
+    if (name.length <= nameLen) return name;
+    return name.substring(0, nameLen - 3) + "...";
+  }
+  return firstname;
+}
+
+function addCloseButton($el) {
+  // <i class="close material-icons">close</i>
+  let $remove = $createTextualElement("i", {
+    "class": "close material-icons"
+  }, "close");
+  $remove.on("click", (event) => {
+    var $target = $(event.currentTarget.parentNode.parentNode);
+    var $siblings = $($($target[0].parentNode).children());
+    $target.addClass("removed");
+    without($siblings, $target, "removed");
+    adjustHeight($siblings);
+  });
+  $el.children(".delete-class").append($remove);
+}
+
+function $createClass(row) {
+  var color = row.siape % colors.length;
+  var variation = row.siape % (colorVariations.length + 1);
+  var $class = $createTextualElement("div", {
+    "siape": row.siape,
+    "code": row.code,
+    "period": row.period,
+    "title": row.name + "\n" + row.title + " (" + row.code + ")",
+    "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
+  }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
+  addCloseButton($class);
+  return $class;
+}
+
+function adjustHeight($elements) {
+  if (typeof $elements !== typeof undefined && $elements !== null) {
+    var ratio = 100.0 / $elements.length;
+    // $elements.css("max-height", ratio);
+    $.each($elements, (index, element) => {
+      $(element).css("max-height", ratio);
+    });
+  } else {
+    syslog(LOG_W, "adjustHeight", 1, "Invalid $elements argument");
+  }
+}
+
+function loadClasses() {
+  classes = [];
+  var timeQuery = {
+    string: "select distinct semester, dow, period, block from class;",
+    params: []
+  };
+  db.each(timeQuery.string, timeQuery.params, function(timeErr, timeRow) {
+    if (timeErr !== null) {
+      syslog(LOG_E, "loadClasses", 1, timeErr);
+    } else {
+      let classes = [];
+      let classQuery = {
+        // cannot select just professor.* and subject.* because of $createClass column dependencies
+        string: "select * from class natural join professor natural join subject where semester = ? and dow = ? and period = ? and block = ?;",
+        params: [timeRow.semester, timeRow.dow, timeRow.period, timeRow.block]
+      };
+      let selector = "td.putable[semester=" + timeRow.semester + "][shift=" + timeRow.period + "][day=" + timeRow.dow + "][time=" + timeRow.block + "]";
+      console.log(selector);
+      db.each(classQuery.string, classQuery.params, function(classErr, classRow) {
+        if (classErr !== null) {
+          syslog(LOG_E, "loadClasses", 1, classErr);
+        } else {
+          let $class = $createClass(classRow);
+          $class.css("width", "100%");
+          $class.css("display", "block");
+          classes.push($class);
+        }
+      }, function(completedClassErr, completedClassRowQtty) {
+        if (completedClassErr !== null) {
+          syslog(LOG_E, "loadClasses", 2, completedClassErr);
+        } else {
+          adjustHeight(classes);
+          $(selector).append(classes);
+        }
+      });
+    }
+  });
 }
 
 function logLevelToString(level) {

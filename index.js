@@ -59,18 +59,7 @@ drake.on("drop", function(el, target, source, sibling) {
   } else {
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
-      // <i class="close material-icons">close</i>
-      let $remove = $createTextualElement("i", {
-        "class": "close material-icons"
-      }, "close");
-      $remove.on("click", (event) => {
-        var $target = $(event.currentTarget.parentNode.parentNode);
-        var $siblings = $($($target[0].parentNode).children());
-        $target.addClass("removed");
-        without($siblings, $target, "removed");
-        adjustHeight($siblings);
-      });
-      $el.children(".delete-class").append($remove);
+      addCloseButton($el);
     }
   }
 });
@@ -175,18 +164,6 @@ function without($elements, $el, classFilter) {
   return false;
 }
 
-function adjustHeight($elements) {
-  if (typeof $elements !== typeof undefined && $elements !== null) {
-    var ratio = 100.0 / $elements.length;
-    // $elements.css("max-height", ratio);
-    $.each($elements, (index, element) => {
-      $(element).css("max-height", ratio);
-    });
-  } else {
-    syslog(LOG_W, "adjustHeight", 1, "Invalid $elements argument");
-  }
-}
-
 function $buildTimeTable(semester, shift) {
   var i = 0,
     times = 0;
@@ -280,23 +257,6 @@ function lastName(fullname) {
   return null;
 }
 
-function naming(fullname) {
-  if (fullname.length <= nameLen) return fullname;
-
-  var firstname = firstName(fullname);
-  if (firstname.length === nameLen || firstname.length + 1 === nameLen) // + 1 por causa do espaço com o sobrenome
-    return firstname;
-  if (firstname.length > nameLen) return firstname.substring(0, nameLen - 3) + "...";
-
-  var lastname = lastName(fullname);
-  if (lastname !== null) {
-    var name = firstname + " " + lastname;
-    if (name.length <= nameLen) return name;
-    return name.substring(0, nameLen - 3) + "...";
-  }
-  return firstname;
-}
-
 function buildClasses(semester, shift) {
   var $row = $createElement("div", {
     "semester": semester,
@@ -310,17 +270,13 @@ function buildClasses(semester, shift) {
   };
   var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
   db.each(query.string, query.params, function(err, row) {
-    let color = row.siape % colors.length;
-    let variation = row.siape % (colorVariations.length + 1);
-    let $div = $createTextualElement("div", {
-      "siape": row.siape,
-      "code": row.code,
-      "period": row.period,
-      "title": row.name + "\n" + row.title + " (" + row.code + ")",
-      "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
-    }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
-    $(rowSelector).append($div);
-  }, function(err, nrows) {});
+    if (err !== null) {
+      syslog(LOG_E, "buildClasses", 1, err);
+    } else {
+      let $div = $createClass(row);
+      $(rowSelector).append($div);
+    }
+  });
   return $row;
 }
 

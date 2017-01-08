@@ -485,6 +485,20 @@ create table professor_restriction(
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade
 );
 
+create table class(
+  semester  integer,
+  dow       integer,
+  period    integer,
+  block     integer,
+  siape     integer,
+  code      varchar(8),
+  primary key(semester, dow, period, block, siape, code),
+  foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
+  foreign key(siape, code) references professor_subject(siape, code) on delete cascade
+);
+insert into class values (6, 2, 1, 1, 1645173, "GEX108");
+insert into class values (6, 2, 1, 1, 1835372, "GEX105");
+
 -- create table period_restriction(
 --   periodr integer,
 --   number  integer,
@@ -502,20 +516,4 @@ create table professor_restriction(
 --   foreign key(rsod) references shift(sod),
 --   foreign key(rhour) references time(hour),
 --   constraint unique_period_restriction unique(number, sod, hour, rnumber, rsod, rhour)
--- );
---
--- create table class(
---   lesson  integer,
---   siape   integer,
---   code    varchar(8),
---   number  integer,
---   sod     integer,
---   hour    integer,
---   primary key(lesson),
---   foreign key(siape) references professor(siape),
---   foreign key(code) references subject(code),
---   foreign key(number) references dayofweek(number),
---   foreign key(sod) references shift(sod),
---   foreign key(hour) references time(hour),
---   constraint unique_class unique(siape, code, number, sod, hour)
 -- );
