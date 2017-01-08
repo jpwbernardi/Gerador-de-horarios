@@ -16,7 +16,7 @@ Descrição do projeto:
 # Para contribuir com o projeto:
 
 - Instalar o Node.js/npm
-  + Via [package manager](https://nodejs.org/en/download/package-manager/#windows) (recomendado)
+  + Via [package manager](https://nodejs.org/en/download/package-manager/) (recomendado)
   + A partir do instalador do [site](https://nodejs.org/en/download/)
 
 - Algumas versões do Ubuntu e derivados têm problemas com os nomes dos executáveis. Caso o `npm install` falhe, pode-se tentar a seguinte solução:
@@ -25,18 +25,17 @@ Descrição do projeto:
   sudo ln -s /usr/bin/nodejs /usr/bin/node
   ```
 
-- Executar o comando abaixo como administrador - **apenas para Windows** ([fonte](http://stackoverflow.com/questions/21658832/npm-install-error-msb3428-could-not-load-the-visual-c-component-vcbuild-ex#answer-39235952))
+- Executar o comando abaixo como **administrador** - **apenas para Windows** ([fonte](http://stackoverflow.com/questions/21658832/npm-install-error-msb3428-could-not-load-the-visual-c-component-vcbuild-ex#answer-39235952), [mais informações](https://github.com/Microsoft/nodejs-guidelines/blob/master/windows-environment.md))
 
   ```
   npm install --global --production windows-build-tools
   ```
 
-- Adicionar o Python 2 à [PATH](https://www.java.com/en/download/help/path.xml) - **apenas para Windows**
-  + Foi instalado na pasta `C:\Users\<your_user>\.windows-build-tools\python27` com o comando acima
+  + Adicionar o Python 2 (instalado na pasta `%USERPROFILE%\.windows-build-tools\python27` pelo comando acima) à [PATH](https://www.java.com/en/download/help/path.xml)
 
 - Baixar o [SQLite](http://sqlite.org/download.html) (o pacote de binários pré-compilados e com shell) para executar o `resetdb.sh`
   + Extrair em uma pasta da sua escolha
-  + Adicionar ao PATH também
+  + Adicionar ao PATH
 
 - Após clonar o repositório e estando na pasta raiz do projeto, executar:
 
@@ -53,7 +52,8 @@ Descrição do projeto:
   Para Windows:
 
   ```
-  ./node_modules/.bin/electron-rebuild -w sqlite3 -p
+  .\node_modules\.bin\electron-rebuild.cmd
+  mv '.\node_modules\sqlite3\lib\binding\{node_abi}-{platform}-{arch}\' .\node_modules\sqlite3\lib\binding\electron-v1.4-win32-x64\
   ```
 
 - Finalmente, para executar o projeto:
