@@ -20,6 +20,8 @@
 
 .combo-caret {
   cursor: pointer;
+  top: -16px !important;
+  font-size: 12px !important;
 }
 
 .btn {
@@ -68,7 +70,6 @@
 .ui-menu-item .ui-state-active {
   background-color: #eee;
 }
-
 
 /* Materialize container overwrite */
 

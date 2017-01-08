@@ -82,12 +82,10 @@ var autocompleteOptions = {
   }
 };
 
-$(document).ready(function() {
-  $(".modal").modal();
-});
+$(".modal").modal();
+$(".button-collapse").sideNav();
 setTimeout(mainInit, 0);
 buildMenu();
-$(".button-collapse").sideNav();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
 

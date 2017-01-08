@@ -22,7 +22,7 @@ table tbody tr td.putable {
 .draggable {
   margin: 0;
   height: 100px;
-  max-width: 15%;
+  width: 15%;
   max-height: 100px;
   overflow: hidden;
   text-align: left;

@@ -43,7 +43,7 @@ drake.on("drag", function(el, source) {
 drake.on("over", function(el, container, source) {
   var $el = $(el);
   var $newSiblings = $($(container).children());
-  $el.css("max-width", "100%");
+  $el.css("width", "100%");
   if (!container.classList.contains("dragula-source")) {
     // if the container el is going to is not .dragula-source
     $newSiblings.push($el);
