@@ -10,8 +10,8 @@ const LOG_I = 2;
 const LOG_W = 3;
 const LOG_E = 4;
 
-const db = nodeRequire("electron").remote.getGlobal('db');
-const objects = nodeRequire("./objects");
+const db = require("electron").remote.getGlobal('db');
+const objects = require("./objects");
 const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
 const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
 var autocompleteOptions = {

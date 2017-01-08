@@ -2,9 +2,9 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-window.nodeRequire = require;
-delete window.require;
-delete window.exports;
-delete window.module;
-
-window.$ = window.jQuery = nodeRequire("jquery");
+// window.nodeRequire = require;
+// delete window.require;
+// delete window.exports;
+// delete window.module;
+//
+// window.$ = window.jQuery = nodeRequire("jquery");

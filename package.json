@@ -11,9 +11,12 @@
     "url": "git+https://github.com/jpwbernardi/Gerador-de-horarios"
   },
   "keywords": [
-    "Electron",
-    "scheduler",
-    "generator"
+    "academic",
+    "agenda",
+    "electron",
+    "material",
+    "materialize",
+    "scheduler"
   ],
   "author": "GitHub",
   "license": "CC0-1.0",
@@ -23,13 +26,15 @@
   "homepage": "https://github.com/jpwbernardi/Gerador-de-horarios",
   "dependencies": {
     "dragula": "^3.7.2",
-    "jquery": "^3.1.0",
+    "jquery": "^3.1.1",
+    "jquery-mask-plugin": "^1.14.8",
     "jquery-steps": "^1.1.0",
-    "materialize-css": "^0.97.7",
-    "sqlite3": "^3.1.4"
+    "materialize-css": "^0.97.8",
+    "sqlite3": "^3.1.8"
   },
   "devDependencies": {
-    "electron": "^1.4.3",
-    "electron-rebuild": "^1.2.1"
+    "bluebird": "^3.4.7",
+    "electron": "^1.4.13",
+    "electron-rebuild": "^1.5.5"
   }
 }

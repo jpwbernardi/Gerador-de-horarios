@@ -135,19 +135,23 @@ function queryProfessorRestrictions() {
     params: []
   };
   db.each(professorQuery.string, professorQuery.params, (err, row) => {
-    var query = {
-      string: "select 'td[shift=' || period || '][day=' || dow || '][time=' || block || ']' as restriction from professor_restriction where siape = ? and active = 1;",
-      params: [row.siape]
-    };
-    db.all(query.string, query.params, (err, rows) => {
-      if (err === null) {
-        professorRestrictions[row.siape] = rows[0].restriction;
-        for (let i = 1; i < rows.length; i++) professorRestrictions[row.siape] += ", " + rows[i].restriction;
-        syslog(LOG_I, "queryProfessorRestrictions", 1, "Loaded " + rows.length + " professor restrictions for SIAPE " + row.siape);
-      } else {
-        syslog(LOG_E, "queryProfessorRestrictions", 2, err);
-      }
-    });
+    if (err !== null) {
+      syslog(LOG_E, "queryProfessorRestrictions", 1, err);
+    } else {
+      var query = {
+        string: "select 'td[shift=' || period || '][day=' || dow || '][time=' || block || ']' as restriction from professor_restriction where siape = ? and active = 1;",
+        params: [row.siape]
+      };
+      db.all(query.string, query.params, (err, rows) => {
+        if (err === null) {
+          professorRestrictions[row.siape] = rows[0].restriction;
+          for (let i = 1; i < rows.length; i++) professorRestrictions[row.siape] += ", " + rows[i].restriction;
+          syslog(LOG_I, "queryProfessorRestrictions", 1, "Loaded " + rows.length + " professor restrictions for SIAPE " + row.siape);
+        } else {
+          syslog(LOG_E, "queryProfessorRestrictions", 2, err);
+        }
+      });
+    }
   });
 }
 
