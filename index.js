@@ -241,8 +241,7 @@ function buildClasses(semester, shift) {
     if (err !== null) {
       syslog(LOG_E, "buildClasses", 1, err);
     } else {
-      let $div = $createClass(row, false);
-      $(rowSelector).append($div);
+      $(rowSelector).append($createSourceClass(row));
     }
   });
   return $row;

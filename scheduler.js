@@ -50,7 +50,7 @@ const autocompleteOptions = {
     } else syslog(LOG_I, "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
-    if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
+    if (typeof ownerObj.orderBy !== typeof undefined)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
     syslog(LOG_I, "autocompleteOptions", 1, query);
     syslog(LOG_I, "autocompleteOptions", 5, params);
@@ -82,10 +82,13 @@ const autocompleteOptions = {
   }
 };
 
+// array of arrays, first index is list head of each time block
+var globalClassList = [];
+
 $(".modal").modal();
 $(".button-collapse").sideNav();
 setTimeout(mainInit, 0);
-setTimeout(loadClasses, 0);
+setTimeout(loadClassesFromDatabase, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
@@ -435,7 +438,7 @@ function orderBy(fields, types) {
       throw new RangeError("Ordering type must be specified for every field, if any");
   } else defaultOrder = true;
   for (let i = 0; i < fields.length; i++)
-    order += fields[i] + " " + decodeOrder(defaultOrder === true ? ORDER_TYPE_ASC : types[i]);
+    order += fields[i] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[i]);
   return order;
 }
 
@@ -546,6 +549,9 @@ function $buildForm(obj, clazz) {
   } else if (clazz === "list") {
     let rownum = 0;
     let query = selectAllJoins(obj);
+    if (typeof obj.orderBy !== typeof undefined)
+      query += " order by " + orderBy(obj.orderBy.fields, obj.orderBy.types);
+    console.log(query);
     db.each(query, function(err, row) {
       if (err === null)
         setTimeout(function(rownum) {
@@ -757,7 +763,7 @@ function naming(fullname) {
   return firstname;
 }
 
-function isSame(theClass, otherClass, classFilter) {
+function isSameClass(theClass, otherClass, classFilter) {
   if (otherClass.classList.contains(classFilter)
     && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
     && theClass.getAttribute("code") === otherClass.getAttribute("code")
@@ -769,7 +775,7 @@ function isSame(theClass, otherClass, classFilter) {
 function without($elements, $el, classFilter) {
   var i;
   for (i = 0; i < $elements.length; i++)
-    if (isSame($el[0], $elements[i], classFilter)) break;
+    if (isSameClass($el[0], $elements[i], classFilter)) break;
   if (i < $elements.length) {
     $elements.splice(i, 1);
     return true;
@@ -796,13 +802,30 @@ function $createClass(row, addClose) {
   var color = row.siape % colors.length;
   var variation = row.siape % (colorVariations.length + 1);
   var $class = $createTextualElement("div", {
+    "counter": row.counter,
+    "semester": row.semester,
+    "dow": row.dow,
+    "period": row.period,
+    "block": row.block,
     "siape": row.siape,
     "code": row.code,
-    "period": row.period,
+    "prevClass": row.prevClass,
+    "nextClass": row.nextClass,
     "title": row.name + "\n" + row.title + " (" + row.code + ")",
     "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
   }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
   if (addClose) addCloseButton($class);
+  return $class;
+}
+
+function $createSourceClass(row) {
+  return $createClass(row, false);
+}
+
+function $createAddedClass(row) {
+  var $class = $createClass(row, true);
+  $class.css("width", "100%");
+  $class.css("display", "block");
   return $class;
 }
 
@@ -818,40 +841,53 @@ function adjustHeight($elements) {
   }
 }
 
-function loadClasses() {
-  var classes = [];
-  var timeQuery = {
-    string: "select distinct semester, dow, period, block from class;",
+function loadClassesFromDatabase() {
+  var headCounterQuery = {
+    string: "select counter, semester, dow, period, block from class where prevClass is null group by semester, dow, period, block;",
     params: []
   };
-  db.each(timeQuery.string, timeQuery.params, function(timeErr, timeRow) {
-    if (timeErr !== null) {
-      syslog(LOG_E, "loadClasses", 1, timeErr);
+  db.each(headCounterQuery.string, headCounterQuery.params, function(headCounterErr, headCounterRow) {
+    if (headCounterErr !== null) {
+      syslog(LOG_E, "loadClassesFromDatabase", 1, headCounterErr);
     } else {
-      let classes = [];
-      let classQuery = {
-        // cannot select just professor.* and subject.* because of $createClass column dependencies
-        string: "select * from class natural join professor natural join subject where semester = ? and dow = ? and period = ? and block = ?;",
-        params: [timeRow.semester, timeRow.dow, timeRow.period, timeRow.block]
+      // cannot select just professor.* and subject.* because of $createClass column dependencies
+      let classQueryString = "select * from class natural join professor natural join subject where counter = ?;"
+      let headQuery = {
+        string: classQueryString,
+        params: [headCounterRow.counter]
       };
-      let selector = "td.putable[semester=" + timeRow.semester + "][shift=" + timeRow.period + "][day=" + timeRow.dow + "][time=" + timeRow.block + "]";
-      db.each(classQuery.string, classQuery.params, function(classErr, classRow) {
-        if (classErr !== null) {
-          syslog(LOG_E, "loadClasses", 1, classErr);
+      syslog(LOG_I, "loadClassesFromDatabase", 2, "headQuery: " + headQuery.string);
+      syslog(LOG_I, "loadClassesFromDatabase", 3, "headParams: " + headQuery.params);
+      db.get(headQuery.string, headQuery.params, function(headErr, headRow) {
+        if (headErr !== null) {
+          syslog(LOG_E, "loadClassesFromDatabase", 4, headErr + " for parameters " + headQuery.params);
+        } else if (typeof headRow === typeof undefined) {
+          syslog(LOG_E, "loadClassesFromDatabase", 5, "Head row is undefined for parameters " + headQuery.params);
         } else {
-          let $class = $createClass(classRow, true);
-          $class.css("width", "100%");
-          $class.css("display", "block");
-          classes.push($class);
-        }
-      }, function(completedClassErr, completedClassRowQtty) {
-        if (completedClassErr !== null) {
-          syslog(LOG_E, "loadClasses", 2, completedClassErr);
-        } else {
-          adjustHeight(classes);
-          $(selector).append(classes);
+          var nextClass = headRow.nextClass;
+          var classList = [$createAddedClass(headRow)];
+          loadNextClassInto(classList, classQueryString, headRow.nextClass);
         }
       });
+    }
+  });
+}
+
+function loadNextClassInto(list, query, next) {
+  syslog(LOG_D, "loadNextClassInto", 1, "nextClass: " + next);
+  db.get(query, [next], function(err, row) {
+    if (err !== null) {
+      syslog(LOG_E, "loadNextClassInto", 2, err);
+    } else {
+      list.push($createAddedClass(row));
+      if (row.nextClass !== null) {
+        loadNextClassInto(list, query, row.nextClass);
+      } else {
+        globalClassList.push(list);
+        adjustHeight(list);
+        let selector = "td.putable[semester=" + row.semester + "][shift=" + row.period + "][day=" + row.dow + "][time=" + row.block + "]";
+        $(selector).append(list);
+      }
     }
   });
 }
