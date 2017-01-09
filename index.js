@@ -99,7 +99,6 @@ queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
   var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
-  console.log(selector);
   $(selector).empty();
 });
 
@@ -118,26 +117,41 @@ $("main").on("click", ".make-pdf", (event) => {
   // incluir ação
 });
 
+function buildRestrictionSelector(periodDowBlockRow) {
+  // 'td.putable[shift=' || period || '][day=' || dow || '][time=' || block || ']'
+  var selector = "td.putable";
+  if (periodDowBlockRow.period !== 0) {
+    selector += "[shift='" + periodDowBlockRow.period + "']";
+  }
+  if (periodDowBlockRow.dow !== 0) {
+    selector += "[day='" + periodDowBlockRow.dow + "']";
+  }
+  if (periodDowBlockRow.block !== 0) {
+    selector += "[time='" + periodDowBlockRow.block + "']";
+  }
+  return selector;
+}
+
 function queryProfessorRestrictions() {
   var professorQuery = {
-    string: "select siape from professor_restriction group by siape;",
+    string: "select distinct siape from professor_restriction;",
     params: []
   };
-  db.each(professorQuery.string, professorQuery.params, (err, row) => {
-    if (err !== null) {
-      syslog(LOG_E, "queryProfessorRestrictions", 1, err);
+  db.each(professorQuery.string, professorQuery.params, (siapeErr, siapeRow) => {
+    if (siapeErr !== null) {
+      syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 1, siapeErr);
     } else {
-      var query = {
-        string: "select 'td[shift=' || period || '][day=' || dow || '][time=' || block || ']' as restriction from professor_restriction where siape = ? and active = 1;",
-        params: [row.siape]
+      var restrictionQuery = {
+        string: "select period, dow, block from professor_restriction where siape = ? and active = 1;",
+        params: [siapeRow.siape]
       };
-      db.all(query.string, query.params, (err, rows) => {
-        if (err === null) {
-          professorRestrictions[row.siape] = rows[0].restriction;
-          for (let i = 1; i < rows.length; i++) professorRestrictions[row.siape] += ", " + rows[i].restriction;
-          syslog(LOG_I, "queryProfessorRestrictions", 1, "Loaded " + rows.length + " professor restrictions for SIAPE " + row.siape);
+      db.all(restrictionQuery.string, restrictionQuery.params, (restrictionErr, restrictionRows) => {
+        if (restrictionErr === null) {
+          professorRestrictions[siapeRow.siape] = buildRestrictionSelector(restrictionRows[0]);
+          for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i].restriction);
+          syslog(LOG_LEVEL.I, "queryProfessorRestrictions", 1, "Loaded " + restrictionRows.length + " professor restrictions for SIAPE " + siapeRow.siape);
         } else {
-          syslog(LOG_E, "queryProfessorRestrictions", 2, err);
+          syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 2, restrictionErr);
         }
       });
     }
@@ -239,7 +253,7 @@ function buildClasses(semester, shift) {
   var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
   db.each(query.string, query.params, function(err, row) {
     if (err !== null) {
-      syslog(LOG_E, "buildClasses", 1, err);
+      syslog(LOG_LEVEL.E, "buildClasses", 1, err);
     } else {
       $(rowSelector).append($createSourceClass(row));
     }

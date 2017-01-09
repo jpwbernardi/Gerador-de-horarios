@@ -501,12 +501,12 @@ create table class(
   foreign key(prevClass) references class(counter) on delete set default,
   foreign key(prevClass) references class(counter) on delete set default
 );
-insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
-insert into class values (2, 6, 2, 1, 1, 1645173, "GEX108", 1, 3);
-insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
-insert into class values (4, 6, 3, 1, 1, 1645173, "GEX108", null, 5);
-insert into class values (5, 6, 3, 1, 1, 1645173, "GEX108", 4, 6);
-insert into class values (6, 6, 3, 1, 1, 1835372, "GEX105", 5, null);
+insert into class values (1, 1, 2, 1, 1, 1645173, "GEX108", null, 2);
+insert into class values (2, 1, 2, 1, 1, 1645173, "GEX108", 1, 3);
+insert into class values (3, 1, 2, 1, 1, 1835372, "GEX105", 2, null);
+insert into class values (4, 1, 3, 1, 1, 1645173, "GEX108", null, 5);
+insert into class values (5, 1, 3, 1, 1, 1645173, "GEX108", 4, 6);
+insert into class values (6, 1, 3, 1, 1, 1835372, "GEX105", 5, null);
 
 -- create table period_restriction(
 --   periodr integer,

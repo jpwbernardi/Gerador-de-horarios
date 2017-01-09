@@ -43,6 +43,7 @@ app.on('ready', () => {
   global.db.on('close', function() {
     console.log('Dabase closed successfully!');
   });
+  loadClassesFromDatabase();
   createWindow();
 })
 
@@ -71,3 +72,56 @@ app.on('quit', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+global.classRows = null;
+global.LOG_LEVEL = {
+  V: 0,
+  D: 1,
+  I: 2,
+  W: 3,
+  E: 4
+};
+global.LOG_LEVEL_STRING = ["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR"];
+
+function syslog(logLevel, functionName, code, message) {
+  console.log(LOG_LEVEL_STRING[logLevel] + ": " + message, "(code " + code + " at " + functionName + ")");
+}
+
+function loadClassesFromDatabase() {
+  classRows = [];
+  let headCounterQuery = {
+    string: "select counter, semester, dow, period, block from class where prevClass is null group by semester, dow, period, block;",
+    params: []
+  };
+  db.each(headCounterQuery.string, headCounterQuery.params, function(headCounterErr, headCounterRow) {
+    if (headCounterErr !== null) {
+      syslog(LOG_LEVEL.E, "loadClassesFromDatabase", 1, headCounterErr);
+    } else {
+      let classList = [];
+      loadClassesInto(classList, headCounterRow.counter);
+    }
+  });
+}
+
+function loadClassesInto(classList, classCounter) {
+  let classQuery = {
+    // cannot select just professor.* and subject.* because of $createClass column dependencies
+    string: "select * from class natural join professor natural join subject where counter = ?;",
+    params: [classCounter]
+  };
+  syslog(LOG_LEVEL.D, "loadClassesInto", 1, "query params: " + classQuery.params);
+  db.get(classQuery.string, classQuery.params, function(classErr, classRow) {
+    if (classErr !== null) {
+      syslog(LOG_LEVEL.E, "loadClassesInto", 2, classErr);
+    } else if (typeof classRow === typeof undefined) {
+      syslog(LOG_LEVEL.E, "loadClassesInto", 3, "undefined classRow");
+    } else {
+      classList.push(classRow);
+      if (classRow.nextClass !== null) {
+        loadClassesInto(classList, classRow.nextClass);
+      } else {
+        classRows.push(classList);
+      }
+    }
+  });
+}

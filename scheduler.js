@@ -4,14 +4,12 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
 // https://github.com/mapbox/node-sqlite3/wiki/API
 
-const LOG_V = 0;
-const LOG_D = 1;
-const LOG_I = 2;
-const LOG_W = 3;
-const LOG_E = 4;
 const nameLen = 16;
 const objects = require("./objects");
-const db = require("electron").remote.getGlobal('db');
+const electron = require("electron");
+const db = electron.remote.getGlobal('db');
+const LOG_LEVEL = electron.remote.getGlobal("LOG_LEVEL");
+const LOG_LEVEL_STRING = electron.remote.getGlobal("LOG_LEVEL_STRING");
 const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
 const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
 const autocompleteOptions = {
@@ -43,17 +41,17 @@ const autocompleteOptions = {
             params.push($whereField.val());
           }
         } else {
-          syslog(LOG_E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
-      } else syslog(LOG_W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
-    } else syslog(LOG_I, "autocompleteOptions", 2, obj.name + " has no selectWhere");
+      } else syslog(LOG_LEVEL.W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else syslog(LOG_LEVEL.I, "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
     if (typeof ownerObj.orderBy !== typeof undefined)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
-    syslog(LOG_I, "autocompleteOptions", 1, query);
-    syslog(LOG_I, "autocompleteOptions", 5, params);
+    syslog(LOG_LEVEL.I, "autocompleteOptions", 1, query);
+    syslog(LOG_LEVEL.I, "autocompleteOptions", 5, params);
     db.each(query, params, function(err, row) {
       var keys = autocompleteFields(ownerObj);
       var label = row[keys[0]];
@@ -68,7 +66,7 @@ const autocompleteOptions = {
           if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });
-        syslog(LOG_I, "autocompleteOptions", 6, JSON.stringify(rowJson));
+        syslog(LOG_LEVEL.I, "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
@@ -82,11 +80,10 @@ const autocompleteOptions = {
   }
 };
 
-// array of arrays, first index is list head of each time block
-var globalClassList = [];
+var globalClassRows = electron.remote.getGlobal("classRows");
 
 setTimeout(mainInit, 0);
-setTimeout(loadClassesFromDatabase, 0);
+setTimeout(buildGridClasses, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
@@ -94,19 +91,8 @@ setTimeout(buildForm, 0, "list");
 $(".modal").modal();
 $(".button-collapse").sideNav();
 
-function logLevelToString(level) {
-  switch (level) {
-    case LOG_V: return "VERBOSE";
-    case LOG_D: return "DEBUG";
-    case LOG_I: return "INFO";
-    case LOG_W: return "WARNING";
-    case LOG_E: return "ERROR";
-  }
-  return "undefined";
-}
-
-function syslog(level, functionName, code, message) {
-  console.log(logLevelToString(level) + ": " + message, "(code " + code + " at " + functionName + ")");
+function syslog(logLevel, functionName, code, message) {
+  console.log(LOG_LEVEL_STRING[logLevel] + ": " + message, "(code " + code + " at " + functionName + ")");
 }
 
 function mainInit() {
@@ -140,13 +126,13 @@ function deleteObject(object, fields) {
   var error = null;
   var query = valuesWhere(object, fields);
   query.string = "delete from " + object.table + " where " + query.string;
-  syslog(LOG_I, "deleteObject", 1, query.string);
-  syslog(LOG_I, "deleteObject", 2, query.params);
+  syslog(LOG_LEVEL.I, "deleteObject", 1, query.string);
+  syslog(LOG_LEVEL.I, "deleteObject", 2, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
-      syslog(LOG_I, "deleteObject", 1, "successfully deleted item");
+      syslog(LOG_LEVEL.I, "deleteObject", 1, "successfully deleted item");
     } else {
-      syslog(LOG_E, "deleteObject", 2, err);
+      syslog(LOG_LEVEL.E, "deleteObject", 2, err);
       error = err;
     }
   });
@@ -163,10 +149,10 @@ function deleteRow(event) {
   if (error === null) {
     $row.remove();
     Materialize.toast("Excluído com sucesso!", 2000);
-    syslog(LOG_I, ".form-delete click", 1, "successfully deleted item");
+    syslog(LOG_LEVEL.I, ".form-delete click", 1, "successfully deleted item");
   } else {
     Materialize.toast("Erro na exclusão!", 3000);
-    syslog(LOG_E, ".form-delete click", 2, err);
+    syslog(LOG_LEVEL.E, ".form-delete click", 2, err);
   }
 }
 
@@ -193,11 +179,11 @@ function saveForm(event) {
     if (editable) deleteObject(obj, fields);
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    syslog(LOG_I, ".form-save click", 1, query.string);
-    syslog(LOG_I, ".form-save click", 2, query.params);
+    syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
+    syslog(LOG_LEVEL.I, ".form-save click", 2, query.params);
     db.run(query.string, query.params, function(err) {
       if (err !== null) {
-        syslog(LOG_E, ".form-save click", 3, err);
+        syslog(LOG_LEVEL.E, ".form-save click", 3, err);
         Materialize.toast("Este registro já está cadastrado!", 3000);
       } else {
         if (!editable) {
@@ -357,7 +343,7 @@ function autocompleteFields(obj) {
     } else {
       fields = obj.fields; // all fields from the 'select *'
     }
-  } else syslog(LOG_W, "autocompleteFields", 1, "obj is undefined!");
+  } else syslog(LOG_LEVEL.W, "autocompleteFields", 1, "obj is undefined!");
   return fields;
 }
 
@@ -414,7 +400,7 @@ function decodeType(obj, findex) {
       // case objects.FIELD_TYPE_FK:
       //   return "fk";
     default:
-      syslog(LOG_W, "decodeType", 1, "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      syslog(LOG_LEVEL.W, "decodeType", 1, "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -426,7 +412,7 @@ function decodeOrder(type) {
     case -1:
       return "desc";
     default:
-      syslog(LOG_W, "decodeOrder", 1, "unknown order by, type '" + type + "'!");
+      syslog(LOG_LEVEL.W, "decodeOrder", 1, "unknown order by, type '" + type + "'!");
       return "";
   }
 }
@@ -450,7 +436,7 @@ function groupBy(fields) {
     group = fields[0];
     for (let i = 1; i < fields.length; i++)
       group += ", " + fields[i];
-  } else syslog(LOG_W, "groupBy", 1, "empty 'fields' parameter");
+  } else syslog(LOG_LEVEL.W, "groupBy", 1, "empty 'fields' parameter");
   return group;
 }
 
@@ -539,7 +525,7 @@ function buildForm(clazz) {
     if (typeof obj !== typeof undefined) {
       $(elem).append($buildForm(obj, clazz));
     } else {
-      syslog(LOG_E, "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+      syslog(LOG_LEVEL.E, "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
     }
   });
 }
@@ -559,10 +545,10 @@ function $buildForm(obj, clazz) {
         setTimeout(function(rownum) {
           $form.append($buildListRow(obj, row, rownum));
         }, 0, rownum++);
-      else syslog(LOG_E, "$buildForm", 1, "error fetching " + obj.table + " rows");
+      else syslog(LOG_LEVEL.E, "$buildForm", 1, "error fetching " + obj.table + " rows");
     }, (err, nrows) => {
-      if (err === null) syslog(LOG_I, "$buildForm", 2, "done loading " + nrows + " row(s)");
-      else syslog(LOG_E, "$buildForm", 3, err);
+      if (err === null) syslog(LOG_LEVEL.I, "$buildForm", 2, "done loading " + nrows + " row(s)");
+      else syslog(LOG_LEVEL.E, "$buildForm", 3, err);
     });
   }
   return $form;
@@ -613,8 +599,8 @@ function appendNewRow(obj, fields) {
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  syslog(LOG_I, "appendNewRow", 1, query.string);
-  syslog(LOG_I, "appendNewRow", 2, query.params);
+  syslog(LOG_LEVEL.I, "appendNewRow", 1, query.string);
+  syslog(LOG_LEVEL.I, "appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
@@ -622,8 +608,8 @@ function appendNewRow(obj, fields) {
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      } else syslog(LOG_E, "appendNewRow", 4, "tuple is undefined");
-    } else syslog(LOG_E, "appendNewRow", 3, err);
+      } else syslog(LOG_LEVEL.E, "appendNewRow", 4, "tuple is undefined");
+    } else syslog(LOG_LEVEL.E, "appendNewRow", 3, err);
   });
 }
 
@@ -834,63 +820,23 @@ function $createAddedClass(row) {
 function adjustHeight($elements) {
   if (typeof $elements !== typeof undefined && $elements !== null) {
     var ratio = 100.0 / $elements.length;
-    // $elements.css("max-height", ratio);
     $.each($elements, (index, element) => {
       $(element).css("max-height", ratio);
     });
   } else {
-    syslog(LOG_W, "adjustHeight", 1, "Invalid $elements argument");
+    syslog(LOG_LEVEL.W, "adjustHeight", 1, "Invalid $elements argument");
   }
 }
 
-function loadClassesFromDatabase() {
-  var headCounterQuery = {
-    string: "select counter, semester, dow, period, block from class where prevClass is null group by semester, dow, period, block;",
-    params: []
-  };
-  db.each(headCounterQuery.string, headCounterQuery.params, function(headCounterErr, headCounterRow) {
-    if (headCounterErr !== null) {
-      syslog(LOG_E, "loadClassesFromDatabase", 1, headCounterErr);
-    } else {
-      // cannot select just professor.* and subject.* because of $createClass column dependencies
-      let classQueryString = "select * from class natural join professor natural join subject where counter = ?;"
-      let headQuery = {
-        string: classQueryString,
-        params: [headCounterRow.counter]
-      };
-      syslog(LOG_I, "loadClassesFromDatabase", 2, "headQuery: " + headQuery.string);
-      syslog(LOG_I, "loadClassesFromDatabase", 3, "headParams: " + headQuery.params);
-      db.get(headQuery.string, headQuery.params, function(headErr, headRow) {
-        if (headErr !== null) {
-          syslog(LOG_E, "loadClassesFromDatabase", 4, headErr + " for parameters " + headQuery.params);
-        } else if (typeof headRow === typeof undefined) {
-          syslog(LOG_E, "loadClassesFromDatabase", 5, "Head row is undefined for parameters " + headQuery.params);
-        } else {
-          var nextClass = headRow.nextClass;
-          var classList = [$createAddedClass(headRow)];
-          loadNextClassInto(classList, classQueryString, headRow.nextClass);
-        }
-      });
-    }
-  });
-}
-
-function loadNextClassInto(list, query, next) {
-  syslog(LOG_D, "loadNextClassInto", 1, "nextClass: " + next);
-  db.get(query, [next], function(err, row) {
-    if (err !== null) {
-      syslog(LOG_E, "loadNextClassInto", 2, err);
-    } else {
-      list.push($createAddedClass(row));
-      if (row.nextClass !== null) {
-        loadNextClassInto(list, query, row.nextClass);
-      } else {
-        globalClassList.push(list);
-        adjustHeight(list);
-        let selector = "td.putable[semester=" + row.semester + "][shift=" + row.period + "][day=" + row.dow + "][time=" + row.block + "]";
-        $(selector).append(list);
-      }
-    }
+function buildGridClasses() {
+  globalClassRows.forEach((blockClasses) => {
+    let firstRow = blockClasses[0];
+    let selector = "td.putable[semester=" + firstRow.semester + "][shift=" + firstRow.period + "][day=" + firstRow.dow + "][time=" + firstRow.block + "]";
+    let $td = $(selector);
+    blockClasses.forEach((classRow) => {
+      $td.append($createAddedClass(classRow));
+    });
+    adjustHeight($td.children());
   });
 }
 
