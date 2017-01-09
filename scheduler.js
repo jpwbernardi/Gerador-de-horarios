@@ -85,13 +85,14 @@ const autocompleteOptions = {
 // array of arrays, first index is list head of each time block
 var globalClassList = [];
 
-$(".modal").modal();
-$(".button-collapse").sideNav();
 setTimeout(mainInit, 0);
 setTimeout(loadClassesFromDatabase, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
+
+$(".modal").modal();
+$(".button-collapse").sideNav();
 
 function logLevelToString(level) {
   switch (level) {
