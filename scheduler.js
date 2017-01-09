@@ -437,8 +437,9 @@ function orderBy(fields, types) {
     if (fields.length !== types.length)
       throw new RangeError("Ordering type must be specified for every field, if any");
   } else defaultOrder = true;
-  for (let i = 0; i < fields.length; i++)
-    order += fields[i] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[i]);
+  order += fields[0] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[0]);
+  for (let i = 1; i < fields.length; i++)
+    order += ", " + fields[i] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[i]);
   return order;
 }
 
