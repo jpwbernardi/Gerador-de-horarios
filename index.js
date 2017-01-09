@@ -108,7 +108,7 @@ $("main").on("click", ".clear-all", (event) => {
   $("#modal-clear-all").modal("open");
   // precisamos do evento original
   $("#modal-clear-all-confirm").off("click.clear-all");
-  $("#modal-clear-all-confirm").on("click", () => {
+  $("#modal-clear-all-confirm").on("click.clear-all", () => {
     var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "]";
     $(selector).empty();
   });
