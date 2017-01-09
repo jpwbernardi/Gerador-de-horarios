@@ -188,6 +188,10 @@ ProfessorSubject.fieldRequired = [true, true];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
 ProfessorSubject.primaryKey = [0, 1];
 ProfessorSubject.foreignKey = [Professor, Subject];
+ProfessorSubject.orderBy = {
+  "fields": [Professor.fields[1], Subject.fields[1]]
+};
+
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;
