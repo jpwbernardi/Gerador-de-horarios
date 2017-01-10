@@ -1,4 +1,3 @@
-var professorRestrictions = {};
 const stepsSettings = {
   headerTag: "h1",
   bodyTag: "section",
@@ -35,6 +34,8 @@ const dragulaSourceOptions = {
   mirrorContainer: document.body, // set the element that gets mirror elements appended
   ignoreInputTextSelection: false // if true, allows users to select input text
 };
+
+var professorRestrictions = {};
 var drake = dragula(dragulaSourceOptions);
 drake.on("drag", function(el, source) {
   $(professorRestrictions[el.getAttribute("siape")]).addClass("red restricted");
@@ -98,17 +99,17 @@ buildGrid();
 queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
-  var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
+  var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
   $(selector).empty();
 });
 
 $("main").on("click", ".clear-all", (event) => {
-  $("#modal-clear-all-semester").html(event.currentTarget.getAttribute("semester"));
+  $("#modal-clear-all-sem").html(event.currentTarget.getAttribute("sem"));
   $("#modal-clear-all").modal("open");
   // precisamos do evento original
   $("#modal-clear-all-confirm").off("click.clear-all");
   $("#modal-clear-all-confirm").on("click.clear-all", () => {
-    var selector = "td.putable[semester=" + event.currentTarget.getAttribute("semester") + "]";
+    var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "]";
     $(selector).empty();
   });
 });
@@ -146,8 +147,10 @@ function queryProfessorRestrictions() {
       };
       db.all(restrictionQuery.string, restrictionQuery.params, (restrictionErr, restrictionRows) => {
         if (restrictionErr === null) {
-          professorRestrictions[siapeRow.siape] = buildRestrictionSelector(restrictionRows[0]);
-          for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i]);
+          if (restrictionRows.length > 0) {
+            professorRestrictions[siapeRow.siape] = buildRestrictionSelector(restrictionRows[0]);
+            for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i]);
+          }
           syslog(LOG_LEVEL.I, "queryProfessorRestrictions", 1, "Loaded " + restrictionRows.length + " professor restrictions for SIAPE " + siapeRow.siape);
         } else {
           syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 2, restrictionErr);
@@ -157,11 +160,11 @@ function queryProfessorRestrictions() {
   });
 }
 
-function $buildTimeTable(semester, shift) {
+function $buildTimeTable(sem, shift) {
   var i = 0,
     times = 0;
   var $table = $createElement("table", {
-      "semester": semester,
+      "sem": sem,
       "shift": shift,
       "class": "timetable our-bordered centered"
     }),
@@ -171,9 +174,9 @@ function $buildTimeTable(semester, shift) {
     "width": "10%",
     "colspan": "2"
   }, $createTextualElement("button", {
-    "semester": semester,
+    "sem": sem,
     "shift": shift,
-    "title": "Limpar turno " + shiftText(shift) + " da " + semester + "ª fase",
+    "title": "Limpar turno " + shiftText(shift) + " da " + sem + "ª fase",
     "class": "btn waves-effect waves-light teal darken-3 light clear-single"
   }, "LIMPAR")));
   $tr.append($createTextualElement("th", {
@@ -222,7 +225,7 @@ function $buildTimeTable(semester, shift) {
     $tr.append($createTextualElement("td", {}, i + "º"));
     for (var j = 2; j <= 7; j++) {
       $tr.append($createElement("td", {
-        "semester": semester,
+        "sem": sem,
         "shift": shift,
         "day": j,
         "time": i,
@@ -238,18 +241,18 @@ function $buildTimeTable(semester, shift) {
   return $table;
 }
 
-function buildClasses(semester, shift) {
+function buildClasses(sem, shift) {
   var $row = $createElement("div", {
-    "semester": semester,
+    "sem": sem,
     "shift": shift,
     "style": "margin-top: 10px;",
     "class": "row putable dragula-source"
   });
   var query = {
     string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?;",
-    params: [semester, shift]
+    params: [sem, shift]
   };
-  var rowSelector = "div.row.putable[semester=" + semester + "][shift=" + shift + "]";
+  var rowSelector = "div.row.putable[sem=" + sem + "][shift=" + shift + "]";
   db.each(query.string, query.params, function(err, row) {
     if (err !== null) {
       syslog(LOG_LEVEL.E, "buildClasses", 1, err);
@@ -290,7 +293,7 @@ function buildGrid() {
       "class": "col s12"
     });
     let $clearAll = $createTextualElement("button", {
-      "semester": i,
+      "sem": i,
       "title": "Remover todos os horários da " + i + "ª fase",
       "class": "btn waves-effect waves-light teal darken-3 clear-all right"
     }, "Limpar " + i + "ª fase");
@@ -323,3 +326,36 @@ function buildGrid() {
   }
   $wizard.steps(stepsSettings);
 }
+
+/****************************** LINKED LIST CODE ******************************/
+
+// function sameBlock(aClass, otherClass) {
+//   return aClass.sem === otherClass.sem && aClass.period === otherClass.period
+//     && aClass.dow === otherClass.dow && aClass.block === otherClass.block;
+// }
+//
+// function findBlock(classRow) {
+//   globalClassRows.forEach((blockClasses, blockIndex) => {
+//     let stClassRow = blockClasses[0];
+//     if (sameBlock(classRow, stClassRow)) return blockIndex;
+//   });
+//   return null;
+// }
+//
+// function findClassAt(blockIndex, classRow) {
+//   globalClassRows[blockIndex].forEach((blockClass, classIndex) => {
+//     if (classRow.counter === blockClass.counter) return classIndex;
+//   });
+//   return null;
+// }
+//
+// function findClass(classRow) {
+//   let blockIndex = findBlock(classRow);
+//   if (blockIndex === null) return null;
+//   let classIndex = findClassAt(blockIndex, classRow);
+//   if (classIndex == null) return null;
+//   return {
+//     "block": blockIndex,
+//     "class": classIndex
+//   };
+// }

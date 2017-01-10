@@ -1,3 +1,6 @@
+-- enabling foreign key constraint enforcement (off by default for compatibility)
+PRAGMA foreign_keys = ON;
+
 create table professor(
   siape integer,
   name  varchar(64),
@@ -260,7 +263,7 @@ create table subject(
   title  varchar(64),
   sem    integer,
   period integer,
-  primary key(code, period),
+  primary key(code, period, sem),
   foreign key(sem) references semester(sem) on delete cascade,
   foreign key(period) references shift(period) on delete cascade
 );
@@ -429,13 +432,14 @@ create table professor_subject(
   siape   integer,
   code    varchar(8),
   period  integer,
-  primary key(siape, code, period),
+  sem     integer,
+  primary key(siape, code, period, sem),
   foreign key(siape) references professor(siape) on delete cascade,
-  foreign key(code, period) references subject(code, period) on delete cascade
+  foreign key(code, period, sem) references subject(code, period, sem) on delete cascade
 );
 insert into professor_subject values
-(1645173, "GEX108", 1),
-(1835372, "GEX105", 1);
+(1645173, "GEX108", 1, 6),
+(1835372, "GEX105", 1, 6);
 
 create table dow_shift_time(
   dow    varchar(16),
@@ -487,7 +491,7 @@ create table professor_restriction(
 
 create table class(
   counter   integer,
-  semester  integer,
+  sem       integer,
   dow       integer,
   period    integer,
   block     integer,
@@ -497,16 +501,16 @@ create table class(
   nextClass integer default null,
   primary key (counter),
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
-  foreign key(siape, code, period) references professor_subject(siape, code, period) on delete cascade,
+  foreign key(siape, code, period, sem) references professor_subject(siape, code, period, sem) on delete cascade,
   foreign key(prevClass) references class(counter) on delete set default,
   foreign key(prevClass) references class(counter) on delete set default
 );
-insert into class values (1, 1, 2, 1, 1, 1645173, "GEX108", null, 2);
-insert into class values (2, 1, 2, 1, 1, 1645173, "GEX108", 1, 3);
-insert into class values (3, 1, 2, 1, 1, 1835372, "GEX105", 2, null);
-insert into class values (4, 1, 3, 1, 1, 1645173, "GEX108", null, 5);
-insert into class values (5, 1, 3, 1, 1, 1645173, "GEX108", 4, 6);
-insert into class values (6, 1, 3, 1, 1, 1835372, "GEX105", 5, null);
+insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
+insert into class values (2, 6, 2, 1, 1, 1645173, "GEX108", 1, 3);
+insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
+insert into class values (4, 6, 3, 1, 1, 1645173, "GEX108", null, 5);
+insert into class values (5, 6, 3, 1, 1, 1645173, "GEX108", 4, 6);
+insert into class values (6, 6, 3, 1, 1, 1835372, "GEX105", 5, null);
 
 -- create table period_restriction(
 --   periodr integer,

@@ -1,5 +1,6 @@
 const url = require('url');
 const path = require('path');
+const ClassList = require("./ClassList.js");
 const sqlite3 = require('sqlite3').verbose();
 const {app, BrowserWindow} = require('electron');
 
@@ -35,17 +36,21 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   global.db = new sqlite3.Database('scheduler.db', (err) => {
-    if (err !== null) console.log("Error opening the database: " + err);
+    if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 1, "Error opening the database: " + err);
   });
-  global.db.on('open', function() {
-    console.log('Dabase opened successfully!');
+  global.db.on('open', () => {
+    syslog(LOG_LEVEL.D, "app.on('ready')", 2, "Database opened successfully");
   });
-  global.db.on('close', function() {
-    console.log('Dabase closed successfully!');
+  global.db.on('close', () => {
+    syslog(LOG_LEVEL.D, "app.on('ready')", 3, "Database closed successfully");
+  });
+  // enabling foreign key constraint enforcement (off by default for compatibility)
+  global.db.exec("PRAGMA foreign_keys = ON;", (err) => {
+    if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 4, err);
   });
   loadClassesFromDatabase();
   createWindow();
-})
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -54,7 +59,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-})
+});
 
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
@@ -62,13 +67,13 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
-})
+});
 
 app.on('quit', () => {
   global.db.close(function(err) {
     if (err !== null) console.log("Error closing the database: " + err);
   });
-})
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
@@ -90,16 +95,19 @@ function syslog(logLevel, functionName, code, message) {
 function loadClassesFromDatabase() {
   classRows = [];
   let headCounterQuery = {
-    string: "select counter, semester, dow, period, block from class where prevClass is null group by semester, dow, period, block;",
+    string: "select counter, sem, dow, period, block from class where prevClass is null group by sem, dow, period, block;",
     params: []
   };
-  db.each(headCounterQuery.string, headCounterQuery.params, function(headCounterErr, headCounterRow) {
+  db.each(headCounterQuery.string, headCounterQuery.params, (headCounterErr, headCounterRow) => {
     if (headCounterErr !== null) {
       syslog(LOG_LEVEL.E, "loadClassesFromDatabase", 1, headCounterErr);
     } else {
-      let classList = [];
+      let classList = new ClassList();
       loadClassesInto(classList, headCounterRow.counter);
     }
+  }, (doneErr, qttyRows) => {
+    syslog(LOG_LEVEL.D, "loadClassesFromDatabase", 2, "Loaded " + qttyRows + " rows");
+    // mainWindow.webContents.send("classList.done");
   });
 }
 
@@ -116,7 +124,7 @@ function loadClassesInto(classList, classCounter) {
     } else if (typeof classRow === typeof undefined) {
       syslog(LOG_LEVEL.E, "loadClassesInto", 3, "undefined classRow");
     } else {
-      classList.push(classRow);
+      classList.pushRow(classRow);
       if (classRow.nextClass !== null) {
         loadClassesInto(classList, classRow.nextClass);
       } else {

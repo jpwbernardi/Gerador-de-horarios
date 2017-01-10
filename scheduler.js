@@ -8,6 +8,7 @@ const nameLen = 16;
 const objects = require("./objects");
 const electron = require("electron");
 const db = electron.remote.getGlobal('db');
+const ClassList = require("./ClassList.js");
 const LOG_LEVEL = electron.remote.getGlobal("LOG_LEVEL");
 const LOG_LEVEL_STRING = electron.remote.getGlobal("LOG_LEVEL_STRING");
 const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
@@ -83,10 +84,10 @@ const autocompleteOptions = {
 var globalClassRows = electron.remote.getGlobal("classRows");
 
 setTimeout(mainInit, 0);
-setTimeout(buildGridClasses, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
+setTimeout(buildGridClasses, 0);
 
 $(".modal").modal();
 $(".button-collapse").sideNav();
@@ -356,7 +357,6 @@ function $createElement(tag, attributes, events) {
   }
   if (typeof events != typeof undefined) {
     $.each(events, function(key, value) {
-      console.log(key, value);
       $element.on(key, value);
       // $element[0].addEventListener(key, value);
     });
@@ -539,7 +539,6 @@ function $buildForm(obj, clazz) {
     let query = selectAllJoins(obj);
     if (typeof obj.orderBy !== typeof undefined)
       query += " order by " + orderBy(obj.orderBy.fields, obj.orderBy.types);
-    console.log(query);
     db.each(query, function(err, row) {
       if (err === null)
         setTimeout(function(rownum) {
@@ -791,7 +790,7 @@ function $createClass(row, addClose) {
   var variation = row.siape % (colorVariations.length + 1);
   var $class = $createTextualElement("div", {
     "counter": row.counter,
-    "semester": row.semester,
+    "sem": row.sem,
     "dow": row.dow,
     "period": row.period,
     "block": row.block,
@@ -829,13 +828,13 @@ function adjustHeight($elements) {
 }
 
 function buildGridClasses() {
-  globalClassRows.forEach((blockClasses) => {
-    let firstRow = blockClasses[0];
-    let selector = "td.putable[semester=" + firstRow.semester + "][shift=" + firstRow.period + "][day=" + firstRow.dow + "][time=" + firstRow.block + "]";
+  globalClassRows.forEach((classList) => {
+    let firstRow = classList.getRowAt(0);
+    let selector = "td.putable[sem=" + firstRow.sem + "][shift=" + firstRow.period + "][day=" + firstRow.dow + "][time=" + firstRow.block + "]";
     let $td = $(selector);
-    blockClasses.forEach((classRow) => {
-      $td.append($createAddedClass(classRow));
-    });
+    for (let i = 0; i < classList.length; i++) {
+      $td.append($createAddedClass(classList.getRowAt(i)));
+    }
     adjustHeight($td.children());
   });
 }
