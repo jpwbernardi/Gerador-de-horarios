@@ -118,8 +118,7 @@ $("main").on("click", ".make-pdf", (event) => {
 });
 
 function buildRestrictionSelector(periodDowBlockRow) {
-  // 'td.putable[shift=' || period || '][day=' || dow || '][time=' || block || ']'
-  var selector = "td.putable";
+  var selector = ".putable:not(.dragula-source)";
   if (periodDowBlockRow.period !== 0) {
     selector += "[shift='" + periodDowBlockRow.period + "']";
   }
@@ -148,7 +147,7 @@ function queryProfessorRestrictions() {
       db.all(restrictionQuery.string, restrictionQuery.params, (restrictionErr, restrictionRows) => {
         if (restrictionErr === null) {
           professorRestrictions[siapeRow.siape] = buildRestrictionSelector(restrictionRows[0]);
-          for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i].restriction);
+          for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i]);
           syslog(LOG_LEVEL.I, "queryProfessorRestrictions", 1, "Loaded " + restrictionRows.length + " professor restrictions for SIAPE " + siapeRow.siape);
         } else {
           syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 2, restrictionErr);

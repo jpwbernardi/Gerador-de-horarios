@@ -497,7 +497,7 @@ create table class(
   nextClass integer default null,
   primary key (counter),
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
-  foreign key(siape, code) references professor_subject(siape, code) on delete cascade,
+  foreign key(siape, code, period) references professor_subject(siape, code, period) on delete cascade,
   foreign key(prevClass) references class(counter) on delete set default,
   foreign key(prevClass) references class(counter) on delete set default
 );
