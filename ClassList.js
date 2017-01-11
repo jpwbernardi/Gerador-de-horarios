@@ -59,14 +59,14 @@ class ClassList {
     return null;
   }
 
-  findRowFrom(node, classRow) {
+  findCounterFrom(node, classCounter) {
     if (node == null) return null;
-    if (node.equalsRow(classRow)) return node;
-    return this.findRowFrom(node.next, classRow);
+    if (node.row.counter == classCounter) return node;
+    return this.findCounterFrom(node.next, classCounter);
   }
 
-  findRow(classRow) {
-    return this.findRowFrom(this._head, classRow);
+  findCounter(classCounter) {
+    return this.findCounterFrom(this._head, classCounter);
   }
 
   find(classNode) {
@@ -118,8 +118,8 @@ class ClassList {
     this._length--;
   }
 
-  removeRow(classRow) {
-    this.remove(this.findRow(classRow));
+  removeCounter(classCounter) {
+    this.remove(this.findCounter(classCounter));
   }
 }
 

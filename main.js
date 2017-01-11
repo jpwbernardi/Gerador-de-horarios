@@ -2,7 +2,7 @@ const url = require('url');
 const path = require('path');
 const ClassList = require("./ClassList.js");
 const sqlite3 = require('sqlite3').verbose();
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -88,8 +88,28 @@ global.LOG_LEVEL = {
 };
 global.LOG_LEVEL_STRING = ["VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR"];
 
+ipcMain.on("classList.remove", (event, blockIndex, classCounter) => {
+  global.classRows[blockIndex].removeCounter(classCounter);
+  removeClassFromDatabase(classCounter);
+  event.sender.send("classList.remove");
+});
+
 function syslog(logLevel, functionName, code, message) {
   console.log(LOG_LEVEL_STRING[logLevel] + ": " + message, "(code " + code + " at " + functionName + ")");
+}
+
+function removeClassFromDatabase(classCounter) {
+  db.run("with del(prevClass, nextClass) as (select prevClass, nextClass from class where counter = ?)"
+    + " update class set nextClass = (select nextClass from del) where counter = (select prevClass from del);", [classCounter], (err) => {
+    if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase prevClass update", 1, err);
+  });
+  db.run("with del(prevClass, nextClass) as (select prevClass, nextClass from class where counter = ?)"
+    + " update class set prevClass = (select prevClass from del) where counter = (select nextClass from del);", [classCounter], (err) => {
+    if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase nextClass update", 2, err);
+  });
+  db.run("delete from class where counter = ?", [classCounter], (err) => {
+    if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase prevClass update", 3, err);
+  });
 }
 
 function loadClassesFromDatabase() {
@@ -107,7 +127,7 @@ function loadClassesFromDatabase() {
     }
   }, (doneErr, qttyRows) => {
     syslog(LOG_LEVEL.D, "loadClassesFromDatabase", 2, "Loaded " + qttyRows + " rows");
-    // mainWindow.webContents.send("classList.done");
+    // mainWindow.webContents.send("classList.loaded");
   });
 }
 

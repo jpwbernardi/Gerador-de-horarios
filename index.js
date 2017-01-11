@@ -24,7 +24,7 @@ const dragulaSourceOptions = {
     return source.classList.contains("dragula-source");
   },
   accepts: function(el, target) {
-    return !target.classList.contains("dragula-source") && el.getAttribute("period") === target.getAttribute("shift");
+    return !target.classList.contains("dragula-source") && el.getAttribute("period") === target.getAttribute("period");
   },
   direction: 'vertical', // Y axis is considered when determining where an element would be dropped
   // copy: true, // elements are moved by default, not copied
@@ -99,7 +99,7 @@ buildGrid();
 queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
-  var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "][shift=" + event.currentTarget.getAttribute("shift") + "]";
+  var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "][period=" + event.currentTarget.getAttribute("period") + "]";
   $(selector).empty();
 });
 
@@ -121,13 +121,13 @@ $("main").on("click", ".make-pdf", (event) => {
 function buildRestrictionSelector(periodDowBlockRow) {
   var selector = ".putable:not(.dragula-source)";
   if (periodDowBlockRow.period !== 0) {
-    selector += "[shift='" + periodDowBlockRow.period + "']";
+    selector += "[period='" + periodDowBlockRow.period + "']";
   }
   if (periodDowBlockRow.dow !== 0) {
-    selector += "[day='" + periodDowBlockRow.dow + "']";
+    selector += "[dow='" + periodDowBlockRow.dow + "']";
   }
   if (periodDowBlockRow.block !== 0) {
-    selector += "[time='" + periodDowBlockRow.block + "']";
+    selector += "[block='" + periodDowBlockRow.block + "']";
   }
   return selector;
 }
@@ -160,12 +160,12 @@ function queryProfessorRestrictions() {
   });
 }
 
-function $buildTimeTable(sem, shift) {
+function $buildTimeTable(sem, period) {
   var i = 0,
     times = 0;
   var $table = $createElement("table", {
       "sem": sem,
-      "shift": shift,
+      "period": period,
       "class": "timetable our-bordered centered"
     }),
     $tsec = $createElement("thead"),
@@ -175,8 +175,8 @@ function $buildTimeTable(sem, shift) {
     "colspan": "2"
   }, $createTextualElement("button", {
     "sem": sem,
-    "shift": shift,
-    "title": "Limpar turno " + shiftText(shift) + " da " + sem + "ª fase",
+    "period": period,
+    "title": "Limpar turno " + shiftText(period) + " da " + sem + "ª fase",
     "class": "btn waves-effect waves-light teal darken-3 light clear-single"
   }, "LIMPAR")));
   $tr.append($createTextualElement("th", {
@@ -204,12 +204,12 @@ function $buildTimeTable(sem, shift) {
   $tr = $createElement("tr");
   // "não dá" pra usar shiftText aqui porque
   // tem os rowspan e o times no noturno...
-  if (shift === 1) {
+  if (period === 1) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
       "rowspan": 5
     }, "Matutino"));
-  } else if (shift === 2) {
+  } else if (period === 2) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
       "rowspan": 5
@@ -226,9 +226,9 @@ function $buildTimeTable(sem, shift) {
     for (var j = 2; j <= 7; j++) {
       $tr.append($createElement("td", {
         "sem": sem,
-        "shift": shift,
-        "day": j,
-        "time": i,
+        "period": period,
+        "dow": j,
+        "block": i,
         "class": "putable"
       }));
     }
@@ -241,18 +241,18 @@ function $buildTimeTable(sem, shift) {
   return $table;
 }
 
-function buildClasses(sem, shift) {
+function buildClasses(sem, period) {
   var $row = $createElement("div", {
     "sem": sem,
-    "shift": shift,
+    "period": period,
     "style": "margin-top: 10px;",
     "class": "row putable dragula-source"
   });
   var query = {
     string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?;",
-    params: [sem, shift]
+    params: [sem, period]
   };
-  var rowSelector = "div.row.putable[sem=" + sem + "][shift=" + shift + "]";
+  var rowSelector = "div.row.putable[sem=" + sem + "][period=" + period + "]";
   db.each(query.string, query.params, function(err, row) {
     if (err !== null) {
       syslog(LOG_LEVEL.E, "buildClasses", 1, err);
@@ -326,36 +326,3 @@ function buildGrid() {
   }
   $wizard.steps(stepsSettings);
 }
-
-/****************************** LINKED LIST CODE ******************************/
-
-// function sameBlock(aClass, otherClass) {
-//   return aClass.sem === otherClass.sem && aClass.period === otherClass.period
-//     && aClass.dow === otherClass.dow && aClass.block === otherClass.block;
-// }
-//
-// function findBlock(classRow) {
-//   globalClassRows.forEach((blockClasses, blockIndex) => {
-//     let stClassRow = blockClasses[0];
-//     if (sameBlock(classRow, stClassRow)) return blockIndex;
-//   });
-//   return null;
-// }
-//
-// function findClassAt(blockIndex, classRow) {
-//   globalClassRows[blockIndex].forEach((blockClass, classIndex) => {
-//     if (classRow.counter === blockClass.counter) return classIndex;
-//   });
-//   return null;
-// }
-//
-// function findClass(classRow) {
-//   let blockIndex = findBlock(classRow);
-//   if (blockIndex === null) return null;
-//   let classIndex = findClassAt(blockIndex, classRow);
-//   if (classIndex == null) return null;
-//   return {
-//     "block": blockIndex,
-//     "class": classIndex
-//   };
-// }

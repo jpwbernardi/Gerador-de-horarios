@@ -263,7 +263,7 @@ create table subject(
   title  varchar(64),
   sem    integer,
   period integer,
-  primary key(code, period, sem),
+  primary key(code, sem, period),
   foreign key(sem) references semester(sem) on delete cascade,
   foreign key(period) references shift(period) on delete cascade
 );
@@ -431,15 +431,16 @@ insert into subject values
 create table professor_subject(
   siape   integer,
   code    varchar(8),
-  period  integer,
   sem     integer,
-  primary key(siape, code, period, sem),
+  period  integer,
+  primary key(siape, code, sem, period),
   foreign key(siape) references professor(siape) on delete cascade,
-  foreign key(code, period, sem) references subject(code, period, sem) on delete cascade
+  foreign key(code, sem, period) references subject(code, sem, period) on delete cascade
 );
 insert into professor_subject values
-(1645173, "GEX108", 1, 6),
-(1835372, "GEX105", 1, 6);
+(1645173, "GEX108", 6, 1),
+(1835372, "GEX105", 6, 1),
+(1806074, "GEX107", 6, 1);
 
 create table dow_shift_time(
   dow    varchar(16),
@@ -506,11 +507,8 @@ create table class(
   foreign key(prevClass) references class(counter) on delete set default
 );
 insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
-insert into class values (2, 6, 2, 1, 1, 1645173, "GEX108", 1, 3);
+insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 1, 3);
 insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
-insert into class values (4, 6, 3, 1, 1, 1645173, "GEX108", null, 5);
-insert into class values (5, 6, 3, 1, 1, 1645173, "GEX108", 4, 6);
-insert into class values (6, 6, 3, 1, 1, 1835372, "GEX105", 5, null);
 
 -- create table period_restriction(
 --   periodr integer,

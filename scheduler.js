@@ -781,6 +781,7 @@ function addCloseButton($el) {
     $target.addClass("removed");
     without($siblings, $target, "removed");
     adjustHeight($siblings);
+    removeClass(event.currentTarget.parentNode.parentNode);
   });
   $el.children(".delete-class").append($remove);
 }
@@ -830,7 +831,7 @@ function adjustHeight($elements) {
 function buildGridClasses() {
   globalClassRows.forEach((classList) => {
     let firstRow = classList.getRowAt(0);
-    let selector = "td.putable[sem=" + firstRow.sem + "][shift=" + firstRow.period + "][day=" + firstRow.dow + "][time=" + firstRow.block + "]";
+    let selector = "td.putable[sem=" + firstRow.sem + "][period=" + firstRow.period + "][dow=" + firstRow.dow + "][block=" + firstRow.block + "]";
     let $td = $(selector);
     for (let i = 0; i < classList.length; i++) {
       $td.append($createAddedClass(classList.getRowAt(i)));
@@ -842,3 +843,74 @@ function buildGridClasses() {
 function saveGrid() {
 
 }
+
+// function sameBlock(aBlock, oBlock) {
+//   return aBlock.getAttribute("sem") == oBlock.getAttribute("sem")
+//     && aBlock.getAttribute("period") == oBlock.getAttribute("period")
+//     && aBlock.getAttribute("dow") == oBlock.getAttribute("dow")
+//     && aBlock.getAttribute("block") == oBlock.getAttribute("block");
+// }
+
+// function inSameBlock(aClass, oClass) {
+//   return aClass.sem === oClass.sem && aClass.period === oClass.period
+//     && aClass.dow === oClass.dow && aClass.block === oClass.block;
+// }
+
+function elInSameBlockAs(classEl, classRow) {
+  return classEl.getAttribute("sem") == classRow.sem && classEl.getAttribute("period") == classRow.period
+    && classEl.getAttribute("dow") == classRow.dow && classEl.getAttribute("block") == classRow.block;
+}
+
+function findBlock(block) {
+  let blockStClassEl = block.children[0];
+  for (let i = 0; i < globalClassRows.length; i++) {
+    let stClassRow = globalClassRows[i].getRowAt(0);
+    if (elInSameBlockAs(blockStClassEl, stClassRow))
+      return i;
+  }
+  return null;
+}
+
+function findElBlock(classEl) {
+  let block = classEl.parentNode;
+  return findBlock(block);
+}
+
+function removeClass(classEl) {
+  let blockIndex = findElBlock(classEl);
+  syslog(LOG_LEVEL.D, "removeClass", 1, "length before " + globalClassRows[blockIndex].length);
+  electron.ipcRenderer.send("classList.remove", blockIndex, classEl.getAttribute("counter"));
+  syslog(LOG_LEVEL.D, "removeClass", 2, "length after " + globalClassRows[blockIndex].length);
+}
+
+electron.ipcRenderer.on("classList.remove", (event, message) => {
+  // console.log(event);
+});
+
+// function findBlockFrom(classRow) {
+//   globalClassRows.forEach((classList, blockIndex) => {
+//     let stClassRow = classList.getRowAt(0);
+//     if (inSameBlock(classRow, stClassRow)) return blockIndex;
+//   });
+//   return null;
+// }
+
+// function findClassRowAt(blockIndex, classRow) {
+//   return globalClassRows[blockIndex].findRow(classRow);
+// }
+
+// function findClassRow(classRow) {
+//   let blockIndex = findBlockFrom(classRow);
+//   if (blockIndex === null) return null;
+//   let classIndex = findClassAt(blockIndex, classRow);
+//   if (classIndex == null) return null;
+//   return {
+//     "block": blockIndex,
+//     "class": classIndex
+//   };
+// }
+
+// function addClassTo(target, classEl, siblingEl) {
+//   let blockIndex = findBlockFrom(target);
+//   globalClassRows[blockIndex].insertRowBefore(classEl, siblingEl);
+// }
