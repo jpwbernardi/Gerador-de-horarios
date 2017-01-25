@@ -35,6 +35,7 @@ const dragulaSourceOptions = {
   ignoreInputTextSelection: false // if true, allows users to select input text
 };
 
+var blockNumber = 0;
 var professorRestrictions = {};
 var drake = dragula(dragulaSourceOptions);
 drake.on("drag", function(el, source) {
@@ -57,6 +58,7 @@ drake.on("drop", function(el, target, source, sibling) {
     Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
     drake.cancel(true);
   } else {
+    addClass(target, el, sibling);
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       addCloseButton($el);
@@ -225,12 +227,14 @@ function $buildTimeTable(sem, period) {
     $tr.append($createTextualElement("td", {}, i + "º"));
     for (var j = 2; j <= 7; j++) {
       $tr.append($createElement("td", {
+        "blockNumber": blockNumber,
         "sem": sem,
         "period": period,
         "dow": j,
         "block": i,
         "class": "putable"
       }));
+      blockNumber += 1;
     }
     $tsec.append($tr);
     if (i < times) {
@@ -263,8 +267,8 @@ function buildClasses(sem, period) {
   return $row;
 }
 
-function shiftText(number) {
-  switch (number) {
+function shiftText(shiftNumber) {
+  switch (shiftNumber) {
     case 1:
     case "1":
       return "matutino";

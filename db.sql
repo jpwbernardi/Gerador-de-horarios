@@ -491,24 +491,35 @@ create table professor_restriction(
 );
 
 create table class(
-  counter   integer,
-  sem       integer,
-  dow       integer,
-  period    integer,
-  block     integer,
-  siape     integer,
-  code      varchar(8),
-  prevClass integer default null,
-  nextClass integer default null,
-  primary key (counter),
+  counter integer,
+  sem     integer,
+  dow     integer,
+  period  integer,
+  block   integer,
+  siape   integer,
+  code    varchar(8),
+  prev    integer default null,
+  next    integer default null,
+  primary key(counter),
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
   foreign key(siape, code, period, sem) references professor_subject(siape, code, period, sem) on delete cascade,
-  foreign key(prevClass) references class(counter) on delete set default,
-  foreign key(prevClass) references class(counter) on delete set default
+  foreign key(prev) references class(counter) on delete set default,
+  foreign key(prev) references class(counter) on delete set default
 );
 insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
 insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 1, 3);
 insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
+
+create table class_list(
+  blockNumber integer,
+  head        integer,
+  tail        integer,
+  length      integer,
+  primary key(blockNumber),
+  foreign key(head) references class(counter),
+  foreign key(tail) references class(counter)
+);
+insert into class_list values(420, 1, 3, 3);
 
 -- create table period_restriction(
 --   periodr integer,

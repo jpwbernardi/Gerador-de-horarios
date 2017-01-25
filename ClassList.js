@@ -18,10 +18,15 @@ class ClassNode {
 }
 
 class ClassList {
-  constructor() {
+  constructor(blockNumber) {
+    this._blockNumber = blockNumber;
     this._length = 0;
     this._head = null;
     this._tail = null;
+  }
+
+  get blockNumber() {
+    return this._blockNumber;
   }
 
   get head() {
@@ -66,6 +71,7 @@ class ClassList {
   }
 
   findCounter(classCounter) {
+    if (classCounter === null || typeof classCounter === typeof undefined) return null;
     return this.findCounterFrom(this._head, classCounter);
   }
 
@@ -104,8 +110,14 @@ class ClassList {
 
   insertRowBefore(classRow, rowAfter) {
     let classNode = new ClassNode(classRow);
-    let nodeAfter = findRow(rowAfter);
+    let nodeAfter = this.findRow(rowAfter);
     return this.insertBefore(classNode, nodeAfter);
+  }
+
+  insertCounterBefore(classCounter, theCounterAfter) {
+    let classNode = this.findCounter(classCounter);
+    let theNodeAfter = this.findCounter(theCounterAfter);
+    return this.insertBefore(classNode, theNodeAfter);
   }
 
   remove(node) {

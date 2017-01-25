@@ -81,7 +81,7 @@ const autocompleteOptions = {
   }
 };
 
-var globalClassRows = electron.remote.getGlobal("classRows");
+var globalClassLists = electron.remote.getGlobal("classLists");
 
 setTimeout(mainInit, 0);
 buildMenu();
@@ -797,8 +797,8 @@ function $createClass(row, addClose) {
     "block": row.block,
     "siape": row.siape,
     "code": row.code,
-    "prevClass": row.prevClass,
-    "nextClass": row.nextClass,
+    "prev": row.prev,
+    "next": row.next,
     "title": row.name + "\n" + row.title + " (" + row.code + ")",
     "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
   }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
@@ -829,88 +829,69 @@ function adjustHeight($elements) {
 }
 
 function buildGridClasses() {
-  globalClassRows.forEach((classList) => {
-    let firstRow = classList.getRowAt(0);
-    let selector = "td.putable[sem=" + firstRow.sem + "][period=" + firstRow.period + "][dow=" + firstRow.dow + "][block=" + firstRow.block + "]";
-    let $td = $(selector);
+  for (let blockNumber in globalClassLists) {
+    let classList = globalClassLists[blockNumber];
+    let $td = $("td.putable[blockNumber=" + blockNumber + "]");
     for (let i = 0; i < classList.length; i++) {
       $td.append($createAddedClass(classList.getRowAt(i)));
     }
     adjustHeight($td.children());
-  });
-}
-
-function saveGrid() {
-
-}
-
-// function sameBlock(aBlock, oBlock) {
-//   return aBlock.getAttribute("sem") == oBlock.getAttribute("sem")
-//     && aBlock.getAttribute("period") == oBlock.getAttribute("period")
-//     && aBlock.getAttribute("dow") == oBlock.getAttribute("dow")
-//     && aBlock.getAttribute("block") == oBlock.getAttribute("block");
-// }
-
-// function inSameBlock(aClass, oClass) {
-//   return aClass.sem === oClass.sem && aClass.period === oClass.period
-//     && aClass.dow === oClass.dow && aClass.block === oClass.block;
-// }
-
-function elInSameBlockAs(classEl, classRow) {
-  return classEl.getAttribute("sem") == classRow.sem && classEl.getAttribute("period") == classRow.period
-    && classEl.getAttribute("dow") == classRow.dow && classEl.getAttribute("block") == classRow.block;
-}
-
-function findBlock(block) {
-  let blockStClassEl = block.children[0];
-  for (let i = 0; i < globalClassRows.length; i++) {
-    let stClassRow = globalClassRows[i].getRowAt(0);
-    if (elInSameBlockAs(blockStClassEl, stClassRow))
-      return i;
   }
-  return null;
 }
 
-function findElBlock(classEl) {
-  let block = classEl.parentNode;
-  return findBlock(block);
+function getBlockNumber(classEl) {
+  return classEl.parentNode.getAttribute("blockNumber");
 }
 
 function removeClass(classEl) {
-  let blockIndex = findElBlock(classEl);
-  syslog(LOG_LEVEL.D, "removeClass", 1, "length before " + globalClassRows[blockIndex].length);
-  electron.ipcRenderer.send("classList.remove", blockIndex, classEl.getAttribute("counter"));
-  syslog(LOG_LEVEL.D, "removeClass", 2, "length after " + globalClassRows[blockIndex].length);
+  let blockNumber = getBlockNumber(classEl);
+  electron.ipcRenderer.send("classList.remove", blockNumber, classEl.getAttribute("counter"));
+}
+
+function addClass(containerEl, classEl, theElAfter) {
+  let clazz = jsonify(classEl);
+  let blockNumber = getBlockNumber(classEl);
+  let container = jsonify(containerEl);
+  // electron.ipcRenderer.send("classList.add", container, blockNumber, clazz, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
 }
 
 electron.ipcRenderer.on("classList.remove", (event, message) => {
   // console.log(event);
 });
 
+function jsonify(el) {
+  let json = {};
+  for (let i = 0; i < el.attributes.length; i++) {
+    let attribute = el.attributes[i];
+    json[attribute.nodeName] = attribute.nodeValue;
+  }
+  return json;
+}
+
 // function findBlockFrom(classRow) {
-//   globalClassRows.forEach((classList, blockIndex) => {
+//   globalClassLists.forEach((classList, blockNumber) => {
 //     let stClassRow = classList.getRowAt(0);
-//     if (inSameBlock(classRow, stClassRow)) return blockIndex;
+//     if (inSameBlock(classRow, stClassRow)) return blockNumber;
 //   });
 //   return null;
 // }
 
-// function findClassRowAt(blockIndex, classRow) {
-//   return globalClassRows[blockIndex].findRow(classRow);
+// function findClassRowAt(blockNumber, classRow) {
+//   return globalClassLists[blockNumber].findRow(classRow);
 // }
 
 // function findClassRow(classRow) {
-//   let blockIndex = findBlockFrom(classRow);
-//   if (blockIndex === null) return null;
-//   let classIndex = findClassAt(blockIndex, classRow);
+//   let blockNumber = findBlockFrom(classRow);
+//   if (blockNumber === null) return null;
+//   let classIndex = findClassAt(blockNumber, classRow);
 //   if (classIndex == null) return null;
 //   return {
-//     "block": blockIndex,
+//     "block": blockNumber,
 //     "class": classIndex
 //   };
 // }
 
 // function addClassTo(target, classEl, siblingEl) {
-//   let blockIndex = findBlockFrom(target);
-//   globalClassRows[blockIndex].insertRowBefore(classEl, siblingEl);
+//   let blockNumber = findBlockFrom(target);
+//   globalClassLists[blockNumber].insertRowBefore(classEl, siblingEl);
 // }
