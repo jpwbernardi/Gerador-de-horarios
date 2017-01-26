@@ -45,7 +45,7 @@ app.on('ready', () => {
     syslog(LOG_LEVEL.D, "app.on('ready')", 3, "Database closed successfully");
   });
   // enabling foreign key constraint enforcement (off by default for compatibility)
-  global.db.exec("PRAGMA foreign_keys = ON;", (err) => {
+  global.db.exec("PRAGMA foreign_keys = ON", (err) => {
     if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 4, err);
   });
   loadClassesFromDatabase();
@@ -110,7 +110,7 @@ function loadClassesFromDatabase() {
 function loadClassesInto(classList, classCounter) {
   let classQuery = {
     // cannot select just professor.* and subject.* because of $createClass column dependencies
-    string: "select * from class natural join professor natural join subject where counter = ?;",
+    string: "select * from class natural join professor natural join subject where counter = ?",
     params: [classCounter]
   };
   syslog(LOG_LEVEL.D, "loadClassesInto", 1, "query params: " + classQuery.params);
@@ -130,50 +130,65 @@ function loadClassesInto(classList, classCounter) {
   });
 }
 
-ipcMain.on("classList.remove", (event, blockNumber, classCounter) => {
-  global.classLists[blockNumber].removeCounter(classCounter);
-  removeClassFromDatabase(blockNumber, classCounter);
-  event.sender.send("classList.remove");
-});
-
-function removeClassFromDatabase(blockNumber, classCounter) {
-  db.run("with del(next) as (select next from class where counter = ?)"
-    + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [classCounter, classCounter, blockNumber], (err) => {
-    if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase head update", 1, err);
-    else {
-      db.run("with del(prev) as (select prev from class where counter = ?)"
-        + " update class_list set tail = (select prev from del) where tail = ? and blockNumber = ?", [classCounter, classCounter, blockNumber], (err) => {
-        if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase tail update", 2, err);
-        else {
-          db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
-            + " update class set next = (select next from del) where counter = (select prev from del);", [classCounter], (err) => {
-            if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase prev update", 3, err);
-            else {
-              db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
-                + " update class set prev = (select prev from del) where counter = (select next from del);", [classCounter], (err) => {
-                if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase next update", 4, err);
-                else {
-                  db.run("delete from class where counter = ?", [classCounter], (err) => {
-                    if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase delete", 5, err);
-                    else {
-                      db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
-                        if (err !== null) syslog(LOG_LEVEL.E, "removeClassFromDatabase length update", 6, err);
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
-    }
-  });
+function rollbackIfErr(ipcEvent, err, message) {
+  if (err !== null) {
+    db.exec("ROLLBACK", (err) => {
+      if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr.remove ROLLBACK", 2, err);
+    });
+    syslog(LOG_LEVEL.E, message, 1, err);
+    ipcEvent.sender.send("classList.remove", false);
+    setTimeout(() => {
+      mainWindow.reload();
+    }, 1000);
+  }
 }
 
-// ipcMain.on("classList.add", (event, container, blockNumber, clazz, theCounterAfter) => {
-//   global.classLists[blockNumber].insertCounterBefore(clazz.counter, theCounterAfter);
-//   addClassToDatabase(container, clazz, theCounterAfter);
+ipcMain.on("classList.remove", (event, blockNumber, classCounter) => {
+  db.serialize(() => {
+    db.exec("BEGIN IMMEDIATE");
+    db.run("with del(next) as (select next from class where counter = ?)"
+      + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [classCounter, classCounter, blockNumber], (err) => {
+      rollbackIfErr(event, err, "classList.remove head update");
+    });
+
+    db.run("with del(prev) as (select prev from class where counter = ?)"
+      + " update class_list set tail = (select prev from del) where tail = ? and blockNumber = ?", [classCounter, classCounter, blockNumber], (err) => {
+      rollbackIfErr(event, err, "classList.remove tail update");
+    });
+
+    db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+      + " update class set next = (select next from del) where counter = (select prev from del)", [classCounter], (err) => {
+       rollbackIfErr(event, err, "classList.remove prev next update");
+    });
+
+    db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+      + " update class set prev = (select prev from del) where counter = (select next from del)", [classCounter], (err) => {
+      rollbackIfErr(event, err, "classList.remove next prev update");
+    });
+
+    db.run("delete from class where counter = ?", [classCounter], (err) => {
+      rollbackIfErr(event, err, "classList.remove delete");
+    });
+
+    db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
+      if (err === null) {
+        db.exec("COMMIT", (err) => {
+          if (err === null) {
+            global.classLists[blockNumber].removeCounter(classCounter);
+          } else {
+            rollbackIfErr(event, err, "classList.remove COMMIT");
+          }
+        });
+      } else {
+        rollbackIfErr(event, err, "classList.remove length update");
+      }
+    });
+  });
+});
+
+// ipcMain.on("classList.add", (event, blockNumber, clazz, container, theCounterAfter) => {
+//   // global.classLists[blockNumber].insertCounterBefore(clazz.counter, theCounterAfter);
+//   addNewClassToDB(blockNumber, container, clazz, theCounterAfter);
 //   event.sender.send("classList.add");
 // });
 
@@ -205,44 +220,73 @@ insertBefore(node, nodeAfter) {
   this._length++;
   return node;
 }*/
-// function addClassToDatabase(container, clazz, theCounterAfter) {
-//   db.get("select max(counter) from class", (row, err) => {
-//     if (err === null) {
-//       let newCounter = Number(row.counter) + 1;
-//       console.log(", " + newCounter);
-//       let insertQuery = {
-//         string: "insert into class values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-//         params = [newCounter, clazz.sem, container.dow, clazz.period, container.block, clazz.siape, clazz.code, null, theCounterAfter]
-//       };
-//       db.run(insertQuery.string, insertQuery.params, (err) => {
-//         if (err === null) {
-//           if (theCounterAfter !== null) {
-//             db.get("select prev from class where counter = ?", [theCounterAfter], (row, err) => {
-//               if (err === null) {
-//
-//                 db.run("update class set prev = ? where counter = ?", [row.prev, newCounter], (err) => {
-//
-//                 })
-//
-//                 insertParams[6] = row.prev;
-//                 if (row.prev !== null) {
-//                   db.run("update class set next = ? where counter = ?;", [clazz.counter, row.prev], (err) => {
-//                     if (err !== null) syslog(LOG_LEVEL.E, "addClassToDatabase prev update", 3, err);
-//                   });
-//                 }
-//               } else {
-//                 syslog(LOG_LEVEL.E, "addClassToDatabase prev param", 1, err);
-//               }
-//             });
-//           }
-//         } else {
-//           syslog(LOG_LEVEL.E, "addClassToDatabase insert new class", 2, err);
+
+// function updateNextPrevAndLength(blockNumber, maxCounter, prevCounter) {
+//   db.run("update class set prev = ? where counter = ?", [maxCounter, prevCounter], (nextPrevErr) => {
+//     if (nextPrevErr === null) {
+//       db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
+//         if (lengthErr !== null) {
+//           syslog(LOG_LEVEL.E, "updateNextPrevAndLength length update", 2, lengthErr);
 //         }
 //       });
 //     } else {
-//       syslog(LOG_LEVEL.E, "addClassToDatabase max(counter)", 1, err);
+//       syslog(LOG_LEVEL.E, "updateNextPrevAndLength next prev update", 1, nextPrevErr);
 //     }
 //   });
+// }
+//
+// function addNewClassToDB(blockNumber, clazz, container, theCounterAfter) {
+//   if (theCounterAfter === null) pushNewClassToDB(blockNumber, clazz, container);
+//   else {
+//     db.get("select max(counter) + 1 as counter from class", (max, maxErr) => {
+//       if (maxErr === null) {
+//         let insertQuery = {
+//           string: "insert into class (counter, sem, dow, period, block, siape, code, next) values (?, ?, ?, ?, ?, ?, ?, ?)",
+//           params: [max.counter, clazz.sem, container.dow, clazz.period, container.block, clazz.siape, clazz.code, theCounterAfter]
+//         };
+//         db.run(insertQuery.string, insertQuery.params, (insertErr) => {
+//           if (insertErr === null) {
+//             db.get("select prev as counter from class where counter = ?", [theCounterAfter], (prev, prevErr) => {
+//               if (prevErr === null) {
+//                 db.run("update class set prev = ? where counter = ?", [prev.counter, max.counter], (prevUpdateErr) => {
+//                   if (prevUpdateErr === null) {
+//                     if (prev.counter !== null) {
+//                       db.run("update class set next = ? where counter = ?", [max.counter, prev.counter], (prevNextErr) => {
+//                         if (prevNextErr !== null) {
+//                           updateNextPrevAndLength(blockNumber, max.counter, prev.counter);
+//                         } else {
+//                           syslog(LOG_LEVEL.E, "addNewClassToDB prev next update", 5, prevNextErr);
+//                         }
+//                       });
+//                     } else {
+//                       db.run("update class_list set head = ? where blockNumber = ?", [max.counter, blockNumber], (headErr) => {
+//                         if (headErr === null) {
+//                           updateNextPrevAndLength(blockNumber, max.counter, prev.counter);
+//                         } else {
+//                           syslog(LOG_LEVEL.E, "addNewClassToDB head update", 6, headErr);
+//                         }
+//                       });
+//                     }
+//                   } else {
+//                     syslog(LOG_LEVEL.E, "addNewClassToDB prev update", 4, prevUpdateErr);
+//                   }
+//                 });
+//               } else {
+//                 syslog(LOG_LEVEL.E, "addNewClassToDB prev param", 3, prevErr);
+//               }
+//             });
+//           } else {
+//             syslog(LOG_LEVEL.E, "addNewClassToDB insert new class", 2, insertErr);
+//           }
+//         });
+//       } else {
+//         syslog(LOG_LEVEL.E, "addNewClassToDB max counter", 1, maxErr);
+//       }
+//     });
+//
+//   }
+//
+//
 //
 //
 //
@@ -254,11 +298,11 @@ insertBefore(node, nodeAfter) {
 //   if (theCounterAfter !== null) {
 //
 //     db.run("with update(prev) as (select prev from class where counter = ?)"
-//       + " update class set next = ? where counter = (select prev from update);", [theCounterAfter, classCounter], (err) => {
-//       if (err !== null) syslog(LOG_LEVEL.E, "addClassToDatabase next update", 2, err);
+//       + " update class set next = ? where counter = (select prev from update)", [theCounterAfter, classCounter], (err) => {
+//       if (err !== null) syslog(LOG_LEVEL.E, "addNewClassToDB next update", 2, err);
 //     });
-//     db.run("update class set prev = ? where counter = ?;", [classCounter, theCounterAfter], (err) => {
-//       if (err !== null) syslog(LOG_LEVEL.E, "addClassToDatabase prev update", 3, err);
+//     db.run("update class set prev = ? where counter = ?", [classCounter, theCounterAfter], (err) => {
+//       if (err !== null) syslog(LOG_LEVEL.E, "addNewClassToDB prev update", 3, err);
 //     });
 //   }
 //

@@ -848,15 +848,17 @@ function removeClass(classEl) {
   electron.ipcRenderer.send("classList.remove", blockNumber, classEl.getAttribute("counter"));
 }
 
-function addClass(containerEl, classEl, theElAfter) {
-  let clazz = jsonify(classEl);
-  let blockNumber = getBlockNumber(classEl);
-  let container = jsonify(containerEl);
-  // electron.ipcRenderer.send("classList.add", container, blockNumber, clazz, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
-}
+// function addClass(containerEl, classEl, theElAfter) {
+//   let clazz = jsonify(classEl);
+//   let container = jsonify(containerEl);
+//   let blockNumber = getBlockNumber(classEl);
+//   electron.ipcRenderer.send("classList.add", blockNumber, clazz, container, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
+// }
 
-electron.ipcRenderer.on("classList.remove", (event, message) => {
-  // console.log(event);
+electron.ipcRenderer.on("classList.remove", (event, isAllOkay) => {
+  if (isAllOkay === false) {
+    Materialize.toast("Ocorreu um erro ao remover este horário. Recarregando...", 1000);
+  }
 });
 
 function jsonify(el) {

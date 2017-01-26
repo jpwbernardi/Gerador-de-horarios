@@ -58,7 +58,7 @@ drake.on("drop", function(el, target, source, sibling) {
     Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
     drake.cancel(true);
   } else {
-    addClass(target, el, sibling);
+    // addClass(target, el, sibling);
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       addCloseButton($el);
@@ -136,7 +136,7 @@ function buildRestrictionSelector(periodDowBlockRow) {
 
 function queryProfessorRestrictions() {
   var professorQuery = {
-    string: "select distinct siape from professor_restriction;",
+    string: "select distinct siape from professor_restriction",
     params: []
   };
   db.each(professorQuery.string, professorQuery.params, (siapeErr, siapeRow) => {
@@ -144,7 +144,7 @@ function queryProfessorRestrictions() {
       syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 1, siapeErr);
     } else {
       var restrictionQuery = {
-        string: "select period, dow, block from professor_restriction where siape = ? and active = 1;",
+        string: "select period, dow, block from professor_restriction where siape = ? and active = 1",
         params: [siapeRow.siape]
       };
       db.all(restrictionQuery.string, restrictionQuery.params, (restrictionErr, restrictionRows) => {
@@ -249,11 +249,11 @@ function buildClasses(sem, period) {
   var $row = $createElement("div", {
     "sem": sem,
     "period": period,
-    "style": "margin-top: 10px;",
+    "style": "margin-top: 10px",
     "class": "row putable dragula-source"
   });
   var query = {
-    string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?;",
+    string: "select * from professor_subject ps natural join professor p natural join subject s where s.sem = ? and s.period = ?",
     params: [sem, period]
   };
   var rowSelector = "div.row.putable[sem=" + sem + "][period=" + period + "]";
