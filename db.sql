@@ -504,11 +504,14 @@ create table class(
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
   foreign key(siape, code, period, sem) references professor_subject(siape, code, period, sem) on delete cascade,
   foreign key(prev) references class(counter) on delete set default,
-  foreign key(prev) references class(counter) on delete set default
+  foreign key(next) references class(counter) on delete set default
 );
+-- disaabling foreign key constraint enforcement because of not-yet-existant foreign keys
+PRAGMA foreign_keys = OFF;
 insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
 insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 1, 3);
 insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
+PRAGMA foreign_keys = ON;
 
 create table class_list(
   blockNumber integer,

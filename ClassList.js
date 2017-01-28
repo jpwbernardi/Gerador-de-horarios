@@ -18,8 +18,14 @@ class ClassNode {
 }
 
 class ClassList {
-  constructor(blockNumber) {
-    this._blockNumber = blockNumber;
+  constructor(blockNumber, headCounter, tailCounter) {
+    if (typeof blockNumber !== typeof undefined && typeof headCounter !== typeof undefined && typeof tailCounter !== typeof undefined) {
+      this._blockNumber = blockNumber;
+      this._headCounter = headCounter;
+      this._tailCounter = tailCounter;
+    } else {
+      throw new TypeError("All three constructor parameters are mandatory.");
+    }
     this._length = 0;
     this._head = null;
     this._tail = null;
@@ -33,8 +39,16 @@ class ClassList {
     return this._head;
   }
 
+  get headCounter() {
+    return this._headCounter;
+  }
+
   get tail() {
     return this._tail;
+  }
+
+  get tailCounter() {
+    return this._tailCounter;
   }
 
   get length() {

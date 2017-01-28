@@ -81,13 +81,10 @@ const autocompleteOptions = {
   }
 };
 
-var globalClassLists = electron.remote.getGlobal("classLists");
-
 setTimeout(mainInit, 0);
 buildMenu();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
-setTimeout(buildGridClasses, 0);
 
 $(".modal").modal();
 $(".button-collapse").sideNav();
@@ -825,17 +822,6 @@ function adjustHeight($elements) {
     });
   } else {
     syslog(LOG_LEVEL.W, "adjustHeight", 1, "Invalid $elements argument");
-  }
-}
-
-function buildGridClasses() {
-  for (let blockNumber in globalClassLists) {
-    let classList = globalClassLists[blockNumber];
-    let $td = $("td.putable[blockNumber=" + blockNumber + "]");
-    for (let i = 0; i < classList.length; i++) {
-      $td.append($createAddedClass(classList.getRowAt(i)));
-    }
-    adjustHeight($td.children());
   }
 }
 
