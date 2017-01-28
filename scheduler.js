@@ -120,38 +120,125 @@ $("main").on("click", "button.form-delete", (event) => {
   });
 });
 
-function deleteObject(object, fields) {
-  var error = null;
-  var query = valuesWhere(object, fields);
-  query.string = "delete from " + object.table + " where " + query.string;
-  syslog(LOG_LEVEL.I, "deleteObject", 1, query.string);
-  syslog(LOG_LEVEL.I, "deleteObject", 2, query.params);
-  db.run(query.string, query.params, (err) => {
+function rollbackIfErr(err, message) {
+  if (err !== null) {
+    syslog(LOG_LEVEL.E, message, 1, err);
+    db.exec("ROLLBACK", (err) => {
+      if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
+    });
+    Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
+    setTimeout(() => {
+     electron.ipcRenderer.send("window.reload");
+    }, 2000);
+  }
+}
+
+function beginTransaction() {
+  db.exec("BEGIN IMMEDIATE", (err) => {
+    rollbackIfErr(err, "beginTransaction");
+  });
+}
+
+function commitTransaction() {
+  db.exec("COMMIT", (err) => {
+    rollbackIfErr(err, "commitTransaction");
+  });
+}
+
+function classListRemove(blockNumber, counter, shouldUseTransaction, $target, object) {
+  if (shouldUseTransaction === true) beginTransaction();
+  db.run("with del(next) as (select next from class where counter = ?)"
+    + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
+    rollbackIfErr(err, "classListRemove head update");
+  });
+
+  db.run("with del(prev) as (select prev from class where counter = ?)"
+    + " update class_list set tail = (select prev from del) where tail = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
+    rollbackIfErr(err, "classListRemove tail update");
+  });
+
+  db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+    + " update class set next = (select next from del) where counter = (select prev from del)", [counter], (err) => {
+     rollbackIfErr(err, "classListRemove prev next update");
+  });
+
+  db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+    + " update class set prev = (select prev from del) where counter = (select next from del)", [counter], (err) => {
+    rollbackIfErr(err, "classListRemove next prev update");
+  });
+
+  db.run("delete from class where counter = ?", [counter], (err) => {
+    rollbackIfErr(err, "classListRemove delete");
+  });
+
+  db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
     if (err === null) {
-      syslog(LOG_LEVEL.I, "deleteObject", 1, "successfully deleted item");
+      if (shouldUseTransaction === true) commitTransaction();
+      else if (typeof $target !== typeof undefined && typeof object !== typeof undefined) actualDelete($target, object);
     } else {
-      syslog(LOG_LEVEL.E, "deleteObject", 2, err);
-      error = err;
+      rollbackIfErr(event, err, "classListRemove length update");
     }
   });
-  return error;
+}
+
+function getField(fields, desiredFieldName) {
+  for (let i = 0; i < fields.length; i++) {
+    let $field = $(fields[i]);
+    if ($field.attr("field") === desiredFieldName) return $field;
+  }
+  return null;
 }
 
 function deleteRow(event) {
-  var $target = $(event.currentTarget);
-  var $row = $target.closest("div.row");
-  var obj = objects[$target.attr("object")];
-  var index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
-  var fields = $("input." + obj.name + index);
-  var error = deleteObject(obj, fields);
-  if (error === null) {
-    $row.remove();
-    Materialize.toast("Excluído com sucesso!", 2000);
-    syslog(LOG_LEVEL.I, ".form-delete click", 1, "successfully deleted item");
-  } else {
-    Materialize.toast("Erro na exclusão!", 3000);
-    syslog(LOG_LEVEL.E, ".form-delete click", 2, err);
+  let $target = $(event.currentTarget);
+  let object = objects[$target.attr("object")];
+  let index = $target.attr("index");
+  let fields = $("input." + object.name + index);
+  let classQuery = {
+    string: "select * from class",
+    params: null
   }
+  if (object === objects["Professor"] || object === objects["Subject"] || object === objects["ProfessorSubject"]) {
+    beginTransaction();
+    if (object === objects["Professor"]) {
+      classQuery.string += " where siape = ?";
+      classQuery.params = [valueOf(getField(fields, "siape"))];
+    } else if (object === objects["Subject"]) {
+      classQuery.string += " where code = ?";
+      classQuery.params = [valueOf(getField(fields, "code"))];
+    } else { // } else if (object === objects["ProfessorSubject"]) {
+      classQuery.string += " where siape = ? and code = ?";
+      classQuery.params = [valueOf(getField(fields, "siape")), valueOf(getField(fields, "code"))];
+    }
+    db.each(classQuery.string, classQuery.params, (err, row) => {
+      classListRemove(row.blockNumber, row.counter, false, $target, object);
+    }, (err, nrows) => {
+      if (err !== null) syslog(LOG_LEVEL.E, "deleteRow", 1, err);
+    });
+  } else {
+    actualDelete($target, object);
+  }
+}
+
+function actualDelete($target, object) {
+  let $row = $target.closest("div.row");
+  let index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
+  let fields = $("input." + object.name + index);
+  let query = valuesWhere(object, fields);
+  query.string = "delete from " + object.table + " where " + query.string;
+  syslog(LOG_LEVEL.D, "actualDelete", 1, query.string);
+  syslog(LOG_LEVEL.D, "actualDelete", 2, query.params);
+  db.run(query.string, query.params, (err) => {
+    if (err === null) {
+      $row.remove();
+      commitTransaction();
+      Materialize.toast("Excluído com sucesso!", 2000);
+      syslog(LOG_LEVEL.D, "actualDelete", 3, "successfully deleted item");
+    } else {
+      Materialize.toast("Erro na exclusão!", 3000);
+      syslog(LOG_LEVEL.E, "actualDelete", 4, err);
+    }
+  });
 }
 
 $("main").on("click", "button.form-save", saveForm);
@@ -174,7 +261,7 @@ function saveForm(event) {
   if (correct) {
     // yeah, editable is delete old + insert new ...
     let editable = event.currentTarget.hasAttribute("editable") === true;
-    if (editable) deleteObject(obj, fields);
+    if (editable) deleteRow(obj, fields);
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
     syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
@@ -236,8 +323,12 @@ function valuesWhere(obj, fields) {
 }
 
 function valueOf(field) {
-  if (field.type === "checkbox") return field.checked;
-  return field.value;
+  if (field instanceof jQuery) {
+    return field.val();
+  } else {
+    if (field.type === "checkbox") return field.checked;
+    return field.value;
+  }
 }
 
 function objFields(obj, filter) {
@@ -778,7 +869,7 @@ function addCloseButton($el) {
     $target.addClass("removed");
     without($siblings, $target, "removed");
     adjustHeight($siblings);
-    removeClass(event.currentTarget.parentNode.parentNode);
+    classListRemove(getBlockNumber($target[0]), $target.attr("counter"), true);
   });
   $el.children(".delete-class").append($remove);
 }
@@ -794,6 +885,7 @@ function $createClass(row, addClose) {
     "block": row.block,
     "siape": row.siape,
     "code": row.code,
+    "blockNumber": row.blockNumber,
     "prev": row.prev,
     "next": row.next,
     "title": row.name + "\n" + row.title + " (" + row.code + ")",
@@ -830,8 +922,7 @@ function getBlockNumber(classEl) {
 }
 
 function removeClass(classEl) {
-  let blockNumber = getBlockNumber(classEl);
-  electron.ipcRenderer.send("classList.remove", blockNumber, classEl.getAttribute("counter"));
+
 }
 
 // function addClass(containerEl, classEl, theElAfter) {

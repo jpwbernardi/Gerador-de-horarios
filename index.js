@@ -335,8 +335,8 @@ function buildGrid() {
 }
 
 function loadClassLists() {
-  var classLists = [];
-  db.each("select * from class_list order by blockNumber", (classListErr, classListRow) => {
+  let classLists = [];
+  db.each("select * from class_list where length > 0 order by blockNumber", (classListErr, classListRow) => {
     if (classListErr === null) {
       classLists.push(new ClassList(classListRow.blockNumber, classListRow.head, classListRow.tail));
     } else {

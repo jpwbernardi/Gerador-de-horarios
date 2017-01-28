@@ -490,39 +490,41 @@ create table professor_restriction(
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade
 );
 
-create table class(
-  counter integer,
-  sem     integer,
-  dow     integer,
-  period  integer,
-  block   integer,
-  siape   integer,
-  code    varchar(8),
-  prev    integer default null,
-  next    integer default null,
-  primary key(counter),
-  foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade,
-  foreign key(siape, code, period, sem) references professor_subject(siape, code, period, sem) on delete cascade,
-  foreign key(prev) references class(counter) on delete set default,
-  foreign key(next) references class(counter) on delete set default
-);
 -- disaabling foreign key constraint enforcement because of not-yet-existant foreign keys
 PRAGMA foreign_keys = OFF;
-insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", null, 2);
-insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 1, 3);
-insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 2, null);
-PRAGMA foreign_keys = ON;
+create table class(
+  counter     integer,
+  sem         integer,
+  dow         integer,
+  period      integer,
+  block       integer,
+  siape       integer,
+  code        varchar(8),
+  blockNumber integer default null,
+  prev        integer default null,
+  next        integer default null,
+  primary key(counter),
+  foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete no action,
+  foreign key(siape, code, period, sem) references professor_subject(siape, code, period, sem) on delete no action,
+  foreign key(blockNumber) references class_list(blockNumber) on delete no action, -- cascade?
+  foreign key(prev) references class(counter) on delete no action,
+  foreign key(next) references class(counter) on delete no action
+);
+insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", 420, null, 2);
+insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 420, 1, 3);
+insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 420, 2, null);
 
 create table class_list(
   blockNumber integer,
-  head        integer,
-  tail        integer,
-  length      integer,
+  head        integer default null,
+  tail        integer default null,
+  length      integer default 0,
   primary key(blockNumber),
-  foreign key(head) references class(counter),
-  foreign key(tail) references class(counter)
+  foreign key(head) references class(counter) on delete no action,
+  foreign key(tail) references class(counter) on delete no action
 );
 insert into class_list values(420, 1, 3, 3);
+PRAGMA foreign_keys = ON;
 
 -- create table period_restriction(
 --   periodr integer,

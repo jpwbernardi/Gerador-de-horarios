@@ -44,6 +44,7 @@ app.on('ready', () => {
   global.db.on('close', () => {
     syslog(LOG_LEVEL.D, "app.on('ready')", 3, "Database closed successfully");
   });
+  global.db.serialize();
   // enabling foreign key constraint enforcement (off by default for compatibility)
   global.db.exec("PRAGMA foreign_keys = ON", (err) => {
     if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 4, err);
@@ -90,61 +91,9 @@ function syslog(logLevel, functionName, code, message) {
   console.log(LOG_LEVEL_STRING[logLevel] + ": " + message, "(code " + code + " at " + functionName + ")");
 }
 
-// function rollbackIfErr(ipcEvent, err, message) {
-//   if (err !== null) {
-//     db.exec("ROLLBACK", (err) => {
-//       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr.remove ROLLBACK", 2, err);
-//     });
-//     syslog(LOG_LEVEL.E, message, 1, err);
-//     ipcEvent.sender.send("classList.remove", false);
-//     setTimeout(() => {
-//       mainWindow.reload();
-//     }, 1000);
-//   }
-// }
-
-// ipcMain.on("classList.remove", (event, blockNumber, counter) => {
-//   db.serialize(() => {
-//     db.exec("BEGIN IMMEDIATE");
-//     db.run("with del(next) as (select next from class where counter = ?)"
-//       + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
-//       rollbackIfErr(event, err, "classList.remove head update");
-//     });
-//
-//     db.run("with del(prev) as (select prev from class where counter = ?)"
-//       + " update class_list set tail = (select prev from del) where tail = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
-//       rollbackIfErr(event, err, "classList.remove tail update");
-//     });
-//
-//     db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
-//       + " update class set next = (select next from del) where counter = (select prev from del)", [counter], (err) => {
-//        rollbackIfErr(event, err, "classList.remove prev next update");
-//     });
-//
-//     db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
-//       + " update class set prev = (select prev from del) where counter = (select next from del)", [counter], (err) => {
-//       rollbackIfErr(event, err, "classList.remove next prev update");
-//     });
-//
-//     db.run("delete from class where counter = ?", [counter], (err) => {
-//       rollbackIfErr(event, err, "classList.remove delete");
-//     });
-//
-//     db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
-//       if (err === null) {
-//         db.exec("COMMIT", (err) => {
-//           if (err === null) {
-//             global.classLists[blockNumber].removeCounter(counter);
-//           } else {
-//             rollbackIfErr(event, err, "classList.remove COMMIT");
-//           }
-//         });
-//       } else {
-//         rollbackIfErr(event, err, "classList.remove length update");
-//       }
-//     });
-//   });
-// });
+ipcMain.on("window.reload", (event) => {
+  mainWindow.reload();
+});
 
 // ipcMain.on("classList.add", (event, blockNumber, clazz, container, theCounterAfter) => {
 //   // global.classLists[blockNumber].insertCounterBefore(clazz.counter, theCounterAfter);
