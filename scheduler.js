@@ -4,9 +4,16 @@
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
 // https://github.com/mapbox/node-sqlite3/wiki/API
 
-const db = nodeRequire("electron").remote.getGlobal('db');
-const objects = nodeRequire("./objects");
-var autocompleteOptions = {
+const nameLen = 16;
+const objects = require("./objects");
+const electron = require("electron");
+const db = electron.remote.getGlobal('db');
+const ClassList = require("./ClassList.js");
+const LOG_LEVEL = electron.remote.getGlobal("LOG_LEVEL");
+const LOG_LEVEL_STRING = electron.remote.getGlobal("LOG_LEVEL_STRING");
+const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accent-3", "accent-4"];
+const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
+const autocompleteOptions = {
   minLength: 0,
   // autoFocus: true, // automatically focus the first item in result list
   source: function(request, response) {
@@ -35,17 +42,17 @@ var autocompleteOptions = {
             params.push($whereField.val());
           }
         } else {
-          syslog("LOG_ERR", "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
-      } else syslog("LOG_WARN", "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
-    } else syslog("LOG_INFO", "autocompleteOptions", 2, obj.name + " has no selectWhere");
+      } else syslog(LOG_LEVEL.W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
+    } else syslog(LOG_LEVEL.I, "autocompleteOptions", 2, obj.name + " has no selectWhere");
     if (typeof ownerObj.groupBy !== typeof undefined && ownerObj.groupBy.length > 0)
       query += " group by " + groupBy(ownerObj.groupBy);
-    if (typeof ownerObj.orderBy !== typeof undefined && ownerObj.orderBy.length > 0)
+    if (typeof ownerObj.orderBy !== typeof undefined)
       query += " order by " + orderBy(ownerObj.orderBy.fields, ownerObj.orderBy.types);
-    syslog("LOG_INFO", "autocompleteOptions", 1, query);
-    syslog("LOG_INFO", "autocompleteOptions", 5, params);
+    syslog(LOG_LEVEL.I, "autocompleteOptions", 1, query);
+    syslog(LOG_LEVEL.I, "autocompleteOptions", 5, params);
     db.each(query, params, function(err, row) {
       var keys = autocompleteFields(ownerObj);
       var label = row[keys[0]];
@@ -60,10 +67,11 @@ var autocompleteOptions = {
           if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });
-        syslog("LOG_INFO", "autocompleteOptions", 6, JSON.stringify(rowJson));
+        syslog(LOG_LEVEL.I, "autocompleteOptions", 6, JSON.stringify(rowJson));
         results.push(rowJson);
       }
     }, function(err, nrows) {
+      if (nrows === 0) Materialize.toast("Nenhum resultado encontrado!", 1000);
       response(results);
     });
   },
@@ -74,30 +82,26 @@ var autocompleteOptions = {
   }
 };
 
-// var observerConf = {
-//   childList: true
-// };
-// var formObserver = new MutationObserver(function(mutations, observer) {
-//   initAutocomplete();
-// });
-
-// observer.observe(document, observerConf);
-// $.each($("div.form"), (i, form) => {
-//   formObserver.observe(form, observerConf);
-// });
-// $.each($("div.list"), (i, list) => {
-//   formObserver.observe(list, observerConf);
-// });
-
+setTimeout(mainInit, 0);
 buildMenu();
-$(".button-collapse").sideNav();
 buildForm("form");
 setTimeout(buildForm, 0, "list");
-// initAutocomplete();
 
-// function initAutocomplete() {
-  $(".autocomplete").autocomplete(autocompleteOptions);
-// }
+$(".modal").modal();
+$(".button-collapse").sideNav();
+
+function syslog(logLevel, functionName, code, message) {
+  console.log(LOG_LEVEL_STRING[logLevel] + ": " + message, "(code " + code + " at " + functionName + ")");
+}
+
+function mainInit() {
+  let vt = document.getElementsByClassName("vertical-text");
+  for (let i = 0; i < vt.length; i++) {
+    let text = vt[i].innerText;
+    text = text.split("").join("\n");
+    vt[i].innerText = text;
+  }
+}
 
 $("main").on("change", ".autocomplete", (event) => {
   if (event.currentTarget.value === "") {
@@ -108,42 +112,172 @@ $("main").on("change", ".autocomplete", (event) => {
   }
 });
 
+$("main").on("click", "button.form-save", saveForm);
 
 $("main").on("click", "button.form-delete", (event) => {
-  $("div#modal-delete.modal").openModal();
-  $("a#modal-delete-confirm").off("click.delete");
-  $("a#modal-delete-confirm").on("click.delete", function(){deleteRow(event);});
+  $("#modal-delete").modal("open");
+  // we need the original event
+  $("#modal-delete-confirm").off("click.delete");
+  $("#modal-delete-confirm").on("click.delete", () => {
+    deleteRows([event.currentTarget], 0, true);
+  });
 });
 
+$("main").on("click", ".form-delete-all", (event) => {
+  $("#modal-delete").modal("open");
+  // we need the original event
+  $("#modal-delete-confirm").off("click.delete");
+  $("#modal-delete-confirm").on("click.delete", () => {
+    // currently, as we're not using the background process,
+    // the user must wait for the deletions to complete!
+    Materialize.toast("Por favor, aguarde...", 1000);
+    deleteAllRows(event.currentTarget);
+  });
+});
 
-function deleteRow(event) {
-  var $target = $(event.currentTarget);
-  var $row = $target.closest("div.row");
-  var obj = objects[$target.attr("object")];
-  var index = $target.attr("index");
-  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
-  var query = valuesWhere(obj, fields);
-  query.string = "delete from " + obj.table + " where " + query.string;
-  syslog("LOG_INFO", ".form-delete click", 3, query.string);
-  syslog("LOG_INFO", ".form-delete click", 3, query.params);
-  db.run(query.string, query.params, (err) => {
+function rollbackIfErr(err, message) {
+  if (err !== null) {
+    syslog(LOG_LEVEL.E, "rollbackIfErr " + message, 1, err);
+    db.exec("ROLLBACK", (err) => {
+      if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
+    });
+    Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
+    // setTimeout(() => {
+    //  electron.ipcRenderer.send("window.reload");
+    // }, 2000);
+  }
+}
+
+function beginTransaction() {
+  db.exec("BEGIN IMMEDIATE", (err) => {
+    rollbackIfErr(err, "beginTransaction");
+  });
+}
+
+function commitTransaction() {
+  db.exec("COMMIT", (err) => {
+    rollbackIfErr(err, "commitTransaction");
+  });
+}
+
+// if shouldUseTransaction is true, last arguments are irrelevant
+function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
+  if (shouldUseTransaction === true) beginTransaction();
+  db.run("with del(next) as (select next from class where counter = ?)"
+    + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
+    rollbackIfErr(err, "classListRemove head update");
+  });
+
+  db.run("with del(prev) as (select prev from class where counter = ?)"
+    + " update class_list set tail = (select prev from del) where tail = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
+    rollbackIfErr(err, "classListRemove tail update");
+  });
+
+  db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+    + " update class set next = (select next from del) where counter = (select prev from del)", [counter], (err) => {
+     rollbackIfErr(err, "classListRemove prev next update");
+  });
+
+  db.run("with del(prev, next) as (select prev, next from class where counter = ?)"
+    + " update class set prev = (select prev from del) where counter = (select next from del)", [counter], (err) => {
+    rollbackIfErr(err, "classListRemove next prev update");
+  });
+
+  db.run("delete from class where counter = ?", [counter], (err) => {
+    rollbackIfErr(err, "classListRemove delete");
+  });
+
+  db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
     if (err === null) {
-      $row.remove();
-      Materialize.toast("Item deletado com sucesso!", 2000);
-      syslog("LOG_INFO", ".form-delete click", 1, "successfully deleted item.");
+      if (shouldUseTransaction === true) commitTransaction();
+      else if (typeof targets !== typeof undefined && typeof currentIndex !== typeof undefined && typeof object !== typeof undefined) {
+        actualDelete(targets, currentIndex, object, guiRemove);
+      }
     } else {
-      Materialize.toast(err, 3000);
-      syslog("LOG_ERR", ".form-delete click", 2, err);
+      rollbackIfErr(event, err, "classListRemove length update");
     }
   });
 }
 
-$("main").on("click", "button.form-save", (event) => {
+function getField(fields, desiredFieldName) {
+  for (let i = 0; i < fields.length; i++) {
+    let $field = $(fields[i]);
+    if ($field.attr("field") === desiredFieldName) return $field;
+  }
+  return null;
+}
+
+function deleteRows(targets, currentIndex, guiRemove, callback, ...args) {
+  let $target = $(targets[currentIndex]);
+  let object = objects[$target.attr("object")];
+  let index = $target.attr("index");
+  let fields = $("input." + object.name + index);
+  let classQuery = {
+    string: "select * from class",
+    params: null
+  };
+  beginTransaction();
+  if (object === objects["Professor"] || object === objects["Subject"] || object === objects["ProfessorSubject"]) {
+    if (object === objects["Professor"]) {
+      classQuery.string += " where siape = ?";
+      classQuery.params = [valueOf(getField(fields, "siape"))];
+    } else if (object === objects["Subject"]) {
+      classQuery.string += " where code = ?";
+      classQuery.params = [valueOf(getField(fields, "code"))];
+    } else { // } else if (object === objects["ProfessorSubject"]) {
+      classQuery.string += " where siape = ? and code = ?";
+      classQuery.params = [valueOf(getField(fields, "siape")), valueOf(getField(fields, "code"))];
+    }
+    syslog(LOG_LEVEL.D, "deleteRows", 1, "query: " + classQuery.string);
+    syslog(LOG_LEVEL.D, "deleteRows", 2, "params: " + classQuery.params);
+    db.each(classQuery.string, classQuery.params, (err, row) => {
+      classListRemove(row.blockNumber, row.counter, false, targets, currentIndex, object, guiRemove);
+    }, (err, nrows) => {
+      syslog(LOG_LEVEL.D, "deleteRows", 3, "nrows: " + nrows);
+      if (err !== null) syslog(LOG_LEVEL.E, "deleteRows", 1, err);
+      else if (nrows === 0) actualDelete(targets, currentIndex, object, guiRemove, callback, ...args);
+    });
+  } else {
+    actualDelete(targets, currentIndex, object, guiRemove, callback, ...args);
+  }
+}
+
+function actualDelete(targets, currentIndex, object, guiRemove, callback, ...args) {
+  let $target = $(targets[currentIndex]);
+  let $row = $target.closest("div.row");
+  let index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
+  let fields = $("input." + object.name + index);
+  let query = valuesWhere(object, fields);
+  query.string = "delete from " + object.table + " where " + query.string;
+  syslog(LOG_LEVEL.D, "actualDelete", 1, query.string);
+  syslog(LOG_LEVEL.D, "actualDelete", 2, query.params);
+  db.run(query.string, query.params, (err) => {
+    if (err === null) {
+      commitTransaction();
+      if (guiRemove === true) $row.remove();
+      syslog(LOG_LEVEL.D, "actualDelete", 3, "successfully deleted item");
+      if (currentIndex + 1 < targets.length) setTimeout(deleteRows, 0, targets, currentIndex + 1, guiRemove);
+      else {
+        if (guiRemove === true) Materialize.toast("Excluído com sucesso!", 1000);
+        if (typeof callback === "function") callback.apply(callback, args);
+      }
+    } else {
+      rollbackIfErr(err, "actualDelete");
+    }
+  });
+}
+
+function deleteAllRows(eventTarget) {
+  let targets = $(".form-delete[object=" + eventTarget.getAttribute("object") + "]");
+  setTimeout(deleteRows, 0, targets, 0, true);
+}
+
+function saveForm(event) {
   var i;
   var correct = true;
   var obj = objects[event.currentTarget.getAttribute("object")];
-  var index = objects[event.currentTarget.getAttribute("index")];
-  var fields = $("input." + obj.name + (typeof index !== typeof undefined ? index : ""));
+  var index = event.currentTarget.hasAttribute("index") ? event.currentTarget.getAttribute("index") : "";
+  var fields = $("input." + obj.name + index);
   for (i = 0; i < fields.length; i++) {
     var $field = $(fields[i]);
     if (typeof $field.attr("from") !== typeof undefined) $field = $("#" + $field.attr("from"));
@@ -154,21 +288,32 @@ $("main").on("click", "button.form-save", (event) => {
     }
   }
   if (correct) {
-    let query = valuesInsert(obj, fields);
-    query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    syslog("LOG_INFO", ".form-save click", 1, query.string);
-    syslog("LOG_INFO", ".form-save click", 2, query.params);
-    db.run(query.string, query.params, function(err) {
-      if (err !== null) {
-        syslog("LOG_ERR", ".form-save click", 3, err);
-        Materialize.toast(err, 3000);
-      } else {
-        Materialize.toast("Registro salvo com sucesso!", 2000);
+    // yeah, editable is delete old + insert new ...
+    if (event.currentTarget.hasAttribute("editable") === true) {
+      deleteRows([event.currentTarget], 0, false, insertObject, obj, fields, false);
+    } else {
+      insertObject(obj, fields, true);
+    }
+  }
+}
+
+function insertObject(obj, fields, guiInsert) {
+  let query = valuesInsert(obj, fields);
+  query.string = "insert into " + obj.table + " values (" + query.string + ")";
+  syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
+  syslog(LOG_LEVEL.I, ".form-save click", 2, query.params);
+  db.run(query.string, query.params, function(err) {
+    if (err === null) {
+      Materialize.toast("Salvo com sucesso!", 1000);
+      if (guiInsert === true) {
         appendNewRow(obj, fields);
       }
-    });
-  }
-});
+    } else {
+      syslog(LOG_LEVEL.E, ".form-save click", 3, err);
+      Materialize.toast("Este registro já está cadastrado!", 3000);
+    }
+  });
+}
 
 function hasPrimaryNotForeign(obj) {
   var has = false;
@@ -213,8 +358,12 @@ function valuesWhere(obj, fields) {
 }
 
 function valueOf(field) {
-  if (field.type === "checkbox") return field.checked;
-  return field.value;
+  if (field instanceof jQuery) {
+    return field.val();
+  } else {
+    if (field.type === "checkbox") return field.checked;
+    return field.value;
+  }
 }
 
 function objFields(obj, filter) {
@@ -274,7 +423,9 @@ function foreignPrimaryKeys(obj, visited) {
 function getForeignPrimaryObjects(o) {
   var visited = {};
   var queue = foreignPrimaryKeys(o, visited);
-  var fobjs = [], front = 0, back = queue.length - 1;
+  var fobjs = [],
+    front = 0,
+    back = queue.length - 1;
   while (front <= back) {
     let obj = queue[front++];
     visited[obj] = true;
@@ -316,7 +467,7 @@ function autocompleteFields(obj) {
     } else {
       fields = obj.fields; // all fields from the 'select *'
     }
-  } else syslog("LOG_WARN", "autocompleteFields", 1, "obj is undefined!");
+  } else syslog(LOG_LEVEL.W, "autocompleteFields", 1, "obj is undefined!");
   return fields;
 }
 
@@ -329,7 +480,8 @@ function $createElement(tag, attributes, events) {
   }
   if (typeof events != typeof undefined) {
     $.each(events, function(key, value) {
-      $element[0].addEventListener(key, value);
+      $element.on(key, value);
+      // $element[0].addEventListener(key, value);
     });
   }
   return $element;
@@ -368,10 +520,10 @@ function decodeType(obj, findex) {
       return "number";
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
-    // case objects.FIELD_TYPE_FK:
-    //   return "fk";
+      // case objects.FIELD_TYPE_FK:
+      //   return "fk";
     default:
-      syslog("LOG_WARN" , "decodeType", 1 , "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
+      syslog(LOG_LEVEL.W, "decodeType", 1, "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
   }
 }
@@ -383,7 +535,7 @@ function decodeOrder(type) {
     case -1:
       return "desc";
     default:
-      syslog("LOG_WARN", "decodeOrder", 1, "unknown order by, type '" + type + "'!");
+      syslog(LOG_LEVEL.W, "decodeOrder", 1, "unknown order by, type '" + type + "'!");
       return "";
   }
 }
@@ -393,10 +545,11 @@ function orderBy(fields, types) {
   var defaultOrder = false;
   if (typeof types !== typeof undefined && types.length > 0) {
     if (fields.length !== types.length)
-      throw new RangeError("Ordering type must be specified for every field, if any.");
+      throw new RangeError("Ordering type must be specified for every field, if any");
   } else defaultOrder = true;
-  for (let i = 0; i < fields.length; i++)
-    order += fields[i] + " " + decodeOrder(defaultOrder === true ? ORDER_TYPE_ASC : types[i]);
+  order += fields[0] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[0]);
+  for (let i = 1; i < fields.length; i++)
+    order += ", " + fields[i] + " " + decodeOrder(defaultOrder === true ? objects.ORDER_TYPE_ASC : types[i]);
   return order;
 }
 
@@ -406,7 +559,7 @@ function groupBy(fields) {
     group = fields[0];
     for (let i = 1; i < fields.length; i++)
       group += ", " + fields[i];
-  } else syslog("LOG_WARN", "groupBy", 1, "empty 'fields' parameter");
+  } else syslog(LOG_LEVEL.W, "groupBy", 1, "empty 'fields' parameter");
   return group;
 }
 
@@ -443,7 +596,7 @@ function buildMenu() {
   $wrapper.append($ul);
 
   var $nav = $createElement("nav", {
-    "class": "marbot-20px teal darken-3"
+    "class": "marbot-25px teal darken-3"
   });
   $nav.append($wrapper);
   $(".sch-menu").append($nav);
@@ -471,13 +624,19 @@ function buttons($ul) {
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "ccr.html"
-  }, "CCR"));
+  }, "CCRs"));
   $ul.append($item);
 
   $item = $createElement("li", {});
   $item.append($createTextualElement("a", {
     "href": "assoc.html"
   }, "Associações"));
+  $ul.append($item);
+
+  $item = $createElement("li", {});
+  $item.append($createTextualElement("a", {
+    "href": "help.html"
+  }, "Ajuda"));
   $ul.append($item);
 }
 
@@ -486,30 +645,43 @@ function buildForm(clazz) {
   $elems.each(function(index, elem) {
     var o = elem.getAttribute("object");
     var obj = objects[o];
-    if (typeof obj !== typeof undefined)
+    if (typeof obj !== typeof undefined) {
       $(elem).append($buildForm(obj, clazz));
-    else syslog("LOG_ERR", "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+    } else {
+      syslog(LOG_LEVEL.E, "buildForm('" + clazz + "')", 1, "object " + o + " not found!");
+    }
   });
 }
 
 function $buildForm(obj, clazz) {
   var $form = $createElement("div");
-  if (clazz === "form") $form.append($buildFormRow(obj));
-  else if (clazz === "list") {
+  if (clazz === "form") {
+    let $title = $createTextualElement("h4", {}, obj.formTitle);
+    $title.append($createTextualElement("button", {
+      "class": "btn btn-short waves-effect waves-light marleft-10px form-delete-all",
+      "object": obj.name,
+      "title": "Limpar " + obj.formTitle.toLowerCase()
+    }, $createTextualElement("i", {
+      "class": "material-icons"
+    }, "delete")));
+    $form.append($title);
+    $form.append($buildFormRow(obj));
+  } else if (clazz === "list") {
     let rownum = 0;
     let query = selectAllJoins(obj);
+    if (typeof obj.orderBy !== typeof undefined)
+      query += " order by " + orderBy(obj.orderBy.fields, obj.orderBy.types);
     db.each(query, function(err, row) {
       if (err === null)
         setTimeout(function(rownum) {
           $form.append($buildListRow(obj, row, rownum));
         }, 0, rownum++);
-      else syslog("LOG_ERR", "$buildForm", 1, "error fetching " + obj.table + " rows.");
+      else syslog(LOG_LEVEL.E, "$buildForm", 1, "error fetching " + obj.table + " rows");
     }, (err, nrows) => {
-      if (err === null) syslog("LOG_INFO", "$buildForm", 2, "done loading " + nrows + " row(s).");
-      else syslog("LOG_ERR", "$buildForm", 3, err);
+      if (err === null) syslog(LOG_LEVEL.I, "$buildForm", 2, "done loading " + nrows + " row(s)");
+      else syslog(LOG_LEVEL.E, "$buildForm", 3, err);
     });
   }
-  // formObserver.observe($form[0], observerConf);
   return $form;
 }
 
@@ -536,15 +708,6 @@ function $buildListRow(obj, tuple, rownum) {
     "class": "input-field col s4 m2 l2"
   });
   $button = $createTextualElement("button", {
-    "class": "btn btn-short waves-effect waves-light form-edit",
-    "object": obj.name,
-    "index": rownum,
-    "title": "Editar"
-  }, $createTextualElement("i", {
-    "class": "material-icons"
-  }, "edit"));
-  $col.append($button);
-  $button = $createTextualElement("button", {
     "class": "btn btn-short waves-effect waves-light form-delete",
     "object": obj.name,
     "index": rownum,
@@ -558,17 +721,17 @@ function $buildListRow(obj, tuple, rownum) {
 }
 
 function appendNewRow(obj, fields) {
-  var lastRow = -Infinity;
+  var lastRow = -1;
   var rownums = $("div.row").map(function() {
-    return this.getAttribute("index");
+    return Number(this.getAttribute("index"));
   });
-  rownums.each((i, num) => {
-    if (num > lastRow) lastRow = num;
+  rownums.each((i, rowNumber) => {
+    if (rowNumber > lastRow) lastRow = rowNumber;
   });
   var query = valuesWhere(obj, fields);
   query.string = selectAllJoins(obj) + " where " + query.string;
-  syslog("LOG_INFO","appendNewRow", 1,  query.string);
-  syslog("LOG_INFO","appendNewRow", 2, query.params);
+  syslog(LOG_LEVEL.I, "appendNewRow", 1, query.string);
+  syslog(LOG_LEVEL.I, "appendNewRow", 2, query.params);
   db.get(query.string, query.params, (err, tuple) => {
     if (err === null) {
       if (typeof tuple !== typeof undefined) {
@@ -576,8 +739,8 @@ function appendNewRow(obj, fields) {
         let $inputs = $("div.form[object=" + obj.name + "]").find("input");
         $inputs.val("");
         $inputs.filter(":visible:first").focus();
-      } else syslog("LOG_ERR", "appendNewRow", 4, "tuple is undefined.");
-    } else syslog("LOG_ERR", "appendNewRow", 3, err);
+      } else syslog(LOG_LEVEL.E, "appendNewRow", 4, "tuple is undefined");
+    } else syslog(LOG_LEVEL.E, "appendNewRow", 3, err);
   });
 }
 
@@ -591,7 +754,8 @@ function $buildRow(obj, tuple, rownum) {
     var $col = null,
       $input = null;
     if (type === objects.FIELD_TYPE_FK) {
-      let fobj = obj.foreignKey[j], fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
+      let fobj = obj.foreignKey[j],
+        fobjs = hasPrimaryNotForeign(fobj) ? [fobj] : [];
       fobjs = fobjs.concat(getForeignPrimaryObjects(fobj));
       $.each(fobjs, function(k, fo) {
         $col = $createElement("div", {
@@ -653,10 +817,20 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("object", obj.name);
       $input.attr("field", obj.fields[i]);
       $input.attr("value", tuple[obj.fields[i]]);
+      $input.attr("index", rownum);
       $input.attr("title", obj.titles[i]);
-      if (typeof obj.fieldRequired !== typeof undefined && typeof obj.fieldRequired[j] !== typeof undefined && obj.fieldRequired[j] === true)
+      // only on .list forms
+      if (rownum !== "") {
+        $input.attr("editable", "editable");
+        $input.on("change", saveForm);
+      }
+      if (typeof obj.fieldRequired !== typeof undefined &&
+        typeof obj.fieldRequired[j] !== typeof undefined &&
+        obj.fieldRequired[j] === true) {
         $input.attr("required", "required");
-      if (typeof tuple[obj.fields[i]] !== typeof undefined)
+      }
+      // only checkboxes are allowed to be directly updated
+      if (typeof tuple[obj.fields[i]] !== typeof undefined && type !== objects.FIELD_TYPE_BOOLEAN)
         $input.attr("disabled", "disabled");
       var $label = $createTextualElement("label", {
         "for": obj.table + "-" + obj.fields[i] + rownum,
@@ -679,6 +853,168 @@ function $buildRow(obj, tuple, rownum) {
   return $row;
 }
 
-function syslog(level, functionName, code, message) {
-  console.log(level, functionName, code, message);
+function firstName(fullname) {
+  var sep = fullname.indexOf(" ");
+  if (sep !== -1) return fullname.substring(0, sep);
+  return fullname;
 }
+
+function lastName(fullname) {
+  var sep = fullname.lastIndexOf(" ");
+  if (sep !== -1) return fullname.substring(sep + 1);
+  return null;
+}
+
+function naming(fullname) {
+  if (fullname.length <= nameLen) return fullname;
+
+  var firstname = firstName(fullname);
+  if (firstname.length === nameLen || firstname.length + 1 === nameLen) // + 1 por causa do espaço com o sobrenome
+    return firstname;
+  if (firstname.length > nameLen) return firstname.substring(0, nameLen - 3) + "...";
+
+  var lastname = lastName(fullname);
+  if (lastname !== null) {
+    var name = firstname + " " + lastname;
+    if (name.length <= nameLen) return name;
+    return name.substring(0, nameLen - 3) + "...";
+  }
+  return firstname;
+}
+
+function isSameClass(theClass, otherClass, classFilter) {
+  if (otherClass.classList.contains(classFilter)
+    && theClass.getAttribute("siape") === otherClass.getAttribute("siape")
+    && theClass.getAttribute("code") === otherClass.getAttribute("code")
+    && theClass.getAttribute("period") === otherClass.getAttribute("period"))
+      return true;
+  return  false;
+}
+
+function without($elements, $el, classFilter) {
+  var i;
+  for (i = 0; i < $elements.length; i++)
+    if (isSameClass($el[0], $elements[i], classFilter)) break;
+  if (i < $elements.length) {
+    $elements.splice(i, 1);
+    return true;
+  }
+  return false;
+}
+
+function addCloseButton($el) {
+  // <i class="close material-icons">close</i>
+  let $remove = $createTextualElement("i", {
+    "class": "close material-icons"
+  }, "close");
+  $remove.on("click", (event) => {
+    var $target = $(event.currentTarget.parentNode.parentNode);
+    var $siblings = $($($target[0].parentNode).children());
+    $target.addClass("removed");
+    without($siblings, $target, "removed");
+    adjustHeight($siblings);
+    classListRemove(getBlockNumber($target[0]), $target.attr("counter"), true);
+  });
+  $el.children(".delete-class").append($remove);
+}
+
+function $createClass(row, addClose) {
+  var color = row.siape % colors.length;
+  var variation = row.siape % (colorVariations.length + 1);
+  var $class = $createTextualElement("div", {
+    "counter": row.counter,
+    "sem": row.sem,
+    "dow": row.dow,
+    "period": row.period,
+    "block": row.block,
+    "siape": row.siape,
+    "code": row.code,
+    "blockNumber": row.blockNumber,
+    "prev": row.prev,
+    "next": row.next,
+    "title": row.name + "\n" + row.title + " (" + row.code + ")",
+    "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
+  }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
+  if (addClose) addCloseButton($class);
+  return $class;
+}
+
+function $createSourceClass(row) {
+  return $createClass(row, false);
+}
+
+function $createAddedClass(row) {
+  var $class = $createClass(row, true);
+  $class.css("width", "100%");
+  $class.css("display", "block");
+  return $class;
+}
+
+function adjustHeight($elements) {
+  if (typeof $elements !== typeof undefined && $elements !== null) {
+    var ratio = 100.0 / $elements.length;
+    $.each($elements, (index, element) => {
+      $(element).css("max-height", ratio);
+    });
+  } else {
+    syslog(LOG_LEVEL.W, "adjustHeight", 1, "Invalid $elements argument");
+  }
+}
+
+function getBlockNumber(classEl) {
+  return classEl.parentNode.getAttribute("blockNumber");
+}
+
+function removeClass(classEl) {
+
+}
+
+// function addClass(containerEl, classEl, theElAfter) {
+//   let clazz = jsonify(classEl);
+//   let container = jsonify(containerEl);
+//   let blockNumber = getBlockNumber(classEl);
+//   electron.ipcRenderer.send("classList.add", blockNumber, clazz, container, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
+// }
+
+electron.ipcRenderer.on("classList.remove", (event, isAllOkay) => {
+  if (isAllOkay === false) {
+    Materialize.toast("Ocorreu um erro ao remover este horário. Recarregando...", 1000);
+  }
+});
+
+function jsonify(el) {
+  let json = {};
+  for (let i = 0; i < el.attributes.length; i++) {
+    let attribute = el.attributes[i];
+    json[attribute.nodeName] = attribute.nodeValue;
+  }
+  return json;
+}
+
+// function findBlockFrom(classRow) {
+//   globalClassLists.forEach((classList, blockNumber) => {
+//     let stClassRow = classList.getRowAt(0);
+//     if (inSameBlock(classRow, stClassRow)) return blockNumber;
+//   });
+//   return null;
+// }
+
+// function findClassRowAt(blockNumber, classRow) {
+//   return globalClassLists[blockNumber].findRow(classRow);
+// }
+
+// function findClassRow(classRow) {
+//   let blockNumber = findBlockFrom(classRow);
+//   if (blockNumber === null) return null;
+//   let classIndex = findClassAt(blockNumber, classRow);
+//   if (classIndex == null) return null;
+//   return {
+//     "block": blockNumber,
+//     "class": classIndex
+//   };
+// }
+
+// function addClassTo(target, classEl, siblingEl) {
+//   let blockNumber = findBlockFrom(target);
+//   globalClassLists[blockNumber].insertRowBefore(classEl, siblingEl);
+// }

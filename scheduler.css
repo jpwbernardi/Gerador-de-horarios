@@ -1,29 +1,7 @@
-.greenhover:hover {
-  color: green;
-}
-
-.redhover:hover {
-  color: red;
-}
-
-.marbot-20px {
-  margin-bottom: 20px;
-}
-
-.combo-caret {
-  cursor: pointer;
-}
-
-.btn {
-  margin-left: 2px;
-  margin-right: 2px;
-}
-
-.btn-short {
-  padding: 0 0.65rem;
-}
+/* Overrides first! */
 
 /* jQuery Autocomplete */
+
 .ui-helper-hidden-accessible {
   display: none;
 }
@@ -40,7 +18,7 @@
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
-.ui-menu-item {
+.ui-menu-item-wrapper {
   clear: both;
   width: 100%;
   display: block;
@@ -55,12 +33,22 @@
   font-family: "Roboto", sans-serif;
 }
 
-.ui-state-focus {
-  font-weight: bold;
+.ui-menu-item .ui-state-focus,
+.ui-menu-item .ui-state-active {
   background-color: #eee;
 }
 
-/* Materialize container overwrite */
+/* Materialize */
+
+.btn {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.btn-short {
+  padding: 0 0.65rem;
+}
+
 .container {
   width: 95% !important;
 }
@@ -72,7 +60,35 @@
 }
 
 @media only screen and (min-width: 993px) {
-  .container {
+  100% .container {
     width: 85% !important;
   }
+}
+
+/* Our custom stuff */
+
+.greenhover:hover {
+  color: green;
+}
+
+.redhover:hover {
+  color: red;
+}
+
+.martop-50px {
+  margin-top: 50px;
+}
+
+.marbot-25px {
+  margin-bottom: 25px;
+}
+
+.marleft-10px {
+  margin-left: 10px;
+}
+
+.combo-caret {
+  cursor: pointer;
+  top: -16px !important;
+  font-size: 12px !important;
 }

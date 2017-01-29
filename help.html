@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--Import Google Icon Font-->
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="help.css" media="screen,projection" />
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
+
+  <title>Gerador de horários - Ajuda</title>
+</head>
+<body>
+  <div class="sch-menu"></div>
+  <main>
+      <div class="container">
+        <div class="row">
+          <div class="col s30">
+            <h4>Ajuda</h4>
+            <h5>Sumário</h5>
+
+            <div id="text-table-of-contents">
+              <ul>
+                <li><a href="#sec-1">1. Grade</a>
+                  <ul>
+                    <li><a href="#sec-1-1">1.1. Montar uma grade de horários</a></li>
+                    <li><a href="#sec-1-2">1.2. Posicionar uma associação de professor a CCR em uma grade</a></li>
+                    <li><a href="#sec-1-3">1.3. Remover uma associação de professor a CCR de uma grade</a></li>
+                    <li><a href="#sec-1-4">1.4. Limpar a grade de um turno em uma fase</a></li>
+                    <li><a href="#sec-1-5">1.5. Limpar todas as grades em uma fase</a></li>
+                    <li><a href="#sec-1-6">1.6. Gerar PDF dos horários montados</a></li>
+                  </ul>
+                </li>
+                <li><a href="#sec-2">2. Restrições</a>
+                  <ul>
+                    <li><a href="#sec-2-1">2.1. Adicionar restrição</a></li>
+                    <li><a href="#sec-2-2">2.2. Alterar estado de uma restrição (tornar ativa ou inativa)</a></li>
+                    <li><a href="#sec-2-3">2.3. Visualizar restrições</a></li>
+                    <li><a href="#sec-2-4">2.4. Excluir restrição</a></li>
+                    <li><a href="#sec-2-5">2.5. Excluir todas as restrições</a></li>
+                  </ul>
+                </li>
+                <li><a href="#sec-3">3. Professores</a>
+                  <ul>
+                    <li><a href="#sec-3-1">3.1. Adicionar professor</a></li>
+                    <li><a href="#sec-3-2">3.2. Visualizar professores</a></li>
+                    <li><a href="#sec-3-3">3.3. Excluir professor</a></li>
+                    <li><a href="#sec-3-4">3.4. Excluir todos os professores</a></li>
+                  </ul>
+                </li>
+                <li><a href="#sec-4">4. CCRs</a>
+                  <ul>
+                    <li><a href="#sec-4-1">4.1. Adicionar CCR</a></li>
+                    <li><a href="#sec-4-2">4.2. Visualizar CCRs</a></li>
+                    <li><a href="#sec-4-3">4.3. Excluir CCR</a></li>
+                    <li><a href="#sec-4-4">4.4. Excluir todos os CCRs</a></li>
+                  </ul>
+                </li>
+                <li><a href="#sec-5">5. Associações</a>
+                  <ul>
+                    <li><a href="#sec-5-1">5.1. Associar professor a CCR</a></li>
+                    <li><a href="#sec-5-2">5.2. Visualizar associações de professores a CCRs</a></li>
+                    <li><a href="#sec-5-3">5.3. Excluir associação de professor a CCR</a></li>
+                    <li><a href="#sec-5-4">5.4. Excluir todas as associações de professores a CCRs</a></li>
+                  </ul>
+                </li>
+
+              </ul>
+            </div>
+
+            <div id="outline-container-sec-1" class="outline-2">
+              <h5 id="sec-1"><span class="section-number-2">1</span> Grade</h5>
+              <div class="outline-text-2" id="text-1"></div>
+              <div id="outline-container-sec-1-1" class="outline-3">
+                <h6 id="sec-1-1"><span class="section-number-3"><b>1.1</b></span><b> Montar uma grade de horários</b></h6>
+                <div class="outline-text-3" id="text-1-1">
+                  <p align="justify">
+                  Para realizar a montagem de uma grade de horários primeiramente deve ser acessada a tela "Grade" a partir do menu contido na parte superior da aplicação. Em sequência, deverá ser selecionada uma fase. Para isso, basta clicar em um dos 10 retângulos apresentados logo abaixo do menu superior. Cabe destacar que por padrão a 1ª fase está selecionada, sendo que a fase selecionada no momento possui seu retângulo correspondente de cor mais forte que os demais. Após, caso haja uma ou várias associações de professores a CCRs cadastradas para a fase selecionada, essas serão apresentadas abaixo da grade do turno (matutino, vespertino ou noturno) corresponde ao respectivo CCR da associação, podendo então ser posicionadas em suas grades correspondentes e manipuladas de maneira a montar horários que respeitem as associações existentes e as restrições ativas no momento. Para informações sobre como posicionar uma associação de professor a CCR em uma grade consultar o item a <a href="#sec-1-2">1.2</a>, assim como para informações sobre como remover uma associação de professor a CCR de uma grade consultar o item <a href="#sec-1-3">1.3</a>.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-1-2" class="outline-3">
+                <h6 id="sec-1-2"><span class="section-number-3"><b>1.2</b></span><b> Posicionar uma associação de professor a CCR em uma grade</b></h6>
+                <div class="outline-text-3" id="text-1-2">
+                  <p align="justify">
+                  Para posicionar uma associação de professor a CCR em uma grade deve-se pressionar o botão esquerdo do mouse/ touchpad estando com esse posicionado sobre a associação desejada. Após isso, a associação deve ser movida em direção a uma célula de sua grade correspondente, ou seja, aquela existente logo acima do local onde a associação originalmente se encontrava, devendo-se soltar o botão em uma célula da grade sem marcação indicando impossibilidade de escolha/ restrição (células coloridas na cor vermelha indicam impossibilidade de escolha para a associação selecionada).
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-1-3" class="outline-3">
+                <h6 id="sec-1-3"><span class="section-number-3"><b>1.3</b></span><b> Remover uma associação de professor a CCR de uma grade</b></h6>
+                <div class="outline-text-3" id="text-1-3">
+                  <p align="justify">
+                  Para remover uma associação de professor a CCR de uma grade basta clicar no 'x' presente no canto superior direito da associação que deseja remover.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-1-4" class="outline-3">
+                <h6 id="sec-1-4"><span class="section-number-3"><b>1.4</b></span><b> Limpar a grade de um turno em uma fase</b></h6>
+                <div class="outline-text-3" id="text-1-4">
+                  <p align="justify">
+                  Para limpar somente a grade de um turno (matutino, vespertino ou noturno) em uma fase, estando com a fase correta selecionada deve ser pressionado o botão "LIMPAR" localizado no canto superior esquerdo da grade que deseja ser esvaziada.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-1-5" class="outline-3">
+                <h6 id="sec-1-5"><span class="section-number-3"><b>1.5</b></span><b> Limpar todas as grades em uma fase</b></h6>
+                <div class="outline-text-3" id="text-1-5">
+                  <p align="justify">
+                  Para limpar todas as grades em uma fase, estando com a fase correta selecionada deve ser pressionado o botão "LIMPAR '1..10'ª FASE" localizado no canto superior direito da tela da fase que deseja ser esvaziada. Após isso, deve ser confirmada a exclusão no modal que será apresentado.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-1-6" class="outline-3">
+                <h6 id="sec-1-6"><span class="section-number-3"><b>1.6</b></span><b> Gerar PDF dos horários montados</b></h6>
+                <div class="outline-text-3" id="text-1-6">
+                  <p align="justify">
+                  Para gerar um arquivo .pdf contendo os horários montados deve ser acessada a tela "Grade" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser clicado no botão "GERAR PDF" localizado no canto superior direito de qualquer uma das fases.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-2" class="outline-2">
+              <h5 id="sec-2"><span class="section-number-2">2</span> Restrições</h5>
+              <div class="outline-text-2" id="text-2"></div>
+              <div id="outline-container-sec-2-1" class="outline-3">
+                <h6 id="sec-2-1"><span class="section-number-3"><b>2.1</b></span><b> Adicionar restrição</b></h6>
+                <div class="outline-text-3" id="text-2-1">
+                  <p align="justify">
+                  Para adicionar uma restrição deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação. Em sequência devem ser preenchidos os campos "Nome do professor" correspondente ao nome de um professor cadastrado no sistema, "Dia da semana" relativo a um dia da semana (segunda-feira à sábado), "Turno do dia" referente a um turno (matutino, vespertino, noturno ou todos) e "Horário do turno", correspondente a uma aula (primeiro, segundo, terceiro, quarto, quinto (somente para os turnos matutino e vespertino) ou todos). Os campos devem ser preenchidos clicando-se no campo e, a partir da utilização das setas para cima e para baixo, selecionando uma das opções apresentadas através de um enter ou de um clique com o botão esquerdo do mouse. Por fim, deve ser clicado no botão de salvar (ícone de disquete) ao lado dos campos preenchidos.
+                  </p><p align="justify">
+                  Cabe destacar que o campo "Ativa", marcado por padrão, indica que a restrição será considerada na montagem de uma grade. O estado da restrição pode ser marcado como inativo durante o próprio cadastro da restrição (para isso basta desmarcar o campo "Ativa") ou alterado posteriormente (ver seção <a href="#sec-2-2">2.2</a>).
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-2-2" class="outline-3">
+                <h6 id="sec-2-2"><span class="section-number-3"><b>2.2</b></span><b> Alterar estado de uma restrição (tornar ativa ou inativa)</b></h6>
+                <div class="outline-text-3" id="text-2-2">
+                  <p align="justify">
+                  Uma restrição será considerada na montagem de uma grade somente se estiver ativa. Para tornar uma restrição ativa ou inativa deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação. Após isso, deverá ser localizada a restrição desejada na listagem de restrições. Uma restrição estará ativa se o campo "Ativa" estiver marcado, caso contrário estará inativa no momento. Para alterar o estado da restrição basta clicar na checkbox "Ativa", alterando seu estado.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-2-3" class="outline-3">
+                <h6 id="sec-2-3"><span class="section-number-3"><b>2.3</b></span><b> Visualizar restrições</b></h6>
+                <div class="outline-text-3" id="text-2-3">
+                  <p align="justify">
+                  Para visualizar as restrições cadastradas deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-2-4" class="outline-3">
+                <h6 id="sec-2-4"><span class="section-number-3"><b>2.4</b></span><b> Excluir restrição</b></h6>
+                <div class="outline-text-3" id="text-2-4">
+                  <p align="justify">
+                     Para excluir uma restrição deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizada a restrição na lista apresentada e clicado no botão de deletar (ícone de lixeira). Após isso, deve ser confirmada a exclusão no modal que será apresentado.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-2-5" class="outline-3">
+              <h6 id="sec-2-5"><span class="section-number-3"><b>2.5</b></span><b> Excluir todas as restrições</b></h6>
+              <div class="outline-text-3" id="text-2-5">
+                <p align="justify">
+                   Para excluir todas as restrições cadastrados deve ser acessada a tela "Restrições" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser clicado no botão "Limpar restrições" (ícone de lixeira) localizado no canto superior esquerdo da tela, ao lado do título "Restrições".
+                </p>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-3" class="outline-2">
+              <h5 id="sec-3"><span class="section-number-2">3</span> Professores</h5>
+              <div class="outline-text-2" id="text-3"></div>
+              <div id="outline-container-sec-3-1" class="outline-3">
+                <h6 id="sec-3-1"><span class="section-number-3"><b>3.1</b></span><b> Adicionar professor</b></h6>
+                <div class="outline-text-3" id="text-3-1">
+                  <p align="justify">
+                     Para adicionar um novo professor deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser preenchidos os campos "SIAPE" e "Nome do professor" e clicado no botão de salvar (ícone de disquete).
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-3-2" class="outline-3">
+                <h6 id="sec-3-2"><span class="section-number-3"><b>3.2</b></span><b> Visualizar professores</b></h6>
+                <div class="outline-text-3" id="text-3-2">
+                  <p align="justify">
+                  Para visualizar os professores cadastrados deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-3-3" class="outline-3">
+                <h6 id="sec-3-3"><span class="section-number-3"><b>3.3</b></span><b> Excluir professor</b></h6>
+                <div class="outline-text-3" id="text-3-3">
+                  <p align="justify">
+                     Para excluir um professor deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizado o professor na lista apresentada e clicado no botão de deletar (ícone de lixeira). Após isso, deve ser confirmada a exclusão no modal que será apresentado.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-3-4" class="outline-3">
+              <h6 id="sec-3-4"><span class="section-number-3"><b>3.4</b></span><b> Excluir todos os professores</b></h6>
+              <div class="outline-text-3" id="text-3-4">
+                <p align="justify">
+                   Para excluir todos os professores cadastrados deve ser acessada a tela "Professores" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser clicado no botão "Limpar professores" (ícone de lixeira) localizado no canto superior esquerdo da tela, ao lado do título "Professores".
+                </p>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-4" class="outline-2">
+              <h5 id="sec-4"><span class="section-number-2">4</span> CCRs</h5>
+              <div class="outline-text-2" id="text-4"></div>
+              <div id="outline-container-sec-4-1" class="outline-3">
+                <h6 id="sec-4-1"><span class="section-number-3"><b>4.1</b></b></span><b> Adicionar CCR</b></h6>
+                <div class="outline-text-3" id="text-4-1">
+                  <p align="justify">
+                     Para adicionar um novo CCR deve ser acessada a tela "CCRs" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser preenchidos os campos de cadastro, onde "Código" corresponde ao código do CCR (e.g. GEX002), "Componente curricular" à seu nome, "Fase" à fase cujo o CCR pertence (1ª a 10ª) e "Turno do dia" ao turno em que o CCR será ofertado (matutino, vespertino ou noturno). Os campos "Fase" e "Turno do dia" devem ser preenchidos clicando-se no campo e, a partir da utilização das setas para cima e para baixo, selecionando uma das opções apresentadas através de um enter ou de um clique com o botão esquerdo do mouse. Por fim, o CCR deve ser salvo clicando-se no botão de salvar (ícone de disquete).
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-4-2" class="outline-3">
+                <h6 id="sec-4-2"><span class="section-number-3"><b>4.2</b></span><b> Visualizar CCRs</b></h6>
+                <div class="outline-text-3" id="text-4-2">
+                  <p align="justify">
+                  Para visualizar os CCRs cadastrados deve ser acessada a tela "CCRs" a partir do menu contido na parte superior da aplicação.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-4-3" class="outline-3">
+                <h6 id="sec-4-3"><span class="section-number-3"><b>4.3</b></span><b> Excluir CCR</b></h6>
+                <div class="outline-text-3" id="text-4-3">
+                  <p align="justify">
+                     Para excluir um CCR deve ser acessada a tela "CCRs" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizado o CCR na lista apresentada e clicado no botão de deletar (ícone de lixeira). Após isso, deve ser confirmada a exclusão no modal que será apresentado.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-4-4" class="outline-3">
+              <h6 id="sec-4-4"><span class="section-number-3"><b>4.4</b></span><b> Excluir todos os CCRs</b></h6>
+              <div class="outline-text-3" id="text-4-4">
+                <p align="justify">
+                   Para excluir todos os CCRs cadastrados deve ser acessada a tela "CCRs" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser clicado no botão "Limpar componentes curriculares" (ícone de lixeira) localizado no canto superior esquerdo da tela, ao lado do título "Componentes curriculares".
+                </p>
+              </div>
+            </div>
+
+            <div id="outline-container-sec-5" class="outline-2">
+              <h5 id="sec-5"><span class="section-number-2">5</span> Associações</h5>
+              <div class="outline-text-2" id="text-5"></div>
+              <div id="outline-container-sec-5-1" class="outline-3">
+                <h6 id="sec-5-1"><span class="section-number-3"><b>5.1</b></span><b> Associar professor a CCR</b></h6>
+                <div class="outline-text-3" id="text-5-1">
+                  <p align="justify">
+                     Para associar um CCR a um professor deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação. Em sequência, devem ser preenchidos os campos "Nome do professor", "Componente curricular", "Fase" e "Turno do dia", correspondentes ao nome do professor que ministrará o CCR, ao nome do CCR, sua fase e turno de oferta, respectivamente. Os campos devem ser preenchidos clicando-se no campo e, a partir da utilização das setas para cima e para baixo, selecionando uma das opções apresentadas através de um enter ou de um clique com o botão esquerdo do mouse. Por fim, a associação deve ser salva clicando-se no botão de salvar (ícone de disquete).
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-5-2" class="outline-3">
+                <h6 id="sec-5-2"><span class="section-number-3"><b>5.2</b></span><b> Visualizar associações de professores a CCRs</b></h6>
+                <div class="outline-text-3" id="text-5-2">
+                  <p align="justify">
+                  Para visualizar as associações cadastradas deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-5-3" class="outline-3">
+                <h6 id="sec-5-3"><span class="section-number-3"><b>5.3</b></span><b> Excluir associação de professor a CCR</b></h6>
+                <div class="outline-text-3" id="text-5-3">
+                  <p align="justify">
+                     Para excluir uma associação deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser localizada a associação na lista apresentada e clicado no botão de deletar (ícone de lixeira). Após isso, deve ser confirmada a exclusão no modal que será apresentado.
+                  </p>
+                </div>
+              </div>
+
+              <div id="outline-container-sec-5-4" class="outline-3">
+                <h6 id="sec-5-4"><span class="section-number-3"><b>5.4</b></span><b> Excluir todas as associações de professores a CCRs</b></h6>
+                <div class="outline-text-3" id="text-5-4">
+                  <p align="justify">
+                     Para excluir todas as associações de professores a CCRs deve ser acessada a tela "Associações" a partir do menu contido na parte superior da aplicação. Em sequência, deve ser clicado no botão "Limpar associações" (ícone de lixeira) localizado no canto superior esquerdo da tela, ao lado do título "Associações".
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+  </main>
+
+  <!-- Insert this line above script imports -->
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+  <!-- normal script imports etc -->
+  <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
+  <script type="text/javascript" src="scheduler.js"></script>
+
+  <!-- Insert this line after script imports -->
+  <script>if (window.module) module = window.module;</script>
+</body>
+
+</html>

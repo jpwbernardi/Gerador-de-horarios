@@ -19,10 +19,6 @@
   <main>
     <div class="container">
       <div class="row">
-        <div class="col s10">
-          <h4>Associações</h4>
-        </div>
-      </div>
       <div class="form" object="ProfessorSubject"></div>
       <div class="list" object="ProfessorSubject"></div>
     </div>
@@ -36,13 +32,18 @@
       </div>
     </div>
   </main>
-  <script>
-    // You can also require other files to run in this process
-    require('./renderer.js');
-  </script>
-  <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="node_modules/materialize-css/bin/materialize.js"></script>
-  <script type="text/javascript" async src="scheduler.js"></script>
+
+  <!-- Insert this line above script imports -->
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+  <!-- normal script imports etc -->
+  <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery-ui/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
+  <script type="text/javascript" src="scheduler.js"></script>
+
+  <!-- Insert this line after script imports -->
+  <script>if (window.module) module = window.module;</script>
 </body>
 
 </html>

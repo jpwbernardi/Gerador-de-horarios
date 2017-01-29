@@ -44,6 +44,7 @@ function Professor(siape, name) {
   this.siape = siape;
   this.name = name;
 }
+Professor.formTitle = "Professores";
 Professor.table = "professor";
 Professor.fields = ["siape", "name"];
 Professor.fieldRequired = [true, true];
@@ -133,7 +134,7 @@ function Semester(sem) {
 Semester.table = "semester";
 Semester.fields = ["sem"];
 Semester.fieldRequired = [true];
-Semester.titles = ["Semestre"];
+Semester.titles = ["Fase"];
 Semester.fieldTypes = [FIELD_TYPE_NUMBER];
 Semester.col = {
   "s": [12],
@@ -153,6 +154,7 @@ function Subject(code, title, sem, period) {
   this.sem = sem;
   this.period = period;
 }
+Subject.formTitle = "Componentes curriculares";
 Subject.table = "subject";
 Subject.fields = ["code", "title"];
 Subject.fieldRequired = [true, true, true, true];
@@ -163,7 +165,7 @@ Subject.col = {
   "m": [5, 7],
   "l": [2, 3]
 };
-Subject.primaryKey = [0, 3];
+Subject.primaryKey = [0, 2, 3];
 Subject.foreignTitle = 1;
 Subject.foreignKey = [undefined, undefined, Semester, Shift];
 Subject.selectFields = [0, 1];
@@ -171,8 +173,8 @@ Subject.selectWhere = [undefined, undefined, {
   "object": [Subject],
   "field": [Subject.primaryKey[0]]
 }, {
-  "object": [Subject],
-  "field": [Subject.primaryKey[0]]
+  "object": [Subject, Semester],
+  "field": [Subject.primaryKey[0], Semester.primaryKey[0]]
 }];
 Subject.groupBy = [Subject.fields[0]];
 Subject.orderBy = {
@@ -183,11 +185,16 @@ function ProfessorSubject(siape, subject) {
   this.siape = siape;
   this.subject = subject;
 }
+ProfessorSubject.formTitle = "Associações";
 ProfessorSubject.table = "professor_subject";
 ProfessorSubject.fieldRequired = [true, true];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
 ProfessorSubject.primaryKey = [0, 1];
 ProfessorSubject.foreignKey = [Professor, Subject];
+ProfessorSubject.orderBy = {
+  "fields": [Professor.fields[1], Subject.fields[1]]
+};
+
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;
@@ -211,6 +218,7 @@ function ProfessorRestriction(professor, dowShiftTime, active) {
   this.dowShiftTime = dowShiftTime;
   this.active = active;
 }
+ProfessorRestriction.formTitle = "Restrições";
 ProfessorRestriction.table = "professor_restriction";
 ProfessorRestriction.fields = ["active"];
 ProfessorRestriction.fieldRequired = [true, true, true];
