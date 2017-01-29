@@ -1,4 +1,2 @@
-$(document).ready(function() {
-  $('select').material_select();
-  $('input#professor-siape').mask('000000000');
-});
+$("select").material_select();
+$("input#professor-siape").mask("000000000");

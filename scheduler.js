@@ -218,10 +218,7 @@ function deleteRow(event) {
     }, (err, nrows) => {
       syslog(LOG_LEVEL.D, "deleteRow", 3, "nrows: " + nrows);
       if (err !== null) syslog(LOG_LEVEL.E, "deleteRow", 1, err);
-      else if (nrows === 0) {
-        actualDelete($target, object);
-        // commitTransaction();
-      }
+      else if (nrows === 0) actualDelete($target, object);
     });
   } else {
     actualDelete($target, object);
