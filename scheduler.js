@@ -122,19 +122,20 @@ $("main").on("click", "button.form-delete", (event) => {
 
 function rollbackIfErr(err, message) {
   if (err !== null) {
-    syslog(LOG_LEVEL.E, message, 1, err);
+    syslog(LOG_LEVEL.E, "rollbackIfErr " + message, 1, err);
     db.exec("ROLLBACK", (err) => {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
-    setTimeout(() => {
-     electron.ipcRenderer.send("window.reload");
-    }, 2000);
+    // setTimeout(() => {
+    //  electron.ipcRenderer.send("window.reload");
+    // }, 2000);
   }
 }
 
 function beginTransaction() {
   db.exec("BEGIN IMMEDIATE", (err) => {
+    console.log("BEGIN");
     rollbackIfErr(err, "beginTransaction");
   });
 }
@@ -197,7 +198,7 @@ function deleteRow(event) {
   let classQuery = {
     string: "select * from class",
     params: null
-  }
+  };
   if (object === objects["Professor"] || object === objects["Subject"] || object === objects["ProfessorSubject"]) {
     beginTransaction();
     if (object === objects["Professor"]) {
@@ -210,10 +211,17 @@ function deleteRow(event) {
       classQuery.string += " where siape = ? and code = ?";
       classQuery.params = [valueOf(getField(fields, "siape")), valueOf(getField(fields, "code"))];
     }
+    syslog(LOG_LEVEL.D, "deleteRow", 1, "query: " + classQuery.string);
+    syslog(LOG_LEVEL.D, "deleteRow", 2, "params: " + classQuery.params);
     db.each(classQuery.string, classQuery.params, (err, row) => {
       classListRemove(row.blockNumber, row.counter, false, $target, object);
     }, (err, nrows) => {
+      syslog(LOG_LEVEL.D, "deleteRow", 3, "nrows: " + nrows);
       if (err !== null) syslog(LOG_LEVEL.E, "deleteRow", 1, err);
+      else if (nrows === 0) {
+        actualDelete($target, object);
+        // commitTransaction();
+      }
     });
   } else {
     actualDelete($target, object);
