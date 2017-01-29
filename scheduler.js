@@ -71,6 +71,7 @@ const autocompleteOptions = {
         results.push(rowJson);
       }
     }, function(err, nrows) {
+      if (nrows === 0) Materialize.toast("Nenhum resultado encontrado!", 1000);
       response(results);
     });
   },
@@ -118,7 +119,7 @@ $("main").on("click", "button.form-delete", (event) => {
   // we need the original event
   $("#modal-delete-confirm").off("click.delete");
   $("#modal-delete-confirm").on("click.delete", () => {
-    deleteRows([event.currentTarget], 0);
+    deleteRows([event.currentTarget], 0, true);
   });
 });
 
@@ -141,9 +142,9 @@ function rollbackIfErr(err, message) {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
-    setTimeout(() => {
-     electron.ipcRenderer.send("window.reload");
-    }, 2000);
+    // setTimeout(() => {
+    //  electron.ipcRenderer.send("window.reload");
+    // }, 2000);
   }
 }
 
@@ -159,8 +160,8 @@ function commitTransaction() {
   });
 }
 
-// if shouldUseTransaction is true, last three arguments are irrelevant
-function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object) {
+// if shouldUseTransaction is true, last arguments are irrelevant
+function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
   if (shouldUseTransaction === true) beginTransaction();
   db.run("with del(next) as (select next from class where counter = ?)"
     + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
@@ -190,7 +191,7 @@ function classListRemove(blockNumber, counter, shouldUseTransaction, targets, cu
     if (err === null) {
       if (shouldUseTransaction === true) commitTransaction();
       else if (typeof targets !== typeof undefined && typeof currentIndex !== typeof undefined && typeof object !== typeof undefined) {
-        actualDelete(targets, currentIndex, object);
+        actualDelete(targets, currentIndex, object, guiRemove);
       }
     } else {
       rollbackIfErr(event, err, "classListRemove length update");
@@ -206,7 +207,7 @@ function getField(fields, desiredFieldName) {
   return null;
 }
 
-function deleteRows(targets, currentIndex) {
+function deleteRows(targets, currentIndex, guiRemove, callback, ...args) {
   let $target = $(targets[currentIndex]);
   let object = objects[$target.attr("object")];
   let index = $target.attr("index");
@@ -215,8 +216,8 @@ function deleteRows(targets, currentIndex) {
     string: "select * from class",
     params: null
   };
+  beginTransaction();
   if (object === objects["Professor"] || object === objects["Subject"] || object === objects["ProfessorSubject"]) {
-    beginTransaction();
     if (object === objects["Professor"]) {
       classQuery.string += " where siape = ?";
       classQuery.params = [valueOf(getField(fields, "siape"))];
@@ -230,18 +231,18 @@ function deleteRows(targets, currentIndex) {
     syslog(LOG_LEVEL.D, "deleteRows", 1, "query: " + classQuery.string);
     syslog(LOG_LEVEL.D, "deleteRows", 2, "params: " + classQuery.params);
     db.each(classQuery.string, classQuery.params, (err, row) => {
-      classListRemove(row.blockNumber, row.counter, false, targets, currentIndex, object);
+      classListRemove(row.blockNumber, row.counter, false, targets, currentIndex, object, guiRemove);
     }, (err, nrows) => {
       syslog(LOG_LEVEL.D, "deleteRows", 3, "nrows: " + nrows);
       if (err !== null) syslog(LOG_LEVEL.E, "deleteRows", 1, err);
-      else if (nrows === 0) actualDelete(targets, currentIndex, object);
+      else if (nrows === 0) actualDelete(targets, currentIndex, object, guiRemove, callback, ...args);
     });
   } else {
-    actualDelete(targets, currentIndex, object);
+    actualDelete(targets, currentIndex, object, guiRemove, callback, ...args);
   }
 }
 
-function actualDelete(targets, currentIndex, object) {
+function actualDelete(targets, currentIndex, object, guiRemove, callback, ...args) {
   let $target = $(targets[currentIndex]);
   let $row = $target.closest("div.row");
   let index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
@@ -252,11 +253,14 @@ function actualDelete(targets, currentIndex, object) {
   syslog(LOG_LEVEL.D, "actualDelete", 2, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
-      $row.remove();
       commitTransaction();
+      if (guiRemove === true) $row.remove();
       syslog(LOG_LEVEL.D, "actualDelete", 3, "successfully deleted item");
-      if (currentIndex + 1 < targets.length) setTimeout(deleteRows, 0, targets, currentIndex + 1);
-      else Materialize.toast("Excluído com sucesso!", 1000);
+      if (currentIndex + 1 < targets.length) setTimeout(deleteRows, 0, targets, currentIndex + 1, guiRemove);
+      else {
+        if (guiRemove === true) Materialize.toast("Excluído com sucesso!", 1000);
+        if (typeof callback === "function") callback.apply(callback, args);
+      }
     } else {
       rollbackIfErr(err, "actualDelete");
     }
@@ -265,7 +269,7 @@ function actualDelete(targets, currentIndex, object) {
 
 function deleteAllRows(eventTarget) {
   let targets = $(".form-delete[object=" + eventTarget.getAttribute("object") + "]");
-  setTimeout(deleteRows, 0, targets, 0);
+  setTimeout(deleteRows, 0, targets, 0, true);
 }
 
 function saveForm(event) {
@@ -285,24 +289,30 @@ function saveForm(event) {
   }
   if (correct) {
     // yeah, editable is delete old + insert new ...
-    let editable = event.currentTarget.hasAttribute("editable") === true;
-    if (editable) deleteRows([event.currentTarget], 0);
-    let query = valuesInsert(obj, fields);
-    query.string = "insert into " + obj.table + " values (" + query.string + ")";
-    syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
-    syslog(LOG_LEVEL.I, ".form-save click", 2, query.params);
-    db.run(query.string, query.params, function(err) {
-      if (err !== null) {
-        syslog(LOG_LEVEL.E, ".form-save click", 3, err);
-        Materialize.toast("Este registro já está cadastrado!", 3000);
-      } else {
-        if (!editable) {
-          Materialize.toast("Salvo com sucesso!", 2000);
-          appendNewRow(obj, fields);
-        }
-      }
-    });
+    if (event.currentTarget.hasAttribute("editable") === true) {
+      deleteRows([event.currentTarget], 0, false, insertObject, obj, fields, false);
+    } else {
+      insertObject(obj, fields, true);
+    }
   }
+}
+
+function insertObject(obj, fields, guiInsert) {
+  let query = valuesInsert(obj, fields);
+  query.string = "insert into " + obj.table + " values (" + query.string + ")";
+  syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
+  syslog(LOG_LEVEL.I, ".form-save click", 2, query.params);
+  db.run(query.string, query.params, function(err) {
+    if (err === null) {
+      Materialize.toast("Salvo com sucesso!", 1000);
+      if (guiInsert === true) {
+        appendNewRow(obj, fields);
+      }
+    } else {
+      syslog(LOG_LEVEL.E, ".form-save click", 3, err);
+      Materialize.toast("Este registro já está cadastrado!", 3000);
+    }
+  });
 }
 
 function hasPrimaryNotForeign(obj) {
