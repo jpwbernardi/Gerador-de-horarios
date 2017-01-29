@@ -62,16 +62,11 @@ Descrição do projeto:
   npm start
   ```
 
-- Se acontecer algum erro ao executar npm install, pode ser resolvido com o seguinte comando:
-```
-sudo ln -s /usr/bin/nodejs /usr/bin/node
-```
-Para mais informações: http://www.hostingadvice.com/how-to/install-nodejs-ubuntu-14-04/
-
 # Para gerar o executável para o cliente:
 
 Dependências:
 - [electron-packager](https://github.com/electron-userland/electron-packager)
+
   ```
   npm install electron-packager -g
   ```
@@ -79,10 +74,12 @@ Dependências:
 Passos:
 - Comentar a linha de abrir o console no arquivo main.js: `mainWindow.webContents.openDevTools()`;
 - Da pasta raiz do projeto, executar o electron-packager:
+
   ```
   electron-packager .
   ```
   Este comando vai gerar o executável para a plataforma na qual está sendo executado. Para gerar para Linux 64 bits, por exemplo, execute:
+  
   ```
   electron-packager . --platform=linux --arch=x64
   ```
