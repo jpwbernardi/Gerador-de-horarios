@@ -44,6 +44,7 @@ function Professor(siape, name) {
   this.siape = siape;
   this.name = name;
 }
+Professor.formTitle = "Professores";
 Professor.table = "professor";
 Professor.fields = ["siape", "name"];
 Professor.fieldRequired = [true, true];
@@ -153,6 +154,7 @@ function Subject(code, title, sem, period) {
   this.sem = sem;
   this.period = period;
 }
+Subject.formTitle = "Componentes curriculares";
 Subject.table = "subject";
 Subject.fields = ["code", "title"];
 Subject.fieldRequired = [true, true, true, true];
@@ -183,6 +185,7 @@ function ProfessorSubject(siape, subject) {
   this.siape = siape;
   this.subject = subject;
 }
+ProfessorSubject.formTitle = "Associações";
 ProfessorSubject.table = "professor_subject";
 ProfessorSubject.fieldRequired = [true, true];
 ProfessorSubject.fieldTypes = [FIELD_TYPE_FK, FIELD_TYPE_FK];
@@ -215,6 +218,7 @@ function ProfessorRestriction(professor, dowShiftTime, active) {
   this.dowShiftTime = dowShiftTime;
   this.active = active;
 }
+ProfessorRestriction.formTitle = "Restrições";
 ProfessorRestriction.table = "professor_restriction";
 ProfessorRestriction.fields = ["active"];
 ProfessorRestriction.fieldRequired = [true, true, true];

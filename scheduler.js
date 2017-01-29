@@ -111,12 +111,26 @@ $("main").on("change", ".autocomplete", (event) => {
   }
 });
 
+$("main").on("click", "button.form-save", saveForm);
+
 $("main").on("click", "button.form-delete", (event) => {
   $("#modal-delete").modal("open");
   // we need the original event
   $("#modal-delete-confirm").off("click.delete");
   $("#modal-delete-confirm").on("click.delete", () => {
-    deleteRow(event);
+    deleteRows([event.currentTarget], 0);
+  });
+});
+
+$("main").on("click", ".form-delete-all", (event) => {
+  $("#modal-delete").modal("open");
+  // we need the original event
+  $("#modal-delete-confirm").off("click.delete");
+  $("#modal-delete-confirm").on("click.delete", () => {
+    // currently, as we're not using the background process,
+    // the user must wait for the deletions to complete!
+    Materialize.toast("Por favor, aguarde...", 1000);
+    deleteAllRows(event.currentTarget);
   });
 });
 
@@ -127,15 +141,14 @@ function rollbackIfErr(err, message) {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
-    // setTimeout(() => {
-    //  electron.ipcRenderer.send("window.reload");
-    // }, 2000);
+    setTimeout(() => {
+     electron.ipcRenderer.send("window.reload");
+    }, 2000);
   }
 }
 
 function beginTransaction() {
   db.exec("BEGIN IMMEDIATE", (err) => {
-    console.log("BEGIN");
     rollbackIfErr(err, "beginTransaction");
   });
 }
@@ -146,7 +159,8 @@ function commitTransaction() {
   });
 }
 
-function classListRemove(blockNumber, counter, shouldUseTransaction, $target, object) {
+// if shouldUseTransaction is true, last three arguments are irrelevant
+function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object) {
   if (shouldUseTransaction === true) beginTransaction();
   db.run("with del(next) as (select next from class where counter = ?)"
     + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
@@ -175,7 +189,9 @@ function classListRemove(blockNumber, counter, shouldUseTransaction, $target, ob
   db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
     if (err === null) {
       if (shouldUseTransaction === true) commitTransaction();
-      else if (typeof $target !== typeof undefined && typeof object !== typeof undefined) actualDelete($target, object);
+      else if (typeof targets !== typeof undefined && typeof currentIndex !== typeof undefined && typeof object !== typeof undefined) {
+        actualDelete(targets, currentIndex, object);
+      }
     } else {
       rollbackIfErr(event, err, "classListRemove length update");
     }
@@ -190,8 +206,8 @@ function getField(fields, desiredFieldName) {
   return null;
 }
 
-function deleteRow(event) {
-  let $target = $(event.currentTarget);
+function deleteRows(targets, currentIndex) {
+  let $target = $(targets[currentIndex]);
   let object = objects[$target.attr("object")];
   let index = $target.attr("index");
   let fields = $("input." + object.name + index);
@@ -211,21 +227,22 @@ function deleteRow(event) {
       classQuery.string += " where siape = ? and code = ?";
       classQuery.params = [valueOf(getField(fields, "siape")), valueOf(getField(fields, "code"))];
     }
-    syslog(LOG_LEVEL.D, "deleteRow", 1, "query: " + classQuery.string);
-    syslog(LOG_LEVEL.D, "deleteRow", 2, "params: " + classQuery.params);
+    syslog(LOG_LEVEL.D, "deleteRows", 1, "query: " + classQuery.string);
+    syslog(LOG_LEVEL.D, "deleteRows", 2, "params: " + classQuery.params);
     db.each(classQuery.string, classQuery.params, (err, row) => {
-      classListRemove(row.blockNumber, row.counter, false, $target, object);
+      classListRemove(row.blockNumber, row.counter, false, targets, currentIndex, object);
     }, (err, nrows) => {
-      syslog(LOG_LEVEL.D, "deleteRow", 3, "nrows: " + nrows);
-      if (err !== null) syslog(LOG_LEVEL.E, "deleteRow", 1, err);
-      else if (nrows === 0) actualDelete($target, object);
+      syslog(LOG_LEVEL.D, "deleteRows", 3, "nrows: " + nrows);
+      if (err !== null) syslog(LOG_LEVEL.E, "deleteRows", 1, err);
+      else if (nrows === 0) actualDelete(targets, currentIndex, object);
     });
   } else {
-    actualDelete($target, object);
+    actualDelete(targets, currentIndex, object);
   }
 }
 
-function actualDelete($target, object) {
+function actualDelete(targets, currentIndex, object) {
+  let $target = $(targets[currentIndex]);
   let $row = $target.closest("div.row");
   let index = typeof $target.attr("index") !== typeof undefined ? $target.attr("index") : "";
   let fields = $("input." + object.name + index);
@@ -237,16 +254,19 @@ function actualDelete($target, object) {
     if (err === null) {
       $row.remove();
       commitTransaction();
-      Materialize.toast("Excluído com sucesso!", 2000);
       syslog(LOG_LEVEL.D, "actualDelete", 3, "successfully deleted item");
+      if (currentIndex + 1 < targets.length) setTimeout(deleteRows, 0, targets, currentIndex + 1);
+      else Materialize.toast("Excluído com sucesso!", 1000);
     } else {
-      Materialize.toast("Erro na exclusão!", 3000);
-      syslog(LOG_LEVEL.E, "actualDelete", 4, err);
+      rollbackIfErr(err, "actualDelete");
     }
   });
 }
 
-$("main").on("click", "button.form-save", saveForm);
+function deleteAllRows(eventTarget) {
+  let targets = $(".form-delete[object=" + eventTarget.getAttribute("object") + "]");
+  setTimeout(deleteRows, 0, targets, 0);
+}
 
 function saveForm(event) {
   var i;
@@ -266,7 +286,7 @@ function saveForm(event) {
   if (correct) {
     // yeah, editable is delete old + insert new ...
     let editable = event.currentTarget.hasAttribute("editable") === true;
-    if (editable) deleteRow(obj, fields);
+    if (editable) deleteRows([event.currentTarget], 0);
     let query = valuesInsert(obj, fields);
     query.string = "insert into " + obj.table + " values (" + query.string + ")";
     syslog(LOG_LEVEL.I, ".form-save click", 1, query.string);
@@ -626,6 +646,15 @@ function buildForm(clazz) {
 function $buildForm(obj, clazz) {
   var $form = $createElement("div");
   if (clazz === "form") {
+    let $title = $createTextualElement("h4", {}, obj.formTitle);
+    $title.append($createTextualElement("button", {
+      "class": "btn btn-short waves-effect waves-light marleft-10px form-delete-all",
+      "object": obj.name,
+      "title": "Limpar " + obj.formTitle.toLowerCase()
+    }, $createTextualElement("i", {
+      "class": "material-icons"
+    }, "delete")));
+    $form.append($title);
     $form.append($buildFormRow(obj));
   } else if (clazz === "list") {
     let rownum = 0;
