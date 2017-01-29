@@ -1,6 +1,7 @@
 {
   "name": "Gerador-de-horarios",
-  "version": "0.1.0",
+  "productName": "Gerador de horários",
+  "version": "0.8.0",
   "description": "Gerador automático dos horários do semestre",
   "main": "main.js",
   "scripts": {
