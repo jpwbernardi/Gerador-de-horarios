@@ -1,4 +1,4 @@
-﻿-- enabling foreign key constraint enforcement (off by default for compatibility)
+-- enabling foreign key constraint enforcement (off by default for compatibility)
 PRAGMA foreign_keys = ON;
 
 create table professor(
@@ -583,7 +583,7 @@ insert into subject values
 ("OPT021", "Tópicos especiais em redes de computadores", 9, 3),
 ("OPT022", "Tópicos especiais em orientação a objetos", 9, 3),
 ("OPT023", "Tópicos especiais em sistemas operacionais", 9, 3),
-("OPT024", "Tópicos especiais em qualidade de software", , 3),
+("OPT024", "Tópicos especiais em qualidade de software", 9, 3),
 ("OPT025", "Tópicos especiais em segurança", 9, 3),
 ("OPT026", "Tópicos especiais em sistemas distribuídos", 9, 3),
 ("OPT027", "Tópicos especiais em jogos digitais", 9, 3),
