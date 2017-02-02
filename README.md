@@ -62,22 +62,27 @@ Descrição do projeto:
   npm start
   ```
 
-# Para gerar o executável para o cliente (testado apenas em Linux):
+# Para gerar o executável para o cliente:
 
 Dependências:
-- asar
-  ```
-  npm install -g asar
-  ```
+- [electron-packager](https://github.com/electron-userland/electron-packager)
 
-- Última versão do [Electron](http://electron.atom.io/releases/) (baixar o zip linux-x64 e extraí-lo numa pasta com o nome do projeto).
+  ```
+  npm install electron-packager -g
+  ```
 
 Passos:
 - Comentar a linha de abrir o console no arquivo main.js: `mainWindow.webContents.openDevTools()`;
-- Copiar todos os arquivos para uma pasta chamada 'app', exceto as pastas `doc/`, `node_modules/electron*` e o `scheduler.db`;
-- Ainda na pasta recém criada, deletar os executáveis `node_modules/.bin/electron*`;
-- Empacotar a pasta recém criada: `asar pack app app.asar`;
-- Copiar o arquivo `app.asar` para onde o zip do Electron foi extraído, dentro de `resources/` (ao lado dos arquivos `electron.asar` e `default_app.asar`);
-- Copiar o `scheduler.db` para a raiz do zip extraído (ao lado do executável do Electron);
-- Renomear o executável `electron` para `Gerador de horários`;
+- Da pasta raiz do projeto, executar o electron-packager:
+
+  ```
+  electron-packager .
+  ```
+  Este comando vai gerar o executável para a plataforma na qual está sendo executado. Para gerar para Linux 64 bits, por exemplo, execute:
+  
+  ```
+  electron-packager . --platform=linux --arch=x64
+  ```
+  E para mais informações: [electron-packager usage](https://github.com/electron-userland/electron-packager#usage).
+- Copiar o `scheduler.db` para a raiz da pasta recém criada pelo electron-packager;
 - Entregar.
