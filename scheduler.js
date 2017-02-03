@@ -135,6 +135,15 @@ $("main").on("click", ".form-delete-all", (event) => {
   });
 });
 
+function attr(el, attrName) {
+  if (el instanceof jQuery) return el.attr(attrName);
+  return el.getAttribute(attrName);
+}
+
+function defOrNull(field) {
+  return (typeof field !== typeof undefined ? field : null);
+}
+
 function rollbackIfErr(err, message) {
   if (err !== null) {
     syslog(LOG_LEVEL.E, "rollbackIfErr " + message, 1, err);
@@ -162,21 +171,11 @@ function commitTransaction(fname) {
 
 function classListUpdate(el, target, source, sibling) {
   let blockNumber = attr(target, "blockNumber");
-  console.log("source: " + source);
-  console.log("blockNumber: " + blockNumber);
+  beginTransaction();
   if (source !== null && !source.classList.contains("dragula-source")) {
-    classListRemove(blockNumber, attr(el, "counter"), true);
+    classListRemove(attr(source, "blockNumber"), attr(el, "counter"), false);
   }
-  classListInsert(blockNumber, el, sibling, true);
-}
-
-function attr(el, attrName) {
-  if (el instanceof jQuery) return el.attr(attrName);
-  return el.getAttribute(attrName);
-}
-
-function defOrNull(field) {
-  return (typeof field !== typeof undefined ? field : null);
+  classListInsert(blockNumber, el, sibling, commitTransaction, "classListUpdate");
 }
 
 function insertNewClass(blockNumber, el, counter, prev, next) {
@@ -185,15 +184,17 @@ function insertNewClass(blockNumber, el, counter, prev, next) {
   });
 }
 
-// must have started a transaction before calling this fn
-function createNewClassList(blockNumber, el, counter) {
+function createNewClassList(blockNumber, el, counter, callback, ...args) {
   db.run("insert into class_list(blockNumber, length) values (?, ?)", [blockNumber, 1], (classListErr, classListRow) => {
       rollbackIfErr(classListErr, "createNewClassList class_list insert");
   });
   insertNewClass(blockNumber, el, counter);
   db.run("update class_list set head = ?, tail = ? where blockNumber = ?", [counter, counter, blockNumber], (classListErr) => {
-    if (classListErr === null) commitTransaction("createNewClassList");
-    else rollbackIfErr(classListErr, "createNewClassList class_list update");
+    if (classListErr === null) {
+      if (typeof callback === "function") callback.apply(callback, args);
+    } else {
+      rollbackIfErr(classListErr, "createNewClassList class_list update");
+    }
   });
 }
 
@@ -208,24 +209,26 @@ if (this._tail == null) {
 }
 this._length++;
 */
-function classListPush(blockNumber, el, newCounter) {
+function classListPush(blockNumber, el, newCounter, callback, ...args) {
   db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
     if (classListErr === null) {
       if (typeof classListRow === typeof undefined) {
         // if tail is null
-        createNewClassList(blockNumber, el, newCounter);
+        createNewClassList(blockNumber, el, newCounter, callback, ...args);
       } else {
-        insertNewClass(blockNumber, el, classListRow.tail);
-        db.run("with tail(next) as (select next from class where counter = ?)"
-          + " update class set next = ? where counter = (select next from tail)", [classListRow.tail, newCounter], (tailNextErr) => {
+        insertNewClass(blockNumber, el, newCounter, classListRow.tail);
+        db.run("update class set next = ? where counter = ?", [newCounter, classListRow.tail], (tailNextErr) => {
           rollbackIfErr(tailNextErr, "classListPush tail next update");
         });
         db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
           rollbackIfErr(tailErr, "classListPush tail update");
         });
         db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
-          if (lengthErr === null) commitTransaction("classListPush");
-          else rollbackIfErr(lengthErr, "classListPush length update");
+          if (lengthErr === null) {
+            if (typeof callback === "function") callback.apply(callback, args);
+          } else {
+            rollbackIfErr(lengthErr, "classListPush length update");
+          }
         });
       }
     } else {
@@ -244,12 +247,12 @@ nodeAfter.prev = node;
 this._length++;
 return node;
 */
-function classListInsert(blockNumber, el, elAfter, shouldUseTransaction) {
-  if (shouldUseTransaction === true) beginTransaction("classListInsert");
+function classListInsert(blockNumber, el, elAfter, callback, ...args) {
   db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
     if (newClassErr === null) {
-      console.log("newCounter: " + newClassRow.counter);
-      if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter);
+      if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter, callback, ...args);
+      else // @TODO temporary else
+      if (typeof callback === "function") callback.apply(callback, args);
     } else {
       rollbackIfErr(classListErr, "classListInsert");
     }
