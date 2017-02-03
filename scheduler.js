@@ -220,6 +220,11 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
         db.run("update class set next = ? where counter = ?", [newCounter, classListRow.tail], (tailNextErr) => {
           rollbackIfErr(tailNextErr, "classListPush tail next update");
         });
+        if (classListRow.head === null) {
+          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
+            rollbackIfErr(tailErr, "classListPush head update");
+          });
+        }
         db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
           rollbackIfErr(tailErr, "classListPush tail update");
         });
