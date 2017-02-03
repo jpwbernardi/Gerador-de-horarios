@@ -59,7 +59,7 @@ drake.on("drop", function(el, target, source, sibling) {
     Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
     drake.cancel(true);
   } else {
-    // addClass(target, el, sibling);
+    classListUpdate(el, target, source, sibling);
     // add close button just once
     if ($el.children(".delete-class").children().length === 0) {
       addCloseButton($el);
@@ -365,7 +365,7 @@ function loadClassesInto(classList, counter) {
     if (classErr !== null) {
       syslog(LOG_LEVEL.E, "loadClassesInto", 2, classErr);
     } else if (typeof classRow === typeof undefined) {
-      syslog(LOG_LEVEL.E, "loadClassesInto", 3, "undefined classRow");
+      syslog(LOG_LEVEL.W, "loadClassesInto", 3, "undefined classRow for counter = " + counter);
     } else {
       classList.pushRow(classRow);
       if (classRow.next !== null) {

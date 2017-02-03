@@ -148,21 +148,117 @@ function rollbackIfErr(err, message) {
   }
 }
 
-function beginTransaction() {
+function beginTransaction(fname) {
   db.exec("BEGIN IMMEDIATE", (err) => {
-    rollbackIfErr(err, "beginTransaction");
+    rollbackIfErr(err, fname);
   });
 }
 
-function commitTransaction() {
+function commitTransaction(fname) {
   db.exec("COMMIT", (err) => {
-    rollbackIfErr(err, "commitTransaction");
+    rollbackIfErr(err, fname);
+  });
+}
+
+function classListUpdate(el, target, source, sibling) {
+  let blockNumber = attr(target, "blockNumber");
+  console.log("source: " + source);
+  console.log("blockNumber: " + blockNumber);
+  if (source !== null && !source.classList.contains("dragula-source")) {
+    classListRemove(blockNumber, attr(el, "counter"), true);
+  }
+  classListInsert(blockNumber, el, sibling, true);
+}
+
+function attr(el, attrName) {
+  if (el instanceof jQuery) return el.attr(attrName);
+  return el.getAttribute(attrName);
+}
+
+function defOrNull(field) {
+  return (typeof field !== typeof undefined ? field : null);
+}
+
+function insertNewClass(blockNumber, el, counter, prev, next) {
+  db.run("insert into class values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [counter, attr(el, "sem"), attr(el, "dow"), attr(el, "period"), attr(el, "block"), attr(el, "siape"), attr(el, "code"), blockNumber, defOrNull(prev), defOrNull(next)], (classErr) => {
+    rollbackIfErr(classErr, "insertNewClass");
+  });
+}
+
+// must have started a transaction before calling this fn
+function createNewClassList(blockNumber, el, counter) {
+  db.run("insert into class_list(blockNumber, length) values (?, ?)", [blockNumber, 1], (classListErr, classListRow) => {
+      rollbackIfErr(classListErr, "createNewClassList class_list insert");
+  });
+  insertNewClass(blockNumber, el, counter);
+  db.run("update class_list set head = ?, tail = ? where blockNumber = ?", [counter, counter, blockNumber], (classListErr) => {
+    if (classListErr === null) commitTransaction("createNewClassList");
+    else rollbackIfErr(classListErr, "createNewClassList class_list update");
+  });
+}
+
+/*
+if (this._tail == null) {
+  this._head = this._tail = node;
+} else {
+  node.prev = this._tail;
+  node.next = null;
+  this._tail.next = node;
+  this._tail = node;
+}
+this._length++;
+*/
+function classListPush(blockNumber, el, newCounter) {
+  db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
+    if (classListErr === null) {
+      if (typeof classListRow === typeof undefined) {
+        // if tail is null
+        createNewClassList(blockNumber, el, newCounter);
+      } else {
+        insertNewClass(blockNumber, el, classListRow.tail);
+        db.run("with tail(next) as (select next from class where counter = ?)"
+          + " update class set next = ? where counter = (select next from tail)", [classListRow.tail, newCounter], (tailNextErr) => {
+          rollbackIfErr(tailNextErr, "classListPush tail next update");
+        });
+        db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
+          rollbackIfErr(tailErr, "classListPush tail update");
+        });
+        db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
+          if (lengthErr === null) commitTransaction("classListPush");
+          else rollbackIfErr(lengthErr, "classListPush length update");
+        });
+      }
+    } else {
+      rollbackIfErr(classListErr, "classListPush check existance");
+    }
+  });
+}
+
+/*
+if (nodeAfter == null) return this.push(node);
+node.next = nodeAfter;
+node.prev = nodeAfter.prev;
+if (nodeAfter.prev !== null) nodeAfter.prev.next = node;
+else this._head = node;
+nodeAfter.prev = node;
+this._length++;
+return node;
+*/
+function classListInsert(blockNumber, el, elAfter, shouldUseTransaction) {
+  if (shouldUseTransaction === true) beginTransaction("classListInsert");
+  db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
+    if (newClassErr === null) {
+      console.log("newCounter: " + newClassRow.counter);
+      if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter);
+    } else {
+      rollbackIfErr(classListErr, "classListInsert");
+    }
   });
 }
 
 // if shouldUseTransaction is true, last arguments are irrelevant
 function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
-  if (shouldUseTransaction === true) beginTransaction();
+  if (shouldUseTransaction === true) beginTransaction("classListRemove");
   db.run("with del(next) as (select next from class where counter = ?)"
     + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
     rollbackIfErr(err, "classListRemove head update");
@@ -189,12 +285,12 @@ function classListRemove(blockNumber, counter, shouldUseTransaction, targets, cu
 
   db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
     if (err === null) {
-      if (shouldUseTransaction === true) commitTransaction();
+      if (shouldUseTransaction === true) commitTransaction("classListRemove");
       else if (typeof targets !== typeof undefined && typeof currentIndex !== typeof undefined && typeof object !== typeof undefined) {
         actualDelete(targets, currentIndex, object, guiRemove);
       }
     } else {
-      rollbackIfErr(event, err, "classListRemove length update");
+      rollbackIfErr(err, "classListRemove length update");
     }
   });
 }
@@ -216,7 +312,7 @@ function deleteRows(targets, currentIndex, guiRemove, callback, ...args) {
     string: "select * from class",
     params: null
   };
-  beginTransaction();
+  beginTransaction("deleteRows");
   if (object === objects["Professor"] || object === objects["Subject"] || object === objects["ProfessorSubject"]) {
     if (object === objects["Professor"]) {
       classQuery.string += " where siape = ?";
@@ -253,7 +349,7 @@ function actualDelete(targets, currentIndex, object, guiRemove, callback, ...arg
   syslog(LOG_LEVEL.D, "actualDelete", 2, query.params);
   db.run(query.string, query.params, (err) => {
     if (err === null) {
-      commitTransaction();
+      commitTransaction("actualDelete");
       if (guiRemove === true) $row.remove();
       syslog(LOG_LEVEL.D, "actualDelete", 3, "successfully deleted item");
       if (currentIndex + 1 < targets.length) setTimeout(deleteRows, 0, targets, currentIndex + 1, guiRemove);
@@ -976,20 +1072,21 @@ function removeClass(classEl) {
 //   electron.ipcRenderer.send("classList.add", blockNumber, clazz, container, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
 // }
 
-electron.ipcRenderer.on("classList.remove", (event, isAllOkay) => {
-  if (isAllOkay === false) {
-    Materialize.toast("Ocorreu um erro ao remover este horário. Recarregando...", 1000);
-  }
-});
+// function jsonify(el) {
+//   let json = {};
+//   for (let i = 0; i < el.attributes.length; i++) {
+//     let attribute = el.attributes[i];
+//     json[attribute.nodeName] = attribute.nodeValue;
+//   }
+//   return json;
+// }
 
-function jsonify(el) {
-  let json = {};
-  for (let i = 0; i < el.attributes.length; i++) {
-    let attribute = el.attributes[i];
-    json[attribute.nodeName] = attribute.nodeValue;
-  }
-  return json;
-}
+
+
+
+
+
+
 
 // function findBlockFrom(classRow) {
 //   globalClassLists.forEach((classList, blockNumber) => {
