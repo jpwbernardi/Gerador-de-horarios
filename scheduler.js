@@ -51,7 +51,10 @@ const autocompleteOptions = {
               return;
             }
             query += (i === 0 ? " where " : " and ") + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + " = ?";
-            params.push($whereFie          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+            params.push($whereField.val());
+          }
+        } else {
+          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
       } else syslog(LOG_LEVEL.W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
@@ -73,6 +76,7 @@ const autocompleteOptions = {
           "pk": {}
         };
         $.each(ownerObj.primaryKey, function(i, pk) {
+          /* Continue */
           if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true;
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });

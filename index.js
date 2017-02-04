@@ -175,6 +175,18 @@ function queryProfessorRestrictions() {
             for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i]);
           }
           syslog(LOG_LEVEL.I, "queryProfessorRestrictions", 1, "Loaded " + restrictionRows.length + " professor restrictions for SIAPE " + siapeRow.siape);
+          } else {
+           syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 2, restrictionErr);
+         }
+       });
+    }
+  });
+}
+
+function $buildTimeTable(sem, period) {
+  var i = 0,
+    times = 0;
+  var $table = $createElement("table", {
       "sem": sem,
       "period": period,
       "class": "timetable our-bordered centered"

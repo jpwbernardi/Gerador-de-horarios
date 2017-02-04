@@ -218,10 +218,12 @@ DowShiftTime.primaryKey = [0, 1, 2];
 DowShiftTime.foreignKey = [DayOfWeek, Shift, Time];
 DowShiftTime.selectWhere = [undefined, {
   "object": [DayOfWeek],
-  "field": DayOfWeek.primaryKey // Isso é um vetor
+  /* Isso é um vetor */
+  "field": DayOfWeek.primaryKey
 }, {
   "object": [Shift],
-  "field": Shift.primaryKey // Isso é um vetor
+  /* Isso é um vetor */
+  "field": Shift.primaryKey
 }];
 
 function ProfessorRestriction(professor, dowShiftTime, active) {
