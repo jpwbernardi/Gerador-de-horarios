@@ -7,7 +7,7 @@
               professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
               matutino, vespertino e noturno;
               * 'ClassList.js' corresponde ao arquivo JavaScript que contém as classes, atributos e métodos responsáveis pela representação
-              em memória do banco de dados.
+              em memória da lista de associações da grade salvas no banco de dados.
 */
 
 class ClassNode {
