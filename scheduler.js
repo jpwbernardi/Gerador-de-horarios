@@ -6,10 +6,9 @@
               Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
               professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
               matutino, vespertino e noturno;
-              * 'scheduler.js' corresponde ao arquivo JavaScript
+              * 'scheduler.js' corresponde ao arquivo JavaScript do processo principal (em foreground) da aplicação. Código global da
+              aplicação que deve ser adicionado a todas as páginas HTML.
 */
-
-// Global js for the project, *add it to every page*
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect

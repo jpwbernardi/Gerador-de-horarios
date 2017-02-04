@@ -6,7 +6,7 @@
               Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
               professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
               matutino, vespertino e noturno;
-              * 'main.js' corresponde ao arquivo JavaScript do processo principal (em background) do nosso aplicativo.
+              * 'main.js' corresponde ao arquivo JavaScript do processo principal (em background) da aplicação.
 */
 
 const url = require('url');
