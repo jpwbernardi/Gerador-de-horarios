@@ -1,3 +1,15 @@
+/* Arquivo:   objects.js
+   Autores:   Acácia dos Campos da Terra, Davi Rizzotto Pegoraro, Gabriel Batista Galli, Harold Cristien Santos Becker, João Pedro Winckler
+              Bernardi, Matheus Henrique Trichez e Vladimir Belinski
+   Descrição: o presente arquivo faz parte do projeto Gerador de Horários, no qual é criada uma aplicação que visa ser uma ferramenta
+              facilitadora para a geração dos horários do semestre (em relação aos componentes curriculares) dos cursos de graduação do
+              Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
+              professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
+              matutino, vespertino e noturno;
+              * 'objects.js' corresponde ao arquivo JavaScript responsável pela geração automática dos formulários que se relacionam com o
+              banco de dados na aplicação
+*/
+
 const QUERY_TYPE_INSERT = 1,
   QUERY_TYPE_UPDATE = 2,
   QUERY_TYPE_DELETE = 0,
@@ -194,7 +206,6 @@ ProfessorSubject.foreignKey = [Professor, Subject];
 ProfessorSubject.orderBy = {
   "fields": [Professor.fields[1], Subject.fields[1]]
 };
-
 
 function DowShiftTime(dayOfWeek, shift, time) {
   this.dayOfWeek = dayOfWeek;
