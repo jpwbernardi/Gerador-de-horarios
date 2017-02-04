@@ -157,19 +157,31 @@ function defOrNull(field) {
   return (typeof field !== typeof undefined ? field : null);
 }
 
+/**
+ * Checa se a variável {@code err} é nula. Se não for, loga este erro juntamente
+ * com a {@code message} através da função {@code syslog}. Após isso, executa um
+ * {@code ROLLBACK} no banco de dados e avisa o usuário da ocorrência de um erro.
+ * Finalmente, recarrega a página para atualizar a memória com os dados corretos
+ * salvos no banco de dados. Caso aconteça um erro na execução do {@code ROLLBACK},
+ * é feita outra chamada à {@code syslog} para registrar o novo erro.
+ * @param err o erro retornado em uma callback de uma chamada da API do node-sqlite3
+ * @param mensagem adicional para ser registrada no log
+ * @return {@code undefined}
+ */
 function rollbackIfErr(err, message) {
   if (err !== null) {
+    let timeout = 2000;
     syslog(LOG_LEVEL.E, "rollbackIfErr " + message, 1, err);
     db.exec("ROLLBACK", (err) => {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
-    Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
+    Materialize.toast("Ocorreu um erro! Recarregando...", timeout);
     /**
      * @TODO REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
      */
     // setTimeout(() => {
     //  electron.ipcRenderer.send("window.reload");
-    // }, 2000);
+    // }, timeout);
   }
 }
 
