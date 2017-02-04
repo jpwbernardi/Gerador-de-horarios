@@ -214,28 +214,21 @@ function createNewClassList(blockNumber, el, counter, callback, ...args) {
   });
 }
 
-/*
-if (this._tail == null) {
-  this._head = this._tail = node;
-} else {
-  node.prev = this._tail;
-  node.next = null;
-  this._tail.next = node;
-  this._tail = node;
-}
-this._length++;
-*/
 function classListPush(blockNumber, el, newCounter, callback, ...args) {
   db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
     if (classListErr === null) {
-      if (typeof classListRow === typeof undefined || classListRow.tail === null) {
-        // if tail is null
+      if (typeof classListRow === typeof undefined) {
         createNewClassList(blockNumber, el, newCounter, callback, ...args);
       } else {
         insertNewClass(blockNumber, el, newCounter, classListRow.tail);
         db.run("update class set next = ? where counter = ?", [newCounter, classListRow.tail], (tailNextErr) => {
           rollbackIfErr(tailNextErr, "classListPush tail next update");
         });
+        if (classListRow.head === null) {
+          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
+            rollbackIfErr(tailErr, "classListPush head update");
+          });
+        }
         db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
           rollbackIfErr(tailErr, "classListPush tail update");
         });
@@ -253,16 +246,6 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
   });
 }
 
-/*
-if (nodeAfter == null) return this.push(node);
-node.next = nodeAfter;
-node.prev = nodeAfter.prev;
-if (nodeAfter.prev !== null) nodeAfter.prev.next = node;
-else this._head = node;
-nodeAfter.prev = node;
-this._length++;
-return node;
-*/
 function classListInsert(blockNumber, el, elAfter, callback, ...args) {
   db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
     if (newClassErr === null) {
