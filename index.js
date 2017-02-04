@@ -19,17 +19,21 @@ const stepsSettings = {
 const dragulaSourceOptions = {
   isContainer: function(el) {
     return el.classList.contains("putable");
-    // return false; // only elements in drake.containers will be taken into account
+    /* Somente elementos em drake.containers serão considerados */
+    // return false;
   },
   moves: function(el, source, handle, sibling) {
     return el.classList.contains("draggable");
-    // return true; // elements are always draggable by default
+    /* Por padrão os elementos são sempre 'draggable' */
+    // return true;
   },
   // accepts: function(el, target, source, sibling) {
-  //   return true; // elements can be dropped in any of the `containers` by default
+  /* Por padrão os elementos podem ser soltos em qualquer um dos 'containers' */
+  //   return true;
   // },
   invalid: function(el, handle) {
-    return false; // don't prevent any drags from initiating by default
+    /* Não impede que quaisquer arrastos sejam iniciados por padrão */
+    return false;
   },
   copy: function(el, source) {
     return source.classList.contains("dragula-source");
@@ -37,16 +41,22 @@ const dragulaSourceOptions = {
   accepts: function(el, target) {
     return !target.classList.contains("dragula-source") && el.getAttribute("period") === target.getAttribute("period");
   },
-  direction: 'vertical', // Y axis is considered when determining where an element would be dropped
-  // copy: true, // elements are moved by default, not copied
-  copySortSource: false, // elements in copy-source containers can be reordered
-  revertOnSpill: true, // spilling will put the element back where it was dragged from, if this is true
-  removeOnSpill: false, // spilling will `.remove` the element, if this is true
-  mirrorContainer: document.body, // set the element that gets mirror elements appended
-  ignoreInputTextSelection: false // if true, allows users to select input text
+  /* O eixo Y é considerado ao determinar onde um elemento seria solto */
+  direction: 'vertical',
+  /* Por padrão os elementos são movidos, não copiados */
+  // copy: true,
+  /* Elementos em containers 'copy-source' podem ser reordenados */
+  copySortSource: false,
+  /* Se 'true' o elemento será posto de volta no lugar de onde foi arrastado */
+  revertOnSpill: true,
+  /* Se 'true' o elemento será removido */
+  removeOnSpill: false,
+  /* Define o elemento que obtém os elementos espelhados anexados */
+  mirrorContainer: document.body,
+  /* Se 'true' permite aos usuários selecionar o texto de entrada */
+  ignoreInputTextSelection: false
 };
 
-// used to uniquely number all time blocks in the tables
 var blockNumber = 0;
 var professorRestrictions = {};
 var drake = dragula(dragulaSourceOptions);
@@ -58,7 +68,6 @@ drake.on("over", function(el, container, source) {
   var $newSiblings = $($(container).children());
   $el.css("width", "100%");
   if (!container.classList.contains("dragula-source")) {
-    // if the container el is going to is not .dragula-source
     $newSiblings.push($el);
     adjustHeight($newSiblings);
   }
@@ -71,7 +80,7 @@ drake.on("drop", function(el, target, source, sibling) {
     drake.cancel(true);
   } else {
     classListUpdate(el, target, source, sibling);
-    // add close button just once
+    /* Adiciona botão de fechar uma só vez */
     if ($el.children(".delete-class").children().length === 0) {
       addCloseButton($el);
     }
@@ -81,22 +90,20 @@ drake.on("out", function(el, container, source) {
   var $el = $(el);
   var $siblings = $($(container).children());
   if (source.classList.contains("dragula-source")) {
-    // hack to occupy whole td
+    /* Para ocupar a td inteira */
     $el.css("height", "100%");
     $el.css("display", "block");
   }
   if (!container.classList.contains("dragula-source")) {
     if (!drake.dragging) {
       adjustHeight($siblings);
-      // when we are sure we got out of source,
-      // adjust sizes there
+      /* Quando temos certeza de que saímos de 'source' ajustamos os tamanhos*/
       if (!source.classList.contains("dragula-source")) adjustHeight($($(source).children()));
       $(professorRestrictions[el.getAttribute("siape")]).removeClass("red restricted");
     } else {
-      // else, if it's just passing by and went out
-      // of a container that has a class, restore sizes
-      // but when we fly over our source, do not
-      // remove el from the height ratio
+      /* "else, if it's just passing by and went out of a container that has a class,
+      restore sizes but when we fly over our source, do not remove el from the height
+      ratio"*/
       if (container !== source) without($siblings, $el, "gu-transit");
       adjustHeight($siblings);
     }
@@ -122,7 +129,7 @@ $("main").on("click", ".clear-single", (event) => {
 $("main").on("click", ".clear-all", (event) => {
   $("#modal-clear-all-sem").html(event.currentTarget.getAttribute("sem"));
   $("#modal-clear-all").modal("open");
-  // precisamos do evento original
+  /* É necessário o evento original */
   $("#modal-clear-all-confirm").off("click.clear-all");
   $("#modal-clear-all-confirm").on("click.clear-all", () => {
     var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "]";
@@ -131,7 +138,7 @@ $("main").on("click", ".clear-all", (event) => {
 });
 
 $("main").on("click", ".make-pdf", (event) => {
-  // incluir ação
+  // Incluir ação
 });
 
 function buildRestrictionSelector(periodDowBlockRow) {
@@ -168,18 +175,6 @@ function queryProfessorRestrictions() {
             for (let i = 1; i < restrictionRows.length; i++) professorRestrictions[siapeRow.siape] += ", " + buildRestrictionSelector(restrictionRows[i]);
           }
           syslog(LOG_LEVEL.I, "queryProfessorRestrictions", 1, "Loaded " + restrictionRows.length + " professor restrictions for SIAPE " + siapeRow.siape);
-        } else {
-          syslog(LOG_LEVEL.E, "queryProfessorRestrictions", 2, restrictionErr);
-        }
-      });
-    }
-  });
-}
-
-function $buildTimeTable(sem, period) {
-  var i = 0,
-    times = 0;
-  var $table = $createElement("table", {
       "sem": sem,
       "period": period,
       "class": "timetable our-bordered centered"
@@ -218,8 +213,7 @@ function $buildTimeTable(sem, period) {
   $tsec = $createElement("tbody");
   times = 5;
   $tr = $createElement("tr");
-  // "não dá" pra usar shiftText aqui porque
-  // tem os rowspan e o times no noturno...
+  /* "Não dá" pra usar shiftText aqui, pois temos os rowspan e o times no noturno */
   if (period === 1) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
@@ -367,7 +361,8 @@ function loadClasses(classLists) {
 
 function loadClassesInto(classList, counter) {
   let classQuery = {
-    // cannot select just professor.* and subject.* because of $createClass column dependencies
+    /* Não pode ser selecionado só professor.* e subject.*, devido as dependências
+    de coluna de $createClass */
     string: "select * from class natural join professor natural join subject where counter = ?",
     params: [counter]
   };

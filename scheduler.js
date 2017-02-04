@@ -10,9 +10,10 @@
               aplicação que deve ser adicionado a todas as páginas HTML.
 */
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
-// https://github.com/mapbox/node-sqlite3/wiki/API
+/* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect
+   https://github.com/mapbox/node-sqlite3/wiki/API
+*/
 
 const nameLen = 16;
 const objects = require("./objects");
@@ -25,7 +26,8 @@ const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accen
 const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
 const autocompleteOptions = {
   minLength: 0,
-  // autoFocus: true, // automatically focus the first item in result list
+  /* Automaticamente atribui foco ao primeiro item na listagem dos resultados */
+  // autoFocus: true,
   source: function(request, response) {
     var results = [];
     var $this = $(this.element[0]);
@@ -49,10 +51,7 @@ const autocompleteOptions = {
               return;
             }
             query += (i === 0 ? " where " : " and ") + obj.selectWhere[fieldIndex].object[i].fields[obj.selectWhere[fieldIndex].field[i]] + " = ?";
-            params.push($whereField.val());
-          }
-        } else {
-          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
+            params.push($whereFie          syslog(LOG_LEVEL.E, "autocompleteOptions", 4, obj.name + "." + obj.fields[fieldIndex] + " has wrong selectWhere format");
           return;
         }
       } else syslog(LOG_LEVEL.W, "autocompleteOptions", 3, obj.name + " has no selectWhere[" + fieldIndex + "]");
@@ -74,7 +73,7 @@ const autocompleteOptions = {
           "pk": {}
         };
         $.each(ownerObj.primaryKey, function(i, pk) {
-          if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
+          if (ownerObj.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true;
           rowJson.pk[ownerObj.table + "-" + ownerObj.fields[pk] + "-id"] = row[ownerObj.fields[pk]];
         });
         syslog(LOG_LEVEL.I, "autocompleteOptions", 6, JSON.stringify(rowJson));
@@ -126,7 +125,7 @@ $("main").on("click", "button.form-save", saveForm);
 
 $("main").on("click", "button.form-delete", (event) => {
   $("#modal-delete").modal("open");
-  // we need the original event
+  /* É necessário o evento original */
   $("#modal-delete-confirm").off("click.delete");
   $("#modal-delete-confirm").on("click.delete", () => {
     deleteRows([event.currentTarget], 0, true);
@@ -135,11 +134,11 @@ $("main").on("click", "button.form-delete", (event) => {
 
 $("main").on("click", ".form-delete-all", (event) => {
   $("#modal-delete").modal("open");
-  // we need the original event
+  /* É necessário o evento original */
   $("#modal-delete-confirm").off("click.delete");
   $("#modal-delete-confirm").on("click.delete", () => {
-    // currently, as we're not using the background process,
-    // the user must wait for the deletions to complete!
+    /* Atualmente, como não estamos usando o processo background o usuário precisa
+     aguardar para que as deleções sejam completadas */
     Materialize.toast("Por favor, aguarde...", 1000);
     deleteAllRows(event.currentTarget);
   });
@@ -286,7 +285,7 @@ function classListInsert(blockNumber, el, elAfter, callback, ...args) {
   });
 }
 
-// if shouldUseTransaction is true, last arguments are irrelevant
+/* Se 'shouldUseTransaction' é verdadeiro os últimos argumentos são irrelevantes */
 function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
   if (shouldUseTransaction === true) beginTransaction("classListRemove");
   db.run("with del(next) as (select next from class where counter = ?)"
@@ -414,7 +413,6 @@ function saveForm(event) {
     }
   }
   if (correct) {
-    // yeah, editable is delete old + insert new ...
     if (event.currentTarget.hasAttribute("editable") === true) {
       deleteRows([event.currentTarget], 0, false, insertObject, obj, fields, false);
     } else {
@@ -446,7 +444,8 @@ function hasPrimaryNotForeign(obj) {
   $.each(obj.primaryKey, (i, key) => {
     if (obj.fieldTypes[i] !== objects.FIELD_TYPE_FK) {
       has = true;
-      return false; // this return is for $.each
+      /* Esse return é para $.each*/
+      return false;
     }
   });
   return has;
@@ -591,7 +590,8 @@ function autocompleteFields(obj) {
       for (let i = 0; i < obj.selectFields.length; i++)
         fields.push(obj.fields[obj.selectFields[i]]);
     } else {
-      fields = obj.fields; // all fields from the 'select *'
+      /* Todos os campos do 'select *' */
+      fields = obj.fields;
     }
   } else syslog(LOG_LEVEL.W, "autocompleteFields", 1, "obj is undefined!");
   return fields;
@@ -888,7 +888,8 @@ function $buildRow(obj, tuple, rownum) {
           "class": "input-field col"
         });
         $.each(fo.primaryKey, function(l, pk) {
-          if (fo.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true; // continue
+          /* Continue */
+          if (fo.fieldTypes[pk] === objects.FIELD_TYPE_FK) return true;
           $input = $createElement("input", {
             "type": decodeType(fo, pk),
             "id": fo.table + "-" + fo.fields[pk] + "-id" + rownum,
@@ -945,7 +946,7 @@ function $buildRow(obj, tuple, rownum) {
       $input.attr("value", tuple[obj.fields[i]]);
       $input.attr("index", rownum);
       $input.attr("title", obj.titles[i]);
-      // only on .list forms
+      /* Somente em formulários '.list' */
       if (rownum !== "") {
         $input.attr("editable", "editable");
         $input.on("change", saveForm);
@@ -955,7 +956,7 @@ function $buildRow(obj, tuple, rownum) {
         obj.fieldRequired[j] === true) {
         $input.attr("required", "required");
       }
-      // only checkboxes are allowed to be directly updated
+      /* Somente checkboxes são permitidos de serem diretamente atualizados */
       if (typeof tuple[obj.fields[i]] !== typeof undefined && type !== objects.FIELD_TYPE_BOOLEAN)
         $input.attr("disabled", "disabled");
       var $label = $createTextualElement("label", {
@@ -995,7 +996,8 @@ function naming(fullname) {
   if (fullname.length <= nameLen) return fullname;
 
   var firstname = firstName(fullname);
-  if (firstname.length === nameLen || firstname.length + 1 === nameLen) // + 1 por causa do espaço com o sobrenome
+  /* É feito + 1 em 'firstname.lenght' por cuasa do espaço com o sobrenome */
+  if (firstname.length === nameLen || firstname.length + 1 === nameLen)
     return firstname;
   if (firstname.length > nameLen) return firstname.substring(0, nameLen - 3) + "...";
 
@@ -1110,11 +1112,6 @@ function removeClass(classEl) {
 //   }
 //   return json;
 // }
-
-
-
-
-
 
 
 

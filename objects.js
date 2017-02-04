@@ -6,8 +6,8 @@
               Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
               professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
               matutino, vespertino e noturno;
-              * 'objects.js' corresponde ao arquivo JavaScript utilizado como base para a geração automática dos formulários que se relacionam com o
-              banco de dados na aplicação
+              * 'objects.js' corresponde ao arquivo JavaScript utilizado como base para a geração automática dos formulários que se relacionam
+              com o banco de dados na aplicação.
 */
 
 const QUERY_TYPE_INSERT = 1,
@@ -218,10 +218,10 @@ DowShiftTime.primaryKey = [0, 1, 2];
 DowShiftTime.foreignKey = [DayOfWeek, Shift, Time];
 DowShiftTime.selectWhere = [undefined, {
   "object": [DayOfWeek],
-  "field": DayOfWeek.primaryKey // this is an array!
+  "field": DayOfWeek.primaryKey // Isso é um vetor
 }, {
   "object": [Shift],
-  "field": Shift.primaryKey // this is an array!
+  "field": Shift.primaryKey // Isso é um vetor
 }];
 
 function ProfessorRestriction(professor, dowShiftTime, active) {

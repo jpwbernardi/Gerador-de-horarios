@@ -15,36 +15,37 @@ const ClassList = require("./ClassList.js");
 const sqlite3 = require('sqlite3').verbose();
 const {app, BrowserWindow, ipcMain} = require('electron');
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+/* Deve ser mantida uma referência global do objeto da janela, pois se não for
+feito isso a janela será fechada automaticamente quando o objeto JavaScript for
+pego pelo gargabe collector. */
 let mainWindow;
 
 function createWindow() {
-  // Create the browser window.
+  /* Cria a janela de navegação */
   mainWindow = new BrowserWindow({width: 800, height: 600});
 
-  // and load the index.html of the app.
+  /* Carrega o arquivo index.html da aplicação */
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
     protocol: 'file:',
     slashes: true
   }));
 
-  // Open the DevTools.
+  /* Abre o DevTools */
   mainWindow.webContents.openDevTools();
 
-  // Emitted when the window is closed.
+  /* Chamado quando a janela é fechada */
   mainWindow.on('closed', function() {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
+    /* Desreferencia o objeto da janela. Geralmente a janela seria armazenada em
+    um vetor se a aplicação suporta multi janelas. Esse é o momento em que o
+    elemento correspondente deve ser excluído */
     mainWindow = null;
   });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+/* Este método será chamado quando o Electron finalizar a inicialização e estiver
+pronto para criar as janelas de navegação. Algumas APIs somente podem ser usadas
+depois da ocorrência desse evento */
 app.on('ready', () => {
   global.db = new sqlite3.Database('scheduler.db', (err) => {
     if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 1, "Error opening the database: " + err);
@@ -56,25 +57,26 @@ app.on('ready', () => {
     syslog(LOG_LEVEL.D, "app.on('ready')", 3, "Database closed successfully");
   });
   global.db.serialize();
-  // enabling foreign key constraint enforcement (off by default for compatibility)
+  /* Permitindo a imposição de restrições de chave estrangeira (OFF por padrão
+  para compatibilidade) */
   global.db.exec("PRAGMA foreign_keys = ON", (err) => {
     if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 4, err);
   });
   createWindow();
 });
 
-// Quit when all windows are closed.
+/* Sai quando todas as janelas são fechadas */
 app.on('window-all-closed', () => {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
+  /* No OS X é comum para aplicações e sua barra de menu ficarem ativas até que
+  o usuário saia explicitamente com Cmd + Q */
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
+  /* No OS X é comum recriar uma janela na aplicação quando o ícone do dock é
+  clicado e não há outra janela aberta */
   if (mainWindow === null) {
     createWindow();
   }
@@ -86,8 +88,8 @@ app.on('quit', () => {
   });
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+/* Nesse arquivo pode ser incluído o resto do código específico no processo
+principal da aplicação ou adicionar ele em arquivos separados e chamá-los aqui */
 
 global.LOG_LEVEL = {
   V: 0,

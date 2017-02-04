@@ -8,7 +8,8 @@
 --             matutino, vespertino e noturno;
 --             * 'db.sql' corresponde ao arquivo responsável pela criação das tabelas e população do banco de dados da aplicação
 
--- Permitindo a imposição de restrições de chave estrangeira (OFF por padrão para compatibilidade)
+-- Permitindo a imposição de restrições de chave estrangeira (OFF por padrão para
+-- compatibilidade)
 PRAGMA foreign_keys = ON;
 
 create table professor(
