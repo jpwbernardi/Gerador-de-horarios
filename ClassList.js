@@ -7,7 +7,7 @@ class ClassNode {
 
   equalsRow(classRow) {
     if (typeof classRow === typeof undefined || classRow === null) {
-      throw new ReferenceError("Cannor compare to undefined or null");
+      throw new ReferenceError("Cannot compare to undefined or null");
     }
     return this.row.counter === classRow.counter;
   }

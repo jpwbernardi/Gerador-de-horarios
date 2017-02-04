@@ -1,4 +1,14 @@
--- enabling foreign key constraint enforcement (off by default for compatibility)
+--  Arquivo:   db.sql
+--  Autores:   Acácia dos Campos da Terra, Davi Rizzotto Pegoraro, Gabriel Batista Galli, Harold Cristien Santos Becker, João Pedro Winckler
+--             Bernardi, Matheus Henrique Trichez e Vladimir Belinski
+--  Descrição: o presente arquivo faz parte do projeto Gerador de Horários, no qual é criada uma aplicação que visa ser uma ferramenta
+--             facilitadora para a geração dos horários do semestre (em relação aos componentes curriculares) dos cursos de graduação do
+--             Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
+--             professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
+--             matutino, vespertino e noturno;
+--             * 'db.sql' corresponde ao arquivo responsável pela criação das tabelas e população do banco de dados da aplicação
+
+-- Permitindo a imposição de restrições de chave estrangeira (OFF por padrão para compatibilidade)
 PRAGMA foreign_keys = ON;
 
 create table professor(
@@ -206,12 +216,10 @@ insert into professor values
 (2022753, "William Zanete Bertolini"),
 (1961455, "Willian Simões"),
 (1174433, "Zuleide Maria Ignácio"),
-
--- Substitutes Computer Science
+-- Professores substituos de Ciência da Computação
 (0000000, "Jacson Matte"),
 (0000001, "Lais Borin"),
 (0000002, "Priscila Delabetha");
-
 
 create table dayofweek(
   dow       integer,
@@ -268,7 +276,7 @@ create table subject(
   foreign key(period) references shift(period) on delete cascade
 );
 insert into subject values
--- Morning grid
+-- CCRs correspondentes à grade do turno matutino
 ("GEX002", "Introdução à informática", 1, 1),
 ("GEX001", "Matemática instrumental", 1, 1),
 ("GLA001", "Leitura e produção textual I", 1, 1),
@@ -320,7 +328,69 @@ insert into subject values
 ("GEX112", "Segurança e auditoria de sistemas", 8, 1),
 ("GEX120", "Trabalho de conclusão de curso II", 8, 1),
 
--- Afternoon grid
+-- Optativas correspondentes à grade do turno matutino
+
+("OPT001", "Programação funcional e lógica", 7, 1),
+("OPT002", "Informática e sociedade", 7, 1),
+("OPT003", "Modelagem e simulação", 7, 1),
+("OPT004", "Sistemas multimídia", 7, 1),
+("OPT005", "Engenharia da usabilidade", 7, 1),
+("OPT006", "Arquitetura de computadores", 7, 1),
+("OPT007", "Sistemas de tempo real", 7, 1),
+("OPT008", "Administração e gerência de redes", 7, 1),
+("OPT009", "Computação móvel", 7, 1),
+("OPT010", "Administração e organização empresarial", 7, 1),
+("OPT011", "Sistemas de informação", 7, 1),
+("OPT012", "Pesquisa operacional", 7, 1),
+("OPT013", "Paradigmas de linguagens de programação", 7, 1),
+("OPT014", "Empreendedorismo", 7, 1),
+("OPT015", "Informática na educação", 7, 1),
+("OPT016", "Língua brasileira de sinais (Libras)", 7, 1),
+("OPT017", "Linguagem de descrição de hardware", 7, 1),
+("OPT018", "Tópicos especiais em banco de dados", 7, 1),
+("OPT019", "Tópicos especiais em inteligência artificial", 7, 1),
+("OPT020", "Tópicos especiais em desenvolvimento web", 7, 1),
+("OPT021", "Tópicos especiais em redes de computadores", 7, 1),
+("OPT022", "Tópicos especiais em orientação a objetos", 7, 1),
+("OPT023", "Tópicos especiais em sistemas operacionais", 7, 1),
+("OPT024", "Tópicos especiais em qualidade de software", 7, 1),
+("OPT025", "Tópicos especiais em segurança", 7, 1),
+("OPT026", "Tópicos especiais em sistemas distribuídos", 7, 1),
+("OPT027", "Tópicos especiais em jogos digitais", 7, 1),
+("OPT028", "Tópicos em automação e controle", 7, 1),
+("OPT029", "Tópicos especiais em engenharia de software", 7, 1),
+
+("OPT001", "Programação funcional e lógica", 8, 1),
+("OPT002", "Informática e sociedade", 8, 1),
+("OPT003", "Modelagem e simulação", 8, 1),
+("OPT004", "Sistemas multimídia", 8, 1),
+("OPT005", "Engenharia da usabilidade", 8, 1),
+("OPT006", "Arquitetura de computadores", 8, 1),
+("OPT007", "Sistemas de tempo real", 8, 1),
+("OPT008", "Administração e gerência de redes", 8, 1),
+("OPT009", "Computação móvel", 8, 1),
+("OPT010", "Administração e organização empresarial", 8, 1),
+("OPT011", "Sistemas de informação", 8, 1),
+("OPT012", "Pesquisa operacional", 8, 1),
+("OPT013", "Paradigmas de linguagens de programação", 8, 1),
+("OPT014", "Empreendedorismo", 8, 1),
+("OPT015", "Informática na educação", 8, 1),
+("OPT016", "Língua brasileira de sinais (Libras)", 8, 1),
+("OPT017", "Linguagem de descrição de hardware", 8, 1),
+("OPT018", "Tópicos especiais em banco de dados", 8, 1),
+("OPT019", "Tópicos especiais em inteligência artificial", 8, 1),
+("OPT020", "Tópicos especiais em desenvolvimento web", 8, 1),
+("OPT021", "Tópicos especiais em redes de computadores", 8, 1),
+("OPT022", "Tópicos especiais em orientação a objetos", 8, 1),
+("OPT023", "Tópicos especiais em sistemas operacionais", 8, 1),
+("OPT024", "Tópicos especiais em qualidade de software", 8, 1),
+("OPT025", "Tópicos especiais em segurança", 8, 1),
+("OPT026", "Tópicos especiais em sistemas distribuídos", 8, 1),
+("OPT027", "Tópicos especiais em jogos digitais", 8, 1),
+("OPT028", "Tópicos em automação e controle", 8, 1),
+("OPT029", "Tópicos especiais em engenharia de software", 8, 1),
+
+-- CCRs correspondentes à grade do turno vespertino
 
 ("GEX002", "Introdução à informática", 1, 2),
 ("GEX001", "Matemática instrumental", 1, 2),
@@ -373,7 +443,69 @@ insert into subject values
 ("GEX112", "Segurança e auditoria de sistemas", 8, 2),
 ("GEX120", "Trabalho de conclusão de curso II", 8, 2),
 
---Night grid
+-- Optativas correspondentes à grade do turno vespertino
+
+("OPT001", "Programação funcional e lógica", 7, 2),
+("OPT002", "Informática e sociedade", 7, 2),
+("OPT003", "Modelagem e simulação", 7, 2),
+("OPT004", "Sistemas multimídia", 7, 2),
+("OPT005", "Engenharia da usabilidade", 7, 2),
+("OPT006", "Arquitetura de computadores", 7, 2),
+("OPT007", "Sistemas de tempo real", 7, 2),
+("OPT008", "Administração e gerência de redes", 7, 2),
+("OPT009", "Computação móvel", 7, 2),
+("OPT010", "Administração e organização empresarial", 7, 2),
+("OPT011", "Sistemas de informação", 7, 2),
+("OPT012", "Pesquisa operacional", 7, 2),
+("OPT013", "Paradigmas de linguagens de programação", 7, 2),
+("OPT014", "Empreendedorismo", 7, 2),
+("OPT015", "Informática na educação", 7, 2),
+("OPT016", "Língua brasileira de sinais (Libras)", 7, 2),
+("OPT017", "Linguagem de descrição de hardware", 7, 2),
+("OPT018", "Tópicos especiais em banco de dados", 7, 2),
+("OPT019", "Tópicos especiais em inteligência artificial", 7, 2),
+("OPT020", "Tópicos especiais em desenvolvimento web", 7, 2),
+("OPT021", "Tópicos especiais em redes de computadores", 7, 2),
+("OPT022", "Tópicos especiais em orientação a objetos", 7, 2),
+("OPT023", "Tópicos especiais em sistemas operacionais", 7, 2),
+("OPT024", "Tópicos especiais em qualidade de software", 7, 2),
+("OPT025", "Tópicos especiais em segurança", 7, 2),
+("OPT026", "Tópicos especiais em sistemas distribuídos", 7, 2),
+("OPT027", "Tópicos especiais em jogos digitais", 7, 2),
+("OPT028", "Tópicos em automação e controle", 7, 2),
+("OPT029", "Tópicos especiais em engenharia de software", 7, 2),
+
+("OPT001", "Programação funcional e lógica", 8, 2),
+("OPT002", "Informática e sociedade", 8, 2),
+("OPT003", "Modelagem e simulação", 8, 2),
+("OPT004", "Sistemas multimídia", 8, 2),
+("OPT005", "Engenharia da usabilidade", 8, 2),
+("OPT006", "Arquitetura de computadores", 8, 2),
+("OPT007", "Sistemas de tempo real", 8, 2),
+("OPT008", "Administração e gerência de redes", 8, 2),
+("OPT009", "Computação móvel", 8, 2),
+("OPT010", "Administração e organização empresarial", 8, 2),
+("OPT011", "Sistemas de informação", 8, 2),
+("OPT012", "Pesquisa operacional", 8, 2),
+("OPT013", "Paradigmas de linguagens de programação", 8, 2),
+("OPT014", "Empreendedorismo", 8, 2),
+("OPT015", "Informática na educação", 8, 2),
+("OPT016", "Língua brasileira de sinais (Libras)", 8, 2),
+("OPT017", "Linguagem de descrição de hardware", 8, 2),
+("OPT018", "Tópicos especiais em banco de dados", 8, 2),
+("OPT019", "Tópicos especiais em inteligência artificial", 8, 2),
+("OPT020", "Tópicos especiais em desenvolvimento web", 8, 2),
+("OPT021", "Tópicos especiais em redes de computadores", 8, 2),
+("OPT022", "Tópicos especiais em orientação a objetos", 8, 2),
+("OPT023", "Tópicos especiais em sistemas operacionais", 8, 2),
+("OPT024", "Tópicos especiais em qualidade de software", 8, 2),
+("OPT025", "Tópicos especiais em segurança", 8, 2),
+("OPT026", "Tópicos especiais em sistemas distribuídos", 8, 2),
+("OPT027", "Tópicos especiais em jogos digitais", 8, 2),
+("OPT028", "Tópicos em automação e controle", 8, 2),
+("OPT029", "Tópicos especiais em engenharia de software", 8, 2),
+
+-- CCRs correspondentes à grade do turno noturno
 
 ("GEX002", "Introdução à informática", 1, 3),
 ("GEX001", "Matemática instrumental", 1, 3),
@@ -428,137 +560,7 @@ insert into subject values
 
 ("GEX120", "Trabalho de conclusão de curso II", 10, 3),
 
--- OPTs
-
--- M-7
-
-("OPT001", "Programação funcional e lógica", 7, 1),
-("OPT002", "Informática e sociedade", 7, 1),
-("OPT003", "Modelagem e simulação", 7, 1),
-("OPT004", "Sistemas multimídia", 7, 1),
-("OPT005", "Engenharia da usabilidade", 7, 1),
-("OPT006", "Arquitetura de computadores", 7, 1),
-("OPT007", "Sistemas de tempo real", 7, 1),
-("OPT008", "Administração e gerência de redes", 7, 1),
-("OPT009", "Computação móvel", 7, 1),
-("OPT010", "Administração e organização empresarial", 7, 1),
-("OPT011", "Sistemas de informação", 7, 1),
-("OPT012", "Pesquisa operacional", 7, 1),
-("OPT013", "Paradigmas de linguagens de programação", 7, 1),
-("OPT014", "Empreendedorismo", 7, 1),
-("OPT015", "Informática na educação", 7, 1),
-("OPT016", "Língua brasileira de sinais (Libras)", 7, 1),
-("OPT017", "Linguagem de descrição de hardware", 7, 1),
-("OPT018", "Tópicos especiais em banco de dados", 7, 1),
-("OPT019", "Tópicos especiais em inteligência artificial", 7, 1),
-("OPT020", "Tópicos especiais em desenvolvimento web", 7, 1),
-("OPT021", "Tópicos especiais em redes de computadores", 7, 1),
-("OPT022", "Tópicos especiais em orientação a objetos", 7, 1),
-("OPT023", "Tópicos especiais em sistemas operacionais", 7, 1),
-("OPT024", "Tópicos especiais em qualidade de software", 7, 1),
-("OPT025", "Tópicos especiais em segurança", 7, 1),
-("OPT026", "Tópicos especiais em sistemas distribuídos", 7, 1),
-("OPT027", "Tópicos especiais em jogos digitais", 7, 1),
-("OPT028", "Tópicos em automação e controle", 7, 1),
-("OPT029", "Tópicos especiais em engenharia de software", 7, 1),
-
--- M-8
-
-("OPT001", "Programação funcional e lógica", 8, 1),
-("OPT002", "Informática e sociedade", 8, 1),
-("OPT003", "Modelagem e simulação", 8, 1),
-("OPT004", "Sistemas multimídia", 8, 1),
-("OPT005", "Engenharia da usabilidade", 8, 1),
-("OPT006", "Arquitetura de computadores", 8, 1),
-("OPT007", "Sistemas de tempo real", 8, 1),
-("OPT008", "Administração e gerência de redes", 8, 1),
-("OPT009", "Computação móvel", 8, 1),
-("OPT010", "Administração e organização empresarial", 8, 1),
-("OPT011", "Sistemas de informação", 8, 1),
-("OPT012", "Pesquisa operacional", 8, 1),
-("OPT013", "Paradigmas de linguagens de programação", 8, 1),
-("OPT014", "Empreendedorismo", 8, 1),
-("OPT015", "Informática na educação", 8, 1),
-("OPT016", "Língua brasileira de sinais (Libras)", 8, 1),
-("OPT017", "Linguagem de descrição de hardware", 8, 1),
-("OPT018", "Tópicos especiais em banco de dados", 8, 1),
-("OPT019", "Tópicos especiais em inteligência artificial", 8, 1),
-("OPT020", "Tópicos especiais em desenvolvimento web", 8, 1),
-("OPT021", "Tópicos especiais em redes de computadores", 8, 1),
-("OPT022", "Tópicos especiais em orientação a objetos", 8, 1),
-("OPT023", "Tópicos especiais em sistemas operacionais", 8, 1),
-("OPT024", "Tópicos especiais em qualidade de software", 8, 1),
-("OPT025", "Tópicos especiais em segurança", 8, 1),
-("OPT026", "Tópicos especiais em sistemas distribuídos", 8, 1),
-("OPT027", "Tópicos especiais em jogos digitais", 8, 1),
-("OPT028", "Tópicos em automação e controle", 8, 1),
-("OPT029", "Tópicos especiais em engenharia de software", 8, 1),
-
--- V-7
-
-("OPT001", "Programação funcional e lógica", 7, 2),
-("OPT002", "Informática e sociedade", 7, 2),
-("OPT003", "Modelagem e simulação", 7, 2),
-("OPT004", "Sistemas multimídia", 7, 2),
-("OPT005", "Engenharia da usabilidade", 7, 2),
-("OPT006", "Arquitetura de computadores", 7, 2),
-("OPT007", "Sistemas de tempo real", 7, 2),
-("OPT008", "Administração e gerência de redes", 7, 2),
-("OPT009", "Computação móvel", 7, 2),
-("OPT010", "Administração e organização empresarial", 7, 2),
-("OPT011", "Sistemas de informação", 7, 2),
-("OPT012", "Pesquisa operacional", 7, 2),
-("OPT013", "Paradigmas de linguagens de programação", 7, 2),
-("OPT014", "Empreendedorismo", 7, 2),
-("OPT015", "Informática na educação", 7, 2),
-("OPT016", "Língua brasileira de sinais (Libras)", 7, 2),
-("OPT017", "Linguagem de descrição de hardware", 7, 2),
-("OPT018", "Tópicos especiais em banco de dados", 7, 2),
-("OPT019", "Tópicos especiais em inteligência artificial", 7, 2),
-("OPT020", "Tópicos especiais em desenvolvimento web", 7, 2),
-("OPT021", "Tópicos especiais em redes de computadores", 7, 2),
-("OPT022", "Tópicos especiais em orientação a objetos", 7, 2),
-("OPT023", "Tópicos especiais em sistemas operacionais", 7, 2),
-("OPT024", "Tópicos especiais em qualidade de software", 7, 2),
-("OPT025", "Tópicos especiais em segurança", 7, 2),
-("OPT026", "Tópicos especiais em sistemas distribuídos", 7, 2),
-("OPT027", "Tópicos especiais em jogos digitais", 7, 2),
-("OPT028", "Tópicos em automação e controle", 7, 2),
-("OPT029", "Tópicos especiais em engenharia de software", 7, 2),
-
--- V-8
-
-("OPT001", "Programação funcional e lógica", 8, 2),
-("OPT002", "Informática e sociedade", 8, 2),
-("OPT003", "Modelagem e simulação", 8, 2),
-("OPT004", "Sistemas multimídia", 8, 2),
-("OPT005", "Engenharia da usabilidade", 8, 2),
-("OPT006", "Arquitetura de computadores", 8, 2),
-("OPT007", "Sistemas de tempo real", 8, 2),
-("OPT008", "Administração e gerência de redes", 8, 2),
-("OPT009", "Computação móvel", 8, 2),
-("OPT010", "Administração e organização empresarial", 8, 2),
-("OPT011", "Sistemas de informação", 8, 2),
-("OPT012", "Pesquisa operacional", 8, 2),
-("OPT013", "Paradigmas de linguagens de programação", 8, 2),
-("OPT014", "Empreendedorismo", 8, 2),
-("OPT015", "Informática na educação", 8, 2),
-("OPT016", "Língua brasileira de sinais (Libras)", 8, 2),
-("OPT017", "Linguagem de descrição de hardware", 8, 2),
-("OPT018", "Tópicos especiais em banco de dados", 8, 2),
-("OPT019", "Tópicos especiais em inteligência artificial", 8, 2),
-("OPT020", "Tópicos especiais em desenvolvimento web", 8, 2),
-("OPT021", "Tópicos especiais em redes de computadores", 8, 2),
-("OPT022", "Tópicos especiais em orientação a objetos", 8, 2),
-("OPT023", "Tópicos especiais em sistemas operacionais", 8, 2),
-("OPT024", "Tópicos especiais em qualidade de software", 8, 2),
-("OPT025", "Tópicos especiais em segurança", 8, 2),
-("OPT026", "Tópicos especiais em sistemas distribuídos", 8, 2),
-("OPT027", "Tópicos especiais em jogos digitais", 8, 2),
-("OPT028", "Tópicos em automação e controle", 8, 2),
-("OPT029", "Tópicos especiais em engenharia de software", 8, 2),
-
--- N-9
+-- Optativas correspondentes à grade do turno noturno
 
 ("OPT001", "Programação funcional e lógica", 9, 3),
 ("OPT002", "Informática e sociedade", 9, 3),
@@ -589,8 +591,6 @@ insert into subject values
 ("OPT027", "Tópicos especiais em jogos digitais", 9, 3),
 ("OPT028", "Tópicos em automação e controle", 9, 3),
 ("OPT029", "Tópicos especiais em engenharia de software", 9, 3),
-
--- N-10
 
 ("OPT001", "Programação funcional e lógica", 10, 3),
 ("OPT002", "Informática e sociedade", 10, 3),
@@ -684,7 +684,7 @@ create table professor_restriction(
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade
 );
 
--- disaabling foreign key constraint enforcement because of not-yet-existant foreign keys
+-- Desativando a imposição de restrições de chave estrangeira por causa de chaves estrangeiras ainda não existentes
 PRAGMA foreign_keys = OFF;
 create table class(
   counter     integer,
@@ -719,22 +719,3 @@ create table class_list(
 );
 insert into class_list values(420, 1, 3, 3);
 PRAGMA foreign_keys = ON;
-
--- create table period_restriction(
---   periodr integer,
---   number  integer,
---   sod     integer,
---   hour    integer,
---   rnumber integer,
---   rsod    integer,
---   rhour   integer,
---   active  boolean default true,
---   primary key(periodr),
---   foreign key(number) references dayofweek(number),
---   foreign key(sod) references shift(sod),
---   foreign key(hour) references time(hour),
---   foreign key(rnumber) references dayofweek(number),
---   foreign key(rsod) references shift(sod),
---   foreign key(rhour) references time(hour),
---   constraint unique_period_restriction unique(number, sod, hour, rnumber, rsod, rhour)
--- );
