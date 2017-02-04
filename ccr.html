@@ -1,14 +1,25 @@
+<!-- Arquivo:   ccr.html
+     Autores:   Acácia dos Campos da Terra, Davi Rizzotto Pegoraro, Gabriel Batista Galli, Harold Cristien Santos Becker, João Pedro Winckler
+                Bernardi, Matheus Henrique Trichez e Vladimir Belinski
+     Descrição: o presente arquivo faz parte do projeto Gerador de Horários, no qual é criada uma aplicação que visa ser uma ferramenta
+                facilitadora para a geração dos horários do semestre (em relação aos componentes curriculares) dos cursos de graduação do
+                Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
+                professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
+                matutino, vespertino e noturno;
+                * 'ccr.html' corresponde ao arquivo .html responsável pela tela 'CCRs' na aplicação.
+-->
+
 <!DOCTYPE html>
 <html>
 
 <head>
-  <!--Import Google Icon Font-->
+  <!--Importa fonte de ícones do Google-->
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!--Import materialize.css-->
+  <!--Importa materialize.css-->
   <link type="text/css" rel="stylesheet" href="node_modules/materialize-css/bin/materialize.css" media="screen,projection" />
   <link type="text/css" rel="stylesheet" href="scheduler.css" media="screen,projection" />
 
-  <!--Let browser know website is optimized for mobile-->
+  <!--Permite ao navegador saber que o site é otimizado para mobile-->
   <meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" />
 
   <title>Gerador de horários - CCR</title>
@@ -32,16 +43,16 @@
     </div>
   </main>
 
-  <!-- Insert this line above script imports -->
+  <!-- Inserir esta linha antes da importação dos scripts -->
   <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
 
-  <!-- normal script imports etc -->
+  <!-- Importações normais de scripts -->
   <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="jquery-ui/jquery-ui.min.js"></script>
   <script type="text/javascript" src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
   <script type="text/javascript" src="scheduler.js"></script>
 
-  <!-- Insert this line after script imports -->
+  <!-- Inserir esta linha após a importação dos scripts -->
   <script>if (window.module) module = window.module;</script>
 </body>
 
