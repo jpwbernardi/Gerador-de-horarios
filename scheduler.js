@@ -146,29 +146,29 @@ $("main").on("click", ".form-delete-all", (event) => {
   });
 });
 
-/**
+/** @function attr
  * @param el o elemento (objeto jQuery ou DOM) do qual extrair um atributo
  * @param attrName o nome do atributo desejado
- * @return o valor do atributo {@code attrName} do elemento {@code el}
+ * @returns o valor do atributo {@code attrName} do elemento {@code el}
  */
 function attr(el, attrName) {
   if (el instanceof jQuery) return el.attr(attrName);
   return el.getAttribute(attrName);
 }
 
-/**
+/** @function defOrNull
  * Utilizado na montagem dos parâmetros opcionais do SQLite. Retorna o valor do
  * parâmetro, caso exista, ou {@code null} para poder ser chamado diretamente de
  * dentro do vetor de parâmetros a ser passado para o SQLite.
  * @param field o parâmetro opcional desejado
- * @return {@code field}, caso ele não seja {@code undefined}, ou {@code null},
+ * @returns {@code field}, caso ele não seja {@code undefined}, ou {@code null},
  * caso contrário
  */
 function defOrNull(field) {
   return (typeof field !== typeof undefined ? field : null);
 }
 
-/**
+/** @function rollbackIfErr
  * Checa se a variável {@code err} é nula. Se não for, loga este erro juntamente
  * com a {@code message} através da função {@code syslog}. Após isso, executa um
  * {@code ROLLBACK} no banco de dados e avisa o usuário da ocorrência de um erro.
@@ -177,7 +177,7 @@ function defOrNull(field) {
  * é feita outra chamada à {@code syslog} para registrar o novo erro.
  * @param err o erro retornado em uma callback de uma chamada da API do node-sqlite3
  * @param mensagem adicional para ser registrada no log
- * @return {@code undefined}
+ * @returns {@code undefined}
  */
 function rollbackIfErr(err, message) {
   if (err !== null) {
@@ -196,9 +196,15 @@ function rollbackIfErr(err, message) {
   }
 }
 
-function beginTransaction(fname) {
+/** @function beginTransaction
+ * Executa o comando para iniciar imediatamente uma transação no banco de dados.
+ * @param message mensagem a ser encaminhada para {@code rollbackIfErr}, caso
+ * ocorra algum erro
+ * @returns {@code undefined}
+ */
+function beginTransaction(message) {
   db.exec("BEGIN IMMEDIATE", (err) => {
-    rollbackIfErr(err, fname);
+    rollbackIfErr(err, message);
   });
 }
 
