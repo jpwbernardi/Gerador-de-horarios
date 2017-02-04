@@ -135,11 +135,24 @@ $("main").on("click", ".form-delete-all", (event) => {
   });
 });
 
+/**
+ * @param el o elemento (objeto jQuery ou DOM) do qual extrair um atributo
+ * @param attrName o nome do atributo desejado
+ * @return o valor do atributo {@code attrName} do elemento {@code el}
+ */
 function attr(el, attrName) {
   if (el instanceof jQuery) return el.attr(attrName);
   return el.getAttribute(attrName);
 }
 
+/**
+ * Utilizado na montagem dos parâmetros opcionais do SQLite. Retorna o valor do
+ * parâmetro, caso exista, ou {@code null} para poder ser chamado diretamente de
+ * dentro do vetor de parâmetros a ser passado para o SQLite.
+ * @param field o parâmetro opcional desejado
+ * @return {@code field}, caso ele não seja {@code undefined}, ou {@code null},
+ * caso contrário
+ */
 function defOrNull(field) {
   return (typeof field !== typeof undefined ? field : null);
 }
@@ -151,6 +164,9 @@ function rollbackIfErr(err, message) {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
+    /**
+     * @TODO REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
+     */
     // setTimeout(() => {
     //  electron.ipcRenderer.send("window.reload");
     // }, 2000);
@@ -212,7 +228,7 @@ this._length++;
 function classListPush(blockNumber, el, newCounter, callback, ...args) {
   db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
     if (classListErr === null) {
-      if (typeof classListRow === typeof undefined) {
+      if (typeof classListRow === typeof undefined || classListRow.tail === null) {
         // if tail is null
         createNewClassList(blockNumber, el, newCounter, callback, ...args);
       } else {
@@ -220,11 +236,6 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
         db.run("update class set next = ? where counter = ?", [newCounter, classListRow.tail], (tailNextErr) => {
           rollbackIfErr(tailNextErr, "classListPush tail next update");
         });
-        if (classListRow.head === null) {
-          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
-            rollbackIfErr(tailErr, "classListPush head update");
-          });
-        }
         db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
           rollbackIfErr(tailErr, "classListPush tail update");
         });
