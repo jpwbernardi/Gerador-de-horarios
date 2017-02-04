@@ -146,11 +146,24 @@ $("main").on("click", ".form-delete-all", (event) => {
   });
 });
 
+/**
+ * @param el o elemento (objeto jQuery ou DOM) do qual extrair um atributo
+ * @param attrName o nome do atributo desejado
+ * @return o valor do atributo {@code attrName} do elemento {@code el}
+ */
 function attr(el, attrName) {
   if (el instanceof jQuery) return el.attr(attrName);
   return el.getAttribute(attrName);
 }
 
+/**
+ * Utilizado na montagem dos parâmetros opcionais do SQLite. Retorna o valor do
+ * parâmetro, caso exista, ou {@code null} para poder ser chamado diretamente de
+ * dentro do vetor de parâmetros a ser passado para o SQLite.
+ * @param field o parâmetro opcional desejado
+ * @return {@code field}, caso ele não seja {@code undefined}, ou {@code null},
+ * caso contrário
+ */
 function defOrNull(field) {
   return (typeof field !== typeof undefined ? field : null);
 }
@@ -162,6 +175,9 @@ function rollbackIfErr(err, message) {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", 2000);
+    /**
+     * @TODO REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
+     */
     // setTimeout(() => {
     //  electron.ipcRenderer.send("window.reload");
     // }, 2000);
@@ -209,22 +225,10 @@ function createNewClassList(blockNumber, el, counter, callback, ...args) {
   });
 }
 
-/*
-if (this._tail == null) {
-  this._head = this._tail = node;
-} else {
-  node.prev = this._tail;
-  node.next = null;
-  this._tail.next = node;
-  this._tail = node;
-}
-this._length++;
-*/
 function classListPush(blockNumber, el, newCounter, callback, ...args) {
   db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
     if (classListErr === null) {
       if (typeof classListRow === typeof undefined) {
-        // if tail is null
         createNewClassList(blockNumber, el, newCounter, callback, ...args);
       } else {
         insertNewClass(blockNumber, el, newCounter, classListRow.tail);
@@ -253,16 +257,6 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
   });
 }
 
-/*
-if (nodeAfter == null) return this.push(node);
-node.next = nodeAfter;
-node.prev = nodeAfter.prev;
-if (nodeAfter.prev !== null) nodeAfter.prev.next = node;
-else this._head = node;
-nodeAfter.prev = node;
-this._length++;
-return node;
-*/
 function classListInsert(blockNumber, el, elAfter, callback, ...args) {
   db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
     if (newClassErr === null) {
