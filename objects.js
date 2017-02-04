@@ -6,7 +6,7 @@
               Campus Chapecó da Universidade Federal da Fronteira Sul - UFFS, apresentando uma interface gráfica que permite a manutenção de
               professores, componentes curriculares, associações, restrições e a montagem das grades de 10 fases de um curso para os turnos
               matutino, vespertino e noturno;
-              * 'objects.js' corresponde ao arquivo JavaScript responsável pela geração automática dos formulários que se relacionam com o
+              * 'objects.js' corresponde ao arquivo JavaScript utilizado como base para a geração automática dos formulários que se relacionam com o
               banco de dados na aplicação
 */
 
