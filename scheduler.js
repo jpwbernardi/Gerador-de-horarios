@@ -223,62 +223,69 @@ function commitTransaction(fname) {
   });
 }
 
-function classListUpdate(el, target, source, sibling) {
+function gridUpdate(el, target, source, sibling) {
   let blockNumber = attr(target, "blockNumber");
   beginTransaction();
   if (source !== null && !source.classList.contains("dragula-source")) {
     classListRemove(attr(source, "blockNumber"), attr(el, "counter"), false);
   }
-  classListInsert(blockNumber, el, sibling, commitTransaction, "classListUpdate");
+  classListInsert(blockNumber, el, sibling);
 }
 
-function insertNewClass(blockNumber, el, counter, prev, next) {
+function classInsert(blockNumber, el, counter, prev, next) {
   db.run("insert into class values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [counter, attr(el, "sem"), attr(el, "dow"), attr(el, "period"), attr(el, "block"), attr(el, "siape"), attr(el, "code"), blockNumber, defOrNull(prev), defOrNull(next)], (classErr) => {
-    rollbackIfErr(classErr, "insertNewClass");
+    rollbackIfErr(classErr, "classInsert");
   });
 }
 
-function createNewClassList(blockNumber, el, counter, callback, ...args) {
+function classUpdate(counter, columnName, value, rollbackMessage) {
+  db.run("update class set " + columnName + " = ? where counter = ?", [value, counter], (err) => {
+    rollbackIfErr(err, rollbackMessage);
+  });
+}
+
+function addCounterAndCommit(err, el, counter, message) {
+  if (err === null) {
+    attr(el, "counter", counter);
+    commitTransaction(message);
+  } else {
+    rollbackIfErr(err, message);
+  }
+}
+
+function classListCreateAndCommit(blockNumber, el, counter) {
   db.run("insert into class_list(blockNumber, length) values (?, ?)", [blockNumber, 1], (classListErr, classListRow) => {
-      rollbackIfErr(classListErr, "createNewClassList class_list insert");
+      rollbackIfErr(classListErr, "classListCreateAndCommit class_list insert");
   });
-  insertNewClass(blockNumber, el, counter);
+  classInsert(blockNumber, el, counter);
   db.run("update class_list set head = ?, tail = ? where blockNumber = ?", [counter, counter, blockNumber], (classListErr) => {
-    if (classListErr === null) {
-      attr(el, "counter", counter);
-      if (typeof callback === "function") callback.apply(callback, args);
-    } else {
-      rollbackIfErr(classListErr, "createNewClassList class_list update");
-    }
+    addCounterAndCommit(classListErr, el, counter, "classListCreateAndCommit");
   });
 }
 
-function classListPush(blockNumber, el, newCounter, callback, ...args) {
+function classListUpdate(blockNumber, columnName, value, rollbackMessage) {
+  db.run("update class_list set " + columnName + " = ? where blockNumber = ?", [value, blockNumber], (err) => {
+    rollbackIfErr(err, rollbackMessage);
+  });
+}
+
+function classListUpdateLengthAndCommit(blockNumber, el, counter, message) {
+  db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (err) => {
+    addCounterAndCommit(err, el, counter, message);
+  });
+}
+
+function classListPush(blockNumber, el, newCounter) {
   db.get("select * from class_list where blockNumber = ?", [blockNumber], (classListErr, classListRow) => {
     if (classListErr === null) {
       if (typeof classListRow === typeof undefined) {
-        createNewClassList(blockNumber, el, newCounter, callback, ...args);
+        classListCreateAndCommit(blockNumber, el, newCounter);
       } else {
-        insertNewClass(blockNumber, el, newCounter, classListRow.tail);
-        db.run("update class set next = ? where counter = ?", [newCounter, classListRow.tail], (tailNextErr) => {
-          rollbackIfErr(tailNextErr, "classListPush tail next update");
-        });
-        if (classListRow.head === null) {
-          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (headErr) => {
-            rollbackIfErr(headErr, "classListPush head update");
-          });
-        }
-        db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
-          rollbackIfErr(tailErr, "classListPush tail update");
-        });
-        db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
-          if (lengthErr === null) {
-            attr(el, "counter", newCounter);
-            if (typeof callback === "function") callback.apply(callback, args);
-          } else {
-            rollbackIfErr(lengthErr, "classListPush length update");
-          }
-        });
+        classInsert(blockNumber, el, newCounter, classListRow.tail);
+        classUpdate(classListRow.tail, "next", newCounter, "classListPush tail next update");
+        if (classListRow.head === null) classListUpdate(blockNumber, "head", newCounter, "classListPush head update");
+        classListUpdate(blockNumber, "tail", newCounter, "classListPush tail update");
+        classListUpdateLengthAndCommit(blockNumber, el, newCounter, "classListPush");
       }
     } else {
       rollbackIfErr(classListErr, "classListPush check existance");
@@ -286,34 +293,21 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
   });
 }
 
-function classListInsert(blockNumber, el, elAfter, callback, ...args) {
-  db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
+function classListInsert(blockNumber, el, elAfter) {
+  /** Se não há classes salvas no banco de dados e não utilizarmos a função interna
+   * {@code coalesce} do SQLite, {@code newClassRow} será {@code null}.
+   */
+  db.get("select coalesce(max(counter) + 1, 1) as counter from class", (newClassErr, newClassRow) => {
     if (newClassErr === null) {
-      if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter, callback, ...args);
+      if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter);
       else {
         db.get("select * from class where counter = ?", [attr(elAfter, "counter")], (afterErr, afterRow) => {
           if (afterErr === null) {
-            insertNewClass(blockNumber, el, newClassRow.counter, afterRow.prev, afterRow.counter);
-            if (afterRow.prev !== null) {
-              db.run("update class set next = ? where counter = ?", [newClassRow.counter, afterRow.prev], (afterPrevNextErr) => {
-                rollbackIfErr(afterPrevNextErr, "classListInsert update after.prev.next");
-              });
-            } else {
-              db.run("update class_list set head = ? where blockNumber = ?", [newClassRow.counter, blockNumber], (headErr) => {
-                rollbackIfErr(headErr, "classListPush head update");
-              });
-            }
-            db.run("update class set prev = ? where counter = ?", [newClassRow.counter, afterRow.counter], (afterPrevErr) => {
-              rollbackIfErr(afterPrevErr, "classListInsert after prev update");
-            });
-            db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
-              if (lengthErr === null) {
-                attr(el, "counter", newClassRow.counter);
-                if (typeof callback === "function") callback.apply(callback, args);
-              } else {
-                rollbackIfErr(lengthErr, "classListPush length update");
-              }
-            });
+            classInsert(blockNumber, el, newClassRow.counter, afterRow.prev, afterRow.counter);
+            if (afterRow.prev !== null) classUpdate(afterRow.prev, "next", newClassRow.counter, "classListInsert update after.prev.next");
+            else classListUpdate(blockNumber, "head", newClassRow.counter, "classListInsert head update");
+            classUpdate(afterRow.counter, "prev", newClassRow.counter, "classListInsert after prev update");
+            classListUpdateLengthAndCommit(blockNumber, el, newClassRow.counter, "classListInsert");
           } else {
             rollbackIfErr(afterErr, "classListInsert get after");
           }

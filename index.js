@@ -80,7 +80,7 @@ drake.on("drop", function(el, target, source, sibling) {
     Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
     drake.cancel(true);
   } else {
-    classListUpdate(el, target, source, sibling);
+    gridUpdate(el, target, source, sibling);
     /* Adiciona botão de fechar uma só vez */
     if ($el.children(".delete-class").children().length === 0) {
       addCloseButton($el);
