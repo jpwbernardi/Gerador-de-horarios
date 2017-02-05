@@ -448,7 +448,7 @@ function hasPrimaryNotForeign(obj) {
   $.each(obj.primaryKey, (i, key) => {
     if (obj.fieldTypes[i] !== objects.FIELD_TYPE_FK) {
       has = true;
-      /* Esse return é para $.each*/
+      /* Esse return é para $.each */
       return false;
     }
   });

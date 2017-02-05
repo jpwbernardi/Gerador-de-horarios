@@ -57,7 +57,7 @@ app.on('ready', () => {
     syslog(LOG_LEVEL.D, "app.on('ready')", 3, "Database closed successfully");
   });
   global.db.serialize();
-  /* Permitindo a imposição de restrições de chave estrangeira (OFF por padrão
+  /* Habilitando a imposição de restrições de chave estrangeira (OFF por padrão
   para compatibilidade) */
   global.db.exec("PRAGMA foreign_keys = ON", (err) => {
     if (err !== null) syslog(LOG_LEVEL.E, "app.on('ready')", 4, err);

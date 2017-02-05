@@ -24,7 +24,7 @@ const dragulaSourceOptions = {
   },
   moves: function(el, source, handle, sibling) {
     return el.classList.contains("draggable");
-    /* Por padrão os elementos são sempre 'draggable' */
+    /* Por padrão os elementos são sempre arrastáveis */
     // return true;
   },
   // accepts: function(el, target, source, sibling) {
@@ -57,6 +57,7 @@ const dragulaSourceOptions = {
   ignoreInputTextSelection: false
 };
 
+/* Utilizado para numerar unicamente todos os blocos da grade */
 var blockNumber = 0;
 var professorRestrictions = {};
 var drake = dragula(dragulaSourceOptions);
@@ -97,13 +98,17 @@ drake.on("out", function(el, container, source) {
   if (!container.classList.contains("dragula-source")) {
     if (!drake.dragging) {
       adjustHeight($siblings);
-      /* Quando temos certeza de que saímos de 'source' ajustamos os tamanhos*/
+      /* Quando temos certeza de que saímos de 'source' ajustamos os tamanhos */
       if (!source.classList.contains("dragula-source")) adjustHeight($($(source).children()));
       $(professorRestrictions[el.getAttribute("siape")]).removeClass("red restricted");
     } else {
-      /* "else, if it's just passing by and went out of a container that has a class,
-      restore sizes but when we fly over our source, do not remove el from the height
-      ratio"*/
+      /* Caso contrário, se estamos arrastando uma associação e apenas passando por
+      cima de um container que já contém associações, devemos restaurar os tamanhos.
+      Porém, neste ajuste, devemos desconsiderar a associação sendo arrastada no
+      momento se o container em que passamos não é o container de origem (justamente
+      porque estamos apenas passando por cima e a altura total deve ser dividida
+      entre as associações que estão lá. Se passamos por cima da origem, quer dizer
+      que não saímos de lá ainda, então leva-se em conta a associação sendo arrastada) */
       if (container !== source) without($siblings, $el, "gu-transit");
       adjustHeight($siblings);
     }
