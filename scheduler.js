@@ -186,7 +186,6 @@ function defOrNull(field) {
  * é feita outra chamada à {@code syslog} para registrar o novo erro.
  * @param err o erro retornado em uma callback de uma chamada da API do node-sqlite3
  * @param mensagem adicional para ser registrada no log
- * @returns {@code undefined}
  */
 function rollbackIfErr(err, message) {
   if (err !== null) {
@@ -209,7 +208,6 @@ function rollbackIfErr(err, message) {
  * Executa o comando para iniciar imediatamente uma transação no banco de dados.
  * @param message mensagem a ser encaminhada para {@code rollbackIfErr}, caso
  * ocorra algum erro
- * @returns {@code undefined}
  */
 function beginTransaction(message) {
   db.exec("BEGIN IMMEDIATE", (err) => {
@@ -227,7 +225,7 @@ function gridUpdate(el, target, source, sibling) {
   let blockNumber = attr(target, "blockNumber");
   beginTransaction();
   if (source !== null && !source.classList.contains("dragula-source")) {
-    classListRemove(attr(source, "blockNumber"), attr(el, "counter"), false);
+    classListRemove(attr(source, "blockNumber"), attr(el, "counter"));
   }
   classListInsert(blockNumber, el, sibling);
 }
@@ -294,7 +292,8 @@ function classListPush(blockNumber, el, newCounter) {
 }
 
 function classListInsert(blockNumber, el, elAfter) {
-  /** Se não há classes salvas no banco de dados e não utilizarmos a função interna
+  /**
+   * Se não há classes salvas no banco de dados e não utilizarmos a função interna
    * {@code coalesce} do SQLite, {@code newClassRow} será {@code null}.
    */
   db.get("select coalesce(max(counter) + 1, 1) as counter from class", (newClassErr, newClassRow) => {
@@ -319,9 +318,20 @@ function classListInsert(blockNumber, el, elAfter) {
   });
 }
 
-/* Se 'shouldUseTransaction' é verdadeiro, os últimos argumentos são irrelevantes */
-function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
-  if (shouldUseTransaction === true) beginTransaction("classListRemove");
+/** @function classListRemoveAll
+ * Invoca {@code classListRemove} para todos os elementos em {@code elems}
+ * @param elems o vetor de elementos a serem removidos
+ * @param callback uma função para ser executada ao término da execução desta função
+ * @param args... os argumentos para a função {@code callback}
+ */
+function classListRemoveAll(elems, callback, ...args) {
+  for (let i = 0; i < elems.length; i++) {
+    classListRemove(attr(elems[i], "blockNumber"), attr(elems[i], "counter"));
+  }
+  if (typeof callback === "function") callback.apply(callback, args);
+}
+
+function classListRemove(blockNumber, counter, callback, ...args) {
   db.run("with del(next) as (select next from class where counter = ?)"
     + " update class_list set head = (select next from del) where head = ? and blockNumber = ?", [counter, counter, blockNumber], (err) => {
     rollbackIfErr(err, "classListRemove head update");
@@ -348,10 +358,7 @@ function classListRemove(blockNumber, counter, shouldUseTransaction, targets, cu
 
   db.run("update class_list set length = length - 1 where blockNumber = ?", [blockNumber], (err) => {
     if (err === null) {
-      if (shouldUseTransaction === true) commitTransaction("classListRemove");
-      else if (typeof targets !== typeof undefined && typeof currentIndex !== typeof undefined && typeof object !== typeof undefined) {
-        actualDelete(targets, currentIndex, object, guiRemove);
-      }
+      if (typeof callback === "function") callback.apply(callback, args);
     } else {
       rollbackIfErr(err, "classListRemove length update");
     }
@@ -390,7 +397,7 @@ function deleteRows(targets, currentIndex, guiRemove, callback, ...args) {
     syslog(LOG_LEVEL.D, "deleteRows", 1, "query: " + classQuery.string);
     syslog(LOG_LEVEL.D, "deleteRows", 2, "params: " + classQuery.params);
     db.each(classQuery.string, classQuery.params, (err, row) => {
-      classListRemove(row.blockNumber, row.counter, false, targets, currentIndex, object, guiRemove);
+      classListRemove(row.blockNumber, row.counter, actualDelete, targets, currentIndex, object, guiRemove);
     }, (err, nrows) => {
       syslog(LOG_LEVEL.D, "deleteRows", 3, "nrows: " + nrows);
       if (err !== null) syslog(LOG_LEVEL.E, "deleteRows", 1, err);
@@ -1075,7 +1082,8 @@ function addCloseButton($el) {
     $target.addClass("removed");
     without($siblings, $target, "removed");
     adjustHeight($siblings);
-    classListRemove(getBlockNumber($target[0]), $target.attr("counter"), true);
+    beginTransaction("close button onclick");
+    classListRemove(getBlockNumber($target[0]), $target.attr("counter"), commitTransaction, "close button onclick");
   });
   $el.children(".delete-class").append($remove);
 }

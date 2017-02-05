@@ -80,6 +80,7 @@ drake.on("drop", function(el, target, source, sibling) {
     Materialize.toast("Há uma restrição deste professor neste horário!", 2000);
     drake.cancel(true);
   } else {
+    attr(el, "blockNumber", attr(target, "blockNumber"));
     gridUpdate(el, target, source, sibling);
     /* Adiciona botão de fechar uma só vez */
     if ($el.children(".delete-class").children().length === 0) {
@@ -127,8 +128,11 @@ buildGrid();
 queryProfessorRestrictions();
 
 $("main").on("click", ".clear-single", (event) => {
-  var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "][period=" + event.currentTarget.getAttribute("period") + "]";
-  $(selector).empty();
+  let selector = "td.putable > .draggable[sem=" + event.currentTarget.getAttribute("sem") + "][period=" + event.currentTarget.getAttribute("period") + "]";
+  let $elems = $(selector);
+  beginTransaction(".clear-single onclick");
+  classListRemoveAll($elems, commitTransaction, ".clear-single onclick");
+  $elems.remove();
 });
 
 $("main").on("click", ".clear-all", (event) => {
@@ -137,8 +141,11 @@ $("main").on("click", ".clear-all", (event) => {
   /* É necessário o evento original */
   $("#modal-clear-all-confirm").off("click.clear-all");
   $("#modal-clear-all-confirm").on("click.clear-all", () => {
-    var selector = "td.putable[sem=" + event.currentTarget.getAttribute("sem") + "]";
-    $(selector).empty();
+    let selector = "td.putable > .draggable[sem=" + event.currentTarget.getAttribute("sem") + "]";
+    let $elems = $(selector);
+    beginTransaction(".clear-all onclick");
+    classListRemoveAll($elems, commitTransaction, ".clear-all onclick");
+    $elems.remove();
   });
 });
 
