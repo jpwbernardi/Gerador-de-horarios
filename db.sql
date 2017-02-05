@@ -632,10 +632,6 @@ create table professor_subject(
   foreign key(siape) references professor(siape) on delete cascade,
   foreign key(code, sem, period) references subject(code, sem, period) on delete cascade
 );
-insert into professor_subject values
-(1645173, "GEX108", 6, 1),
-(1835372, "GEX105", 6, 1),
-(1806074, "GEX107", 6, 1);
 
 create table dow_shift_time(
   dow    varchar(16),
@@ -705,9 +701,6 @@ create table class(
   foreign key(prev) references class(counter) on delete no action,
   foreign key(next) references class(counter) on delete no action
 );
-insert into class values (1, 6, 2, 1, 1, 1645173, "GEX108", 420, null, 2);
-insert into class values (2, 6, 2, 1, 1, 1806074, "GEX107", 420, 1, 3);
-insert into class values (3, 6, 2, 1, 1, 1835372, "GEX105", 420, 2, null);
 
 create table class_list(
   blockNumber integer,
@@ -718,5 +711,4 @@ create table class_list(
   foreign key(head) references class(counter) on delete no action,
   foreign key(tail) references class(counter) on delete no action
 );
-insert into class_list values(420, 1, 3, 3);
 PRAGMA foreign_keys = ON;
