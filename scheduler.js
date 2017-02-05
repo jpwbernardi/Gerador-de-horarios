@@ -149,10 +149,10 @@ $("main").on("click", ".form-delete-all", (event) => {
 });
 
 /** @function attr
- * @param el o elemento (objeto jQuery ou DOM) do qual manipular um atributo
- * @param attrName o nome do atributo desejado
- * @param attrValue o valor para atribuir ao atributo {@code attrName} (opcional)
- * @returns o valor do atributo {@code attrName} do elemento {@code el}
+ * @param el o elemento (objeto jQuery ou DOM) do qual manipular um atributo.
+ * @param attrName o nome do atributo desejado.
+ * @param attrValue o valor para atribuir ao atributo {@code attrName} (opcional).
+ * @returns o valor do atributo {@code attrName} do elemento {@code el}.
  */
 function attr(el, attrName, attrValue) {
   if (typeof attrValue !== typeof undefined) {
@@ -169,9 +169,9 @@ function attr(el, attrName, attrValue) {
  * Utilizado na montagem dos parâmetros opcionais do SQLite. Retorna o valor do
  * parâmetro, caso exista, ou {@code null} para poder ser chamado diretamente de
  * dentro do vetor de parâmetros a ser passado para o SQLite.
- * @param field o parâmetro opcional desejado
+ * @param field o parâmetro opcional desejado.
  * @returns {@code field}, caso ele não seja {@code undefined}, ou {@code null},
- * caso contrário
+ * caso contrário.
  */
 function defOrNull(field) {
   return (typeof field !== typeof undefined ? field : null);
@@ -184,8 +184,8 @@ function defOrNull(field) {
  * Finalmente, recarrega a página para atualizar a memória com os dados corretos
  * salvos no banco de dados. Caso aconteça um erro na execução do {@code ROLLBACK},
  * é feita outra chamada à {@code syslog} para registrar o novo erro.
- * @param err o erro retornado em uma callback de uma chamada da API do node-sqlite3
- * @param mensagem adicional para ser registrada no log
+ * @param err o erro retornado em uma callback de uma chamada da API do node-sqlite3.
+ * @param mensagem adicional para ser registrada no log.
  */
 function rollbackIfErr(err, message) {
   if (err !== null) {
@@ -207,7 +207,7 @@ function rollbackIfErr(err, message) {
 /** @function beginTransaction
  * Executa o comando para iniciar imediatamente uma transação no banco de dados.
  * @param message mensagem a ser encaminhada para {@code rollbackIfErr}, caso
- * ocorra algum erro
+ * ocorra algum erro.
  */
 function beginTransaction(message) {
   db.exec("BEGIN IMMEDIATE", (err) => {
@@ -319,10 +319,10 @@ function classListInsert(blockNumber, el, elAfter) {
 }
 
 /** @function classListRemoveAll
- * Invoca {@code classListRemove} para todos os elementos em {@code elems}
- * @param elems o vetor de elementos a serem removidos
- * @param callback uma função para ser executada ao término da execução desta função
- * @param args... os argumentos para a função {@code callback}
+ * Invoca {@code classListRemove} para todos os elementos em {@code elems}.
+ * @param elems o vetor de elementos a serem removidos.
+ * @param callback uma função para ser executada ao término da execução desta função.
+ * @param args... os argumentos para a função {@code callback}.
  */
 function classListRemoveAll(elems, callback, ...args) {
   for (let i = 0; i < elems.length; i++) {
@@ -361,6 +361,72 @@ function classListRemove(blockNumber, counter, callback, ...args) {
       if (typeof callback === "function") callback.apply(callback, args);
     } else {
       rollbackIfErr(err, "classListRemove length update");
+    }
+  });
+}
+
+/** @function loadClassLists
+ * @param callback a função a ser invocada ao terminar de
+ * carregar todas as listas de associações. O primeiro e
+ * único parâmetro passado para essa função será um vetor
+ * no qual cada posição será uma lista de associações do
+ * tipo {@code ClassList}. O vetor estará ordenado por
+ * {@code blockNumber}.
+ * @throws {TypeError} se o parâmetro passado não for
+ * uma função.
+ */
+function loadClassLists(callback) {
+  if (typeof callback !== "function")
+    throw new TypeError(callback + " is not a function");
+  let classLists = [];
+  db.each("select * from class_list where length > 0 order by blockNumber", (classListErr, classListRow) => {
+    if (classListErr === null) {
+      classLists.push(new ClassList(classListRow.blockNumber, classListRow.head, classListRow.tail));
+    } else {
+      syslog(LOG_LEVEL.E, "loadClassLists", 2, classListErr);
+    }
+  }, (doneErr, qttyRows) => {
+    syslog(LOG_LEVEL.D, "loadClassLists", 3, "Loaded " + qttyRows + " row(s)");
+    loadClasses(classLists, 0, callback);
+  });
+}
+
+function loadClasses(classLists, currentIndex, callback) {
+  if (currentIndex < classLists.length) {
+    loadClassesInto(classLists[currentIndex], classLists[currentIndex].headCounter, loadClasses, classLists, currentIndex + 1, callback);
+  } else {
+    /**
+     * Neste caso, foi necessário utilizar {@code call} ao invés de
+     * {@code apply} porque o parâmetro é um vetor. Utilizando
+     * {@code apply}, o JavaScript entendia que cada posição do
+     * vetor era um parâmetro para a função de callback, ao invés
+     * de um parâmetro do tipo vetor. Além disso, é especificado
+     * que a callback receberá apenas um parâmetro, tornando o
+     * {@code call} mais apropriado.
+     */
+    callback.call(callback, classLists);
+  }
+}
+
+function loadClassesInto(classList, counter, callback, ...args) {
+  if (typeof callback !== "function")
+    throw new TypeError(callback + " is not a function");
+  let classQuery = {
+    /* Não pode ser selecionado só professor.* e subject.*, devido as dependências
+    de coluna de $createClass */
+    string: "select * from class natural join professor natural join subject where counter = ?",
+    params: [counter]
+  };
+  syslog(LOG_LEVEL.D, "loadClassesInto", 1, "query params: " + classQuery.params);
+  db.get(classQuery.string, classQuery.params, (classErr, classRow) => {
+    if (classErr !== null) {
+      syslog(LOG_LEVEL.E, "loadClassesInto", 2, classErr);
+    } else if (typeof classRow === typeof undefined) {
+      syslog(LOG_LEVEL.W, "loadClassesInto", 3, "class with counter = " + counter + " not found");
+    } else {
+      classList.pushRow(classRow);
+      if (classRow.next !== null) loadClassesInto(classList, classRow.next, callback, ...args);
+      else callback.apply(callback, args);
     }
   });
 }
@@ -1134,53 +1200,3 @@ function adjustHeight($elements) {
 function getBlockNumber(classEl) {
   return classEl.parentNode.getAttribute("blockNumber");
 }
-
-function removeClass(classEl) {
-
-}
-
-// function addClass(containerEl, classEl, theElAfter) {
-//   let clazz = jsonify(classEl);
-//   let container = jsonify(containerEl);
-//   let blockNumber = getBlockNumber(classEl);
-//   electron.ipcRenderer.send("classList.add", blockNumber, clazz, container, theElAfter !== null ? theElAfter.getAttribute("counter") : null);
-// }
-
-// function jsonify(el) {
-//   let json = {};
-//   for (let i = 0; i < el.attributes.length; i++) {
-//     let attribute = el.attributes[i];
-//     json[attribute.nodeName] = attribute.nodeValue;
-//   }
-//   return json;
-// }
-
-
-
-// function findBlockFrom(classRow) {
-//   globalClassLists.forEach((classList, blockNumber) => {
-//     let stClassRow = classList.getRowAt(0);
-//     if (inSameBlock(classRow, stClassRow)) return blockNumber;
-//   });
-//   return null;
-// }
-
-// function findClassRowAt(blockNumber, classRow) {
-//   return globalClassLists[blockNumber].findRow(classRow);
-// }
-
-// function findClassRow(classRow) {
-//   let blockNumber = findBlockFrom(classRow);
-//   if (blockNumber === null) return null;
-//   let classIndex = findClassAt(blockNumber, classRow);
-//   if (classIndex == null) return null;
-//   return {
-//     "block": blockNumber,
-//     "class": classIndex
-//   };
-// }
-
-// function addClassTo(target, classEl, siblingEl) {
-//   let blockNumber = findBlockFrom(target);
-//   globalClassLists[blockNumber].insertRowBefore(classEl, siblingEl);
-// }

@@ -71,6 +71,25 @@ class ClassList {
     return this._length === 0;
   }
 
+  /** @method eachRow
+   * @param callback a função a ser invocada para
+   * cada {@code node.row} da lista. Retorna
+   * imediatamente, sem invocar a função passada
+   * como parâmetro, se a lista estiver vazia.
+   * @throws {TypeError} se o parâmetro passado
+   * não for uma função.
+   */
+  eachRow(callback) {
+    if (typeof callback !== "function")
+      throw new TypeError(callback + " is not a function");
+    if (this.isEmpty()) return;
+    let node = this.head;
+    while (node !== null) {
+      callback.call(callback, node.row);
+      node = node.next;
+    }
+  }
+
   getNodeAt(index) {
     if (this.isEmpty()) return null;
     if (index < 0 || index >= this._length)

@@ -123,7 +123,7 @@ drake.on("cancel", function(el, container, source) {
   $(professorRestrictions[el.getAttribute("siape")]).removeClass("red restricted");
 });
 
-setTimeout(loadClassLists, 0);
+setTimeout(loadClassLists, 0, fillBlocks);
 buildGrid();
 queryProfessorRestrictions();
 
@@ -363,55 +363,16 @@ function buildGrid() {
   $wizard.steps(stepsSettings);
 }
 
-function loadClassLists() {
-  let classLists = [];
-  db.each("select * from class_list where length > 0 order by blockNumber", (classListErr, classListRow) => {
-    if (classListErr === null) {
-      classLists.push(new ClassList(classListRow.blockNumber, classListRow.head, classListRow.tail));
-    } else {
-      syslog(LOG_LEVEL.E, "classLists.load", 1, classListErr);
-    }
-  }, (doneErr, qttyRows) => {
-    syslog(LOG_LEVEL.D, "classLists.load", 2, "Loaded " + qttyRows + " row(s)");
-    setTimeout(loadClasses, 0, classLists);
-  });
-}
-
-function loadClasses(classLists) {
+function fillBlocks(classLists) {
   for (let i = 0; i < classLists.length; i++) {
-    setTimeout(loadClassesInto, 0, classLists[i], classLists[i].headCounter);
+    setTimeout(fillBlockFrom, 0, classLists[i]);
   }
-}
-
-function loadClassesInto(classList, counter) {
-  let classQuery = {
-    /* Não pode ser selecionado só professor.* e subject.*, devido as dependências
-    de coluna de $createClass */
-    string: "select * from class natural join professor natural join subject where counter = ?",
-    params: [counter]
-  };
-  syslog(LOG_LEVEL.D, "loadClassesInto", 1, "query params: " + classQuery.params);
-  db.get(classQuery.string, classQuery.params, function(classErr, classRow) {
-    if (classErr !== null) {
-      syslog(LOG_LEVEL.E, "loadClassesInto", 2, classErr);
-    } else if (typeof classRow === typeof undefined) {
-      syslog(LOG_LEVEL.W, "loadClassesInto", 3, "undefined classRow for counter = " + counter);
-    } else {
-      classList.pushRow(classRow);
-      if (classRow.next !== null) {
-        loadClassesInto(classList, classRow.next);
-      } else {
-        setTimeout(fillBlockFrom, 0, classList);
-      }
-    }
-  });
 }
 
 function fillBlockFrom(classList) {
   let $td = $("td.putable[blockNumber=" + classList.blockNumber + "]");
-  for (let i = 0; i < classList.length; i++) {
-    let row = classList.getRowAt(i);
-    if (row !== null) $td.append($createAddedClass(classList.getRowAt(i)));
-  }
+  classList.eachRow((row) => {
+    $td.append($createAddedClass(row));
+  });
   adjustHeight($td.children());
 }
