@@ -149,13 +149,20 @@ $("main").on("click", ".form-delete-all", (event) => {
 });
 
 /** @function attr
- * @param el o elemento (objeto jQuery ou DOM) do qual extrair um atributo
+ * @param el o elemento (objeto jQuery ou DOM) do qual manipular um atributo
  * @param attrName o nome do atributo desejado
+ * @param attrValue o valor para atribuir ao atributo {@code attrName} (opcional)
  * @returns o valor do atributo {@code attrName} do elemento {@code el}
  */
-function attr(el, attrName) {
-  if (el instanceof jQuery) return el.attr(attrName);
-  return el.getAttribute(attrName);
+function attr(el, attrName, attrValue) {
+  if (typeof attrValue !== typeof undefined) {
+    if (el instanceof jQuery) el.attr(attrName, attrValue);
+    else el.setAttribute(attrName, attrValue);
+    return attrValue;
+  } else {
+    if (el instanceof jQuery) return el.attr(attrName);
+    return el.getAttribute(attrName);
+  }
 }
 
 /** @function defOrNull
@@ -190,7 +197,7 @@ function rollbackIfErr(err, message) {
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", timeout);
     /**
-     * @TODO REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
+     * @todo REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
      */
     // setTimeout(() => {
     //  electron.ipcRenderer.send("window.reload");
@@ -238,6 +245,7 @@ function createNewClassList(blockNumber, el, counter, callback, ...args) {
   insertNewClass(blockNumber, el, counter);
   db.run("update class_list set head = ?, tail = ? where blockNumber = ?", [counter, counter, blockNumber], (classListErr) => {
     if (classListErr === null) {
+      attr(el, "counter", counter);
       if (typeof callback === "function") callback.apply(callback, args);
     } else {
       rollbackIfErr(classListErr, "createNewClassList class_list update");
@@ -256,8 +264,8 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
           rollbackIfErr(tailNextErr, "classListPush tail next update");
         });
         if (classListRow.head === null) {
-          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
-            rollbackIfErr(tailErr, "classListPush head update");
+          db.run("update class_list set head = ? where blockNumber = ?", [newCounter, blockNumber], (headErr) => {
+            rollbackIfErr(headErr, "classListPush head update");
           });
         }
         db.run("update class_list set tail = ? where blockNumber = ?", [newCounter, blockNumber], (tailErr) => {
@@ -265,6 +273,7 @@ function classListPush(blockNumber, el, newCounter, callback, ...args) {
         });
         db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
           if (lengthErr === null) {
+            attr(el, "counter", newCounter);
             if (typeof callback === "function") callback.apply(callback, args);
           } else {
             rollbackIfErr(lengthErr, "classListPush length update");
@@ -281,15 +290,42 @@ function classListInsert(blockNumber, el, elAfter, callback, ...args) {
   db.get("select max(counter) + 1 as counter from class", (newClassErr, newClassRow) => {
     if (newClassErr === null) {
       if (elAfter === null) classListPush(blockNumber, el, newClassRow.counter, callback, ...args);
-      else // @TODO temporary else
-      if (typeof callback === "function") callback.apply(callback, args);
+      else {
+        db.get("select * from class where counter = ?", [attr(elAfter, "counter")], (afterErr, afterRow) => {
+          if (afterErr === null) {
+            insertNewClass(blockNumber, el, newClassRow.counter, afterRow.prev, afterRow.counter);
+            if (afterRow.prev !== null) {
+              db.run("update class set next = ? where counter = ?", [newClassRow.counter, afterRow.prev], (afterPrevNextErr) => {
+                rollbackIfErr(afterPrevNextErr, "classListInsert update after.prev.next");
+              });
+            } else {
+              db.run("update class_list set head = ? where blockNumber = ?", [newClassRow.counter, blockNumber], (headErr) => {
+                rollbackIfErr(headErr, "classListPush head update");
+              });
+            }
+            db.run("update class set prev = ? where counter = ?", [newClassRow.counter, afterRow.counter], (afterPrevErr) => {
+              rollbackIfErr(afterPrevErr, "classListInsert after prev update");
+            });
+            db.run("update class_list set length = length + 1 where blockNumber = ?", [blockNumber], (lengthErr) => {
+              if (lengthErr === null) {
+                attr(el, "counter", newClassRow.counter);
+                if (typeof callback === "function") callback.apply(callback, args);
+              } else {
+                rollbackIfErr(lengthErr, "classListPush length update");
+              }
+            });
+          } else {
+            rollbackIfErr(afterErr, "classListInsert get after");
+          }
+        });
+      }
     } else {
       rollbackIfErr(classListErr, "classListInsert");
     }
   });
 }
 
-/* Se 'shouldUseTransaction' é verdadeiro os últimos argumentos são irrelevantes */
+/* Se 'shouldUseTransaction' é verdadeiro, os últimos argumentos são irrelevantes */
 function classListRemove(blockNumber, counter, shouldUseTransaction, targets, currentIndex, object, guiRemove) {
   if (shouldUseTransaction === true) beginTransaction("classListRemove");
   db.run("with del(next) as (select next from class where counter = ?)"
