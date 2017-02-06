@@ -336,7 +336,8 @@ function buildGrid() {
     $col.append($clearAll);
     let $makePDF = $createTextualElement("button", {
       "title": "Gerar PDF",
-      "class": "btn waves-effect waves-light teal darken-3 make-pdf right"
+      "class": "btn waves-effect waves-light teal darken-3 make-pdf right",
+      "onclick": "openPDF()"
     }, "Gerar PDF");
     $col.append($makePDF);
     $row.append($col);
