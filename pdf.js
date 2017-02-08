@@ -35,7 +35,7 @@ function openPDF() {
             }
             $.each($($elems), (i, elem) => {
               week[block][dow - 1] += attr(elem, 'code') + ' - ' + attr(elem, 'professor').split(' ')[0] + '\n';
-              captions.set(attr(elem, 'code'), attr(elem, 'ccr') + ' - ' + attr(elem, 'professor'));
+              captions.set(attr(elem, 'code') + attr(elem, 'siape'), attr(elem, 'code') + ': ' + attr(elem, 'ccr') + ' - ' + attr(elem, 'professor'));
             });
         }
       if (hasContent === true) {
@@ -64,7 +64,7 @@ function openPDF() {
           }});
         content.push({ text: '\n', fontSize: 8});
         for (let [code, label] of captions) {
-          content.push({ text: code + ': ' + label + '\n', fontSize: 8});
+          content.push({ text: label + '\n', fontSize: 8});
         }
       }
     }
