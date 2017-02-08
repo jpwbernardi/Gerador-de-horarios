@@ -31,6 +31,7 @@ function openPDF() {
             if ($elems.length > 0 && hasContent === false) {
               hasContent = true;
               content.push({ text: '\n' + sem + 'ª fase - ' + periodName(period) + '\n', fontSize: 12, bold: true});
+              content.push({ text: '\n', fontSize: 8});
             }
             $.each($($elems), (i, elem) => {
               week[block][dow - 1] += attr(elem, 'code') + '\n';
@@ -61,6 +62,7 @@ function openPDF() {
               return i === 1 ? 'black' : 'gray';
             }
           }});
+        content.push({ text: '\n', fontSize: 8});
         for (let [code, label] of captions) {
           content.push({ text: code + ': ' + label + '\n', fontSize: 8});
         }
