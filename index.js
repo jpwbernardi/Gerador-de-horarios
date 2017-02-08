@@ -19,18 +19,10 @@ const stepsSettings = {
 const dragulaSourceOptions = {
   isContainer: function(el) {
     return el.classList.contains("putable");
-    /* Somente elementos em drake.containers serão considerados */
-    // return false;
   },
   moves: function(el, source, handle, sibling) {
     return el.classList.contains("draggable");
-    /* Por padrão os elementos são sempre arrastáveis */
-    // return true;
   },
-  // accepts: function(el, target, source, sibling) {
-  /* Por padrão os elementos podem ser soltos em qualquer um dos 'containers' */
-  //   return true;
-  // },
   invalid: function(el, handle) {
     /* Não impede que quaisquer arrastos sejam iniciados por padrão */
     return false;
@@ -43,8 +35,6 @@ const dragulaSourceOptions = {
   },
   /* O eixo Y é considerado ao determinar onde um elemento seria solto */
   direction: 'vertical',
-  /* Por padrão os elementos são movidos, não copiados */
-  // copy: true,
   /* Elementos em containers 'copy-source' podem ser reordenados */
   copySortSource: false,
   /* Se 'true' o elemento será posto de volta no lugar de onde foi arrastado */
@@ -147,10 +137,6 @@ $("main").on("click", ".clear-all", (event) => {
     classListRemoveAll($elems, commitTransaction, ".clear-all onclick");
     $elems.remove();
   });
-});
-
-$("main").on("click", ".make-pdf", (event) => {
-  // Incluir ação
 });
 
 function buildRestrictionSelector(periodDowBlockRow) {

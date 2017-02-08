@@ -685,8 +685,6 @@ create table professor_restriction(
   foreign key(dow, period, block) references dow_shift_time(dow, period, block) on delete cascade
 );
 
--- Desativando a imposição de restrições de chave estrangeira por causa de chaves estrangeiras ainda não existentes
-PRAGMA foreign_keys = OFF;
 create table class(
   counter     integer,
   sem         integer,
@@ -705,10 +703,6 @@ create table class(
   foreign key(prev) references class(counter) on delete no action,
   foreign key(next) references class(counter) on delete no action
 );
-insert into class values
-(1, 6, 2, 1, 1, 1645173, "GEX108", 420, null, 2),
-(2, 6, 2, 1, 1, 1806074, "GEX107", 420, 1, 3),
-(3, 6, 2, 1, 1, 1835372, "GEX105", 420, 2, null);
 
 create table class_list(
   blockNumber integer,
@@ -719,5 +713,3 @@ create table class_list(
   foreign key(head) references class(counter) on delete no action,
   foreign key(tail) references class(counter) on delete no action
 );
-insert into class_list values(420, 1, 3, 3);
-PRAGMA foreign_keys = ON;

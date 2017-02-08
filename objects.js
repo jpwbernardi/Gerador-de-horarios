@@ -26,7 +26,6 @@ const QUERY_TYPE_INSERT = 1,
   VALUES_INSERT = 1;
 
 module.exports = {
-  // Test: Test,
   Professor: Professor,
   Subject: Subject,
   DayOfWeek: DayOfWeek,
@@ -244,23 +243,3 @@ ProfessorRestriction.col = {
 }
 ProfessorRestriction.primaryKey = [0, 1];
 ProfessorRestriction.foreignKey = [Professor, DowShiftTime, undefined];
-
-// function Test(a, b, c) {
-//   this.a = a;
-//   this.b = b;
-//   this.c = c;
-// }
-// Test.table = "test";
-// Test.fields = ["a", "b", "c"];
-// Test.fieldRequired = [true, true, false];
-// Test.titles = ["A", "B", "C"];
-// Test.fieldTypes = [FIELD_TYPE_TEXT, FIELD_TYPE_NUMBER, FIELD_TYPE_BOOLEAN];
-// Test.col = {
-//   "s": [12, 12, 12],
-//   "m": [7, 5, 4],
-//   "l": [3, 2, 2]
-// };
-// Test.primaryKey = [0, 1];
-// Test.orderBy = {
-//   "fields": [Test.fields]
-// };

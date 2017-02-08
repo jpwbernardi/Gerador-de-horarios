@@ -26,8 +26,6 @@ const colorVariations = ["lighten-3", "darken-3", "accent-1", "accent-2", "accen
 const colors = ["red", "pink", "purple", "deep-purple", "indigo", "blue", "light-blue", "cyan", "teal", "green", "light-green", "lime", "yellow", "amber", "orange", "deep-orange", "brown", "grey", "blue-grey"];
 const autocompleteOptions = {
   minLength: 0,
-  /* Automaticamente atribui foco ao primeiro item na listagem dos resultados */
-  // autoFocus: true,
   source: function(request, response) {
     var results = [];
     var $this = $(this.element[0]);
@@ -195,12 +193,9 @@ function rollbackIfErr(err, message) {
       if (err !== null) syslog(LOG_LEVEL.E, "rollbackIfErr ROLLBACK", 2, err);
     });
     Materialize.toast("Ocorreu um erro! Recarregando...", timeout);
-    /**
-     * @todo REATIVAR ISSO AQUI PRA VERSÃO FINAL! COMENTADO PARA DESENVOLVIMENTO
-     */
-    // setTimeout(() => {
-    //  electron.ipcRenderer.send("window.reload");
-    // }, timeout);
+    setTimeout(() => {
+     electron.ipcRenderer.send("window.reload");
+    }, timeout);
   }
 }
 
@@ -456,7 +451,7 @@ function deleteRows(targets, currentIndex, guiRemove, callback, ...args) {
     } else if (object === objects["Subject"]) {
       classQuery.string += " where code = ?";
       classQuery.params = [valueOf(getField(fields, "code"))];
-    } else { // } else if (object === objects["ProfessorSubject"]) {
+    } else {
       classQuery.string += " where siape = ? and code = ?";
       classQuery.params = [valueOf(getField(fields, "siape")), valueOf(getField(fields, "code"))];
     }
@@ -714,7 +709,6 @@ function $createElement(tag, attributes, events) {
   if (typeof events != typeof undefined) {
     $.each(events, function(key, value) {
       $element.on(key, value);
-      // $element[0].addEventListener(key, value);
     });
   }
   return $element;
@@ -753,8 +747,6 @@ function decodeType(obj, findex) {
       return "number";
     case objects.FIELD_TYPE_BOOLEAN:
       return "checkbox";
-      // case objects.FIELD_TYPE_FK:
-      //   return "fk";
     default:
       syslog(LOG_LEVEL.W, "decodeType", 1, "unknown type '" + obj.fieldTypes[findex] + "', index " + findex + " on " + obj.name);
       return "";
@@ -1138,7 +1130,6 @@ function without($elements, $el, classFilter) {
 }
 
 function addCloseButton($el) {
-  // <i class="close material-icons">close</i>
   let $remove = $createTextualElement("i", {
     "class": "close material-icons"
   }, "close");

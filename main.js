@@ -32,7 +32,7 @@ function createWindow() {
   }));
 
   /* Abre o DevTools */
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   /* Chamado quando a janela é fechada */
   mainWindow.on('closed', function() {

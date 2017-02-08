@@ -5,12 +5,11 @@ function periodName(number) {
 function openPDF() {
   var dd = {
       pageSize: 'A4',
-      //pageOrientation: 'landscape',
-      // [left, top, right, bottom] or [horizontal, vertical] or just a number for equal margins
+      /* [esquerda, cima, direita, baixo] */
       pageMargins: [ 50, 30, 50, 30 ],
       styles: {
     		table: {
-    		    alignment: 'center',
+    		  alignment: 'center',
     			fontSize: 10,
     			bold: true,
     		},
@@ -50,7 +49,6 @@ function openPDF() {
             widths: [13, '*', '*', '*', '*', '*', '*'],
             body: week
           },
-          //layout: 'lightHorizontalLines'
           layout: {
             hLineWidth: function(i, node) {
               return (i === 1) ? 2 : 1;
