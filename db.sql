@@ -539,7 +539,7 @@ insert into subject values
 ("GEN039", "Grafos", 5, 3),
 
 ("GCH029", "História da Fronteira Sul", 6, 3),
-("GEX103", "Engenharia software II", 6, 3),
+("GEX103", "Engenharia de software II", 6, 3),
 ("GEX101", "Linguagens formais e autômatos", 6, 3),
 ("GCS010", "Direitos e cidadania", 6, 3),
 ("GEX036", "Cálculo numérico", 6, 3),

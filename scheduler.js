@@ -1168,6 +1168,8 @@ function $createClass(row, addClose) {
     "blockNumber": row.blockNumber,
     "prev": row.prev,
     "next": row.next,
+    "professor": row.name,
+    "ccr": row.title,
     "title": row.name + "\n" + row.title + " (" + row.code + ")",
     "class": "chip draggable white-text " + colors[color] + (variation == colorVariations.length ? "" : " " + colorVariations[variation])
   }, "<span class='delete-class'></span>" + naming(row.name) + " - " + row.title);
