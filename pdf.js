@@ -6,7 +6,7 @@ function openPDF() {
       styles: {
     		table: {
     		  alignment: 'center',
-    			fontSize: 10,
+    			fontSize: 8,
     			bold: true,
     		},
     	}
@@ -34,7 +34,7 @@ function openPDF() {
               content.push({ text: '\n', fontSize: 8});
             }
             $.each($($elems), (i, elem) => {
-              week[block][dow - 1] += attr(elem, 'code') + '\n';
+              week[block][dow - 1] += attr(elem, 'code') + ' - ' + attr(elem, 'professor').split(' ')[0] + '\n';
               captions.set(attr(elem, 'code'), attr(elem, 'ccr') + ' - ' + attr(elem, 'professor'));
             });
         }
