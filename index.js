@@ -197,7 +197,7 @@ function $buildTimeTable(sem, period) {
   }, $createTextualElement("button", {
     "sem": sem,
     "period": period,
-    "title": "Limpar turno " + shiftText(period) + " da " + sem + "ª fase",
+    "title": "Limpar turno " + periodName(period).toLowerCase() + " da " + sem + "ª fase",
     "class": "btn waves-effect waves-light teal darken-3 light clear-single"
   }, "LIMPAR")));
   $tr.append($createTextualElement("th", {
@@ -223,7 +223,7 @@ function $buildTimeTable(sem, period) {
   $tsec = $createElement("tbody");
   times = 5;
   $tr = $createElement("tr");
-  /* "Não dá" pra usar shiftText aqui, pois temos os rowspan e o times no noturno */
+  /* "Não dá" pra usar periodName aqui, pois temos os rowspan e o times no noturno */
   if (period === 1) {
     $tr.append($createTextualElement("td", {
       "class": "vertical-text",
@@ -285,19 +285,8 @@ function buildClasses(sem, period) {
   return $row;
 }
 
-function shiftText(shiftNumber) {
-  switch (shiftNumber) {
-    case 1:
-    case "1":
-      return "matutino";
-    case 2:
-    case "2":
-      return "vespertino";
-    case 3:
-    case "3":
-      return "noturno";
-  }
-  return "";
+function periodName(number) {
+  return ['', 'Matutino', 'Vespertino', 'Noturno'][number];
 }
 
 function buildGrid() {

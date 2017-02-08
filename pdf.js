@@ -1,12 +1,8 @@
-function periodName(number) {
-  return ['', 'Matutino', 'Vespertino', 'Noturno'][number];
-}
-
 function openPDF() {
   var dd = {
       pageSize: 'A4',
       /* [esquerda, cima, direita, baixo] */
-      pageMargins: [ 50, 30, 50, 30 ],
+      pageMargins: [50, 30, 50, 30],
       styles: {
     		table: {
     		  alignment: 'center',
@@ -16,7 +12,7 @@ function openPDF() {
     	}
   };
   let sem, period, dow, block, hasContent;
-  let content = [{ text: 'Horários Ciência da Computação:\n', fontSize: 12, bold: true }];
+  let content = [{text: 'Horários Ciência da Computação\n', fontSize: 12, bold: true, alignment: 'center'}];
   for (sem = 0; sem < 10; sem++)
     for (period = 1; period <= 3; period++) {
       let week = [
@@ -24,10 +20,10 @@ function openPDF() {
         ['1º', '', '', '', '', '', ''],
         ['2º', '', '', '', '', '', ''],
         ['3º', '', '', '', '', '', ''],
-        ['4º', '', '', '', '', '', ''],
-        ['5º', '', '', '', '', '', '']
+        ['4º', '', '', '', '', '', '']
       ];
-      let map = {};
+      if (period < 3) week.push(['5º', '', '', '', '', '', '']);
+      let captions = new Map();
       for (hasContent = false, dow = 2; dow <= 7; dow++)
         for (block = 1; block <= 5; block++) {
             let selector = "td.putable[sem="+ sem + "][period="+ period + "][dow="+ dow + "][block="+ block +"] > div.draggable";
@@ -38,7 +34,7 @@ function openPDF() {
             }
             $.each($($elems), (i, elem) => {
               week[block][dow - 1] += attr(elem, 'code') + '\n';
-              map[attr(elem, 'code')] = attr(elem, 'code') + ': ' + attr(elem, 'ccr') + ' - ' + attr(elem, 'professor');
+              captions.set(attr(elem, 'code'), attr(elem, 'ccr') + ' - ' + attr(elem, 'professor'));
             });
         }
       if (hasContent === true) {
@@ -51,23 +47,23 @@ function openPDF() {
           },
           layout: {
             hLineWidth: function(i, node) {
-              return (i === 1) ? 2 : 1;
+              if (i === 0 || i === node.table.body.length) return 0;
+              return 1;
             },
             vLineWidth: function(i, node) {
-              return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+              if (i === 0 || i === node.table.widths.length) return 0;
+              return 1;
             },
             hLineColor: function(i, node) {
-              if ( i === 1) return 'black';
-              if ( i > 1 && i < node.table.body.length ) return 'gray';
-              if ( i === 0 || i === node.table.body.length) return 'white';
+              return i === 1 ? 'black' : 'gray';
             },
             vLineColor: function(i, node) {
-              return (i < 2 || i === node.table.widths.length) ? 'white' : 'gray';
-            }}});
-        for (let key in map) {
-          content.push({ text:  map[key] + '\n', fontSize: 8});
+              return i === 1 ? 'black' : 'gray';
+            }
+          }});
+        for (let [code, label] of captions) {
+          content.push({ text: code + ': ' + label + '\n', fontSize: 8});
         }
-
       }
     }
   dd['content'] = content;
