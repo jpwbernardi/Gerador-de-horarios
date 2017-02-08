@@ -34,7 +34,7 @@ function openPDF() {
             let $elems = $(selector);
             if ($elems.length > 0 && hasContent === false) {
               hasContent = true;
-              content.push({ text: '\n' + sem + 'º semestre - ' + periodName(period) + '\n', fontSize: 12, bold: true});
+              content.push({ text: '\n' + sem + 'ª fase - ' + periodName(period) + '\n', fontSize: 12, bold: true});
             }
             $.each($($elems), (i, elem) => {
               week[block][dow - 1] += attr(elem, 'code') + '\n';
@@ -71,5 +71,5 @@ function openPDF() {
       }
     }
   dd['content'] = content;
-  pdfMake.createPdf(dd).download('Horario.pdf');
+  pdfMake.createPdf(dd).download('Horários.pdf');
 }
