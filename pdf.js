@@ -1,5 +1,5 @@
 function openPDF() {
-  let selector = "td.putable[sem=6][period=1][dow=2][block=1]";
+  let selector = "td.putable[sem=6][period=1][dow=2][block=2]";
   let $elems = $(selector);
   console.log($elems[0]);
   var dd = {
