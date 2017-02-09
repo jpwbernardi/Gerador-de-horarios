@@ -632,10 +632,6 @@ create table professor_subject(
   foreign key(siape) references professor(siape) on delete cascade,
   foreign key(code, sem, period) references subject(code, sem, period) on delete cascade
 );
-insert into professor_subject values
-(1645173, "GEX108", 6, 1),
-(1835372, "GEX105", 6, 1),
-(1806074, "GEX107", 6, 1);
 
 create table dow_shift_time(
   dow    varchar(16),
